@@ -8,7 +8,7 @@ Repo: https://github.com/Jgmaza/no-sueltes-la-caja
 |---|---|---|---|
 | Danel | [@danelmott](https://github.com/danelmott) | Write | Invitado |
 | Luis | [@turriago](https://github.com/turriago) | Write | Invitado |
-| Zharick | `@______` | Write | Pendiente |
+| Zharick | [@ZHARICK-RGB](https://github.com/ZHARICK-RGB) | Write | Invitado |
 | Juanes | [@ElRompeCasco](https://github.com/ElRompeCasco) | Write | Invitado |
 | Matias | [@matiasaguilar633](https://github.com/matiasaguilar633) | Write | Invitado |
 
