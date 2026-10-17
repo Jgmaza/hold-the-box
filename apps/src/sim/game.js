@@ -17,11 +17,13 @@
 //   hazard:hit      { player }               el rodillo golpeó a alguien
 //   geyser:hit      {}                       un chorro empezó a mojar la caja
 //   box:state / box:impact / box:wet / box:drop  (ver sim/box.js)
+//   npc:alert / npc:windup / npc:shoot / npc:hit / npc:splash  (ver sim/npcs/npcService.js)
 import { CONFIG } from '../config.js';
 import { Box } from './box.js';
 import { solveCarry } from './carry.js';
 import { depenetrate, makeAABB } from './collision.js';
 import { Emitter } from './events.js';
+import { NpcService } from './npcs/npcService.js';
 import { Player } from './player.js';
 import { World } from './world.js';
 
@@ -38,7 +40,8 @@ export const RATING_LABELS = {
 };
 
 export class Game {
-  constructor(level) {
+  /** @param {{seed?: number}} opts  semilla del aleatorio (NPCs): misma semilla = misma partida */
+  constructor(level, { seed = 1 } = {}) {
     this.level = level;
     this.events = new Emitter();
     this.world = new World(level);
@@ -46,6 +49,7 @@ export class Game {
     this.p2 = new Player(2, level.spawn.p2);
     this.players = [this.p1, this.p2];
     this.box = new Box(this.events);
+    this.npcs = new NpcService(level, { world: this.world, box: this.box, events: this.events, seed });
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
     this.time = 0; // reloj del mundo (obstáculos)
@@ -77,6 +81,7 @@ export class Game {
     this.p2.reset(spawn.p2);
     this.world.syncMovers(this.time);
     this.box.snapTo(this.p1, this.p2);
+    this.npcs.reset();
   }
 
   // ---------------------------------------------------------------- acciones (UI / teclado)
@@ -194,6 +199,9 @@ export class Game {
         this.events.emit('hazard:hit', { player: p.id });
       }
     }
+
+    // NPCs: pasean, ven la caja y la atacan (empujones como el rodillo; daño vía box.damage / box.addWet).
+    this.npcs.update(dt, this);
 
     for (const p of this.players) {
       p.endStep(dt);
