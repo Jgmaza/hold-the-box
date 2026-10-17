@@ -69,7 +69,10 @@ export class HardNpc extends Npc {
     this.pos.z += this.dashDir.z * T.dashSpeed * dt;
     this._clampToPlatform();
     const atEdge = len2(this.pos.x - bx, this.pos.z - bz) < T.dashSpeed * dt * 0.5;
-    const hit = this.touching(game.players, 0.1);
+    // Con brazos largos la pareja queda separada y el perro puede pasar por el medio: chocar la caja también cuenta.
+    const boxReach = this.radius + CONFIG.box.size.d / 2 + 0.1;
+    const hitsBox = len2(c.x - this.pos.x, c.z - this.pos.z) < boxReach;
+    const hit = this.touching(game.players, 0.1) ?? (hitsBox ? this.nearestPlayer(game.players) : null);
     if (hit) {
       service.hitPlayer(this, hit, { knock: T.knock, lift: T.lift, dirX: this.dashDir.x, dirZ: this.dashDir.z });
       service.hitBox(this, { damage: T.damage, wet: T.wet, kick: T.kickDeg, player: hit });
