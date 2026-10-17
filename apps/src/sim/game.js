@@ -25,6 +25,7 @@
 //   bomb:beep       { timeLeft }            tic de la mecha
 //   bomb:warn       { timeLeft }            entran los últimos segundos
 //   bomb:explode    {}                      se acabó el tiempo
+//   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
 import { Box } from './box.js';
@@ -34,6 +35,7 @@ import { depenetrate, makeAABB } from './collision.js';
 import { Emitter } from './events.js';
 import { NpcService } from './npcs/npcService.js';
 import { Player } from './player.js';
+import { WeatherService } from './weather/weatherService.js';
 import { World } from './world.js';
 
 export const FAIL_LABELS = {
@@ -50,7 +52,7 @@ export const RATING_LABELS = {
 };
 
 export class Game {
-  /** @param {{seed?: number}} opts  semilla del aleatorio (NPCs): misma semilla = misma partida */
+  /** @param {{seed?: number}} opts  semilla del aleatorio (NPCs y clima): misma semilla = misma partida */
   constructor(level, { seed = 1 } = {}) {
     this.level = level;
     this.events = new Emitter();
@@ -62,6 +64,7 @@ export class Game {
     this.npcs = new NpcService(level, { world: this.world, box: this.box, events: this.events, seed });
     this.cat = new Cat();
     this.bomb = new Bomb();
+    this.weather = new WeatherService(level, { world: this.world, events: this.events, seed });
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
     this.time = 0; // reloj del mundo (obstáculos)
@@ -97,6 +100,7 @@ export class Game {
     this.box.snapTo(this.p1, this.p2);
     this.npcs.reset();
     this.cat.reset();
+    this.weather.reset();
   }
 
   // ---------------------------------------------------------------- acciones (UI / teclado)
@@ -202,9 +206,14 @@ export class Game {
       p.beginStep(cols);
     }
 
+    // Clima de las islas: empuje (viento) y piso resbaloso (lluvia) para cada jugador; la caja, más abajo.
+    const fx = this.weather.update(dt, this);
     const mods = this.box.modifiers();
     for (const p of this.players) {
-      p.integrate(dt, mods);
+      p.push.x = fx.push[p.id].x;
+      p.push.z = fx.push[p.id].z;
+      const grip = fx.gripMul[p.id];
+      p.integrate(dt, grip === 1 ? mods : { ...mods, grip: mods.grip * grip });
       p.applyVelocity(dt, cols);
     }
     solveCarry(p1, p2, dt, cols);
@@ -232,7 +241,11 @@ export class Game {
     const c = this.box.center;
     let wetting = 0;
     for (const g of this.world.geysers) if (g.covers(c)) wetting++;
-    this.box.wetRate = wetting * CONFIG.box.wet.geyserRate;
+    this.box.wetRate = wetting * CONFIG.box.wet.geyserRate + fx.wetRate;
+    // Viento: inclina la caja y se lleva contenido.
+    this.box.external.roll = fx.tilt.roll;
+    this.box.external.pitch = fx.tilt.pitch;
+    this.box.external.drain = fx.drain;
     if (wetting && !this._wasWetting) this.events.emit('geyser:hit', {});
     this._wasWetting = wetting > 0;
 

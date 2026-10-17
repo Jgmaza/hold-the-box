@@ -65,6 +65,7 @@ app.on('update', (dt) => {
   game.update(dt);
   view.update(dt);
   ui.update(dt);
+  audio.update(game);
   debug?.update();
   input.endFrame();
 });

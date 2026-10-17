@@ -208,6 +208,45 @@
   }
 }
 
+/* Clima: chip bajo las barras mientras la caja está en una isla con clima. */
+.weather {
+  position: absolute;
+  top: 132px;
+  left: 16px;
+  padding: 7px 14px;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  background: rgba(20, 20, 30, 0.55);
+  backdrop-filter: blur(4px);
+  transition: background 0.3s, transform 0.2s;
+}
+.weather:empty {
+  display: none;
+}
+.weather[data-type='rain'] {
+  background: rgba(31, 110, 160, 0.75);
+}
+.weather[data-type='wind'] {
+  background: rgba(70, 120, 90, 0.75);
+}
+.weather[data-phase='warn'] {
+  animation: weather-warn 0.5s ease-in-out infinite alternate;
+}
+.weather[data-phase='active'] {
+  background: var(--danger);
+}
+.weather[data-phase='safe'] {
+  background: var(--goal);
+  color: var(--ink);
+}
+@keyframes weather-warn {
+  to {
+    transform: scale(1.07);
+  }
+}
+
 .toasts {
   position: absolute;
   bottom: 28px;

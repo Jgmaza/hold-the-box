@@ -210,6 +210,39 @@ export const CONFIG = {
     },
   },
 
+  // Clima de las islas (ver src/sim/weather/). Se activa poniendo `weather` en una plataforma del nivel.
+  // Ritmo de cada zona: calma → aviso (warn) → activo (aguacero / ráfaga) → calma. Los tiempos varían ±20%.
+  weather: {
+    enabled: true,
+    height: 4, // alto de la zona sobre el piso de la isla
+
+    // Lluvia: la llovizna moja 8 %/s y el AGUACERO 40 %/s: un aguacero entero al descubierto deshace la caja.
+    // Para eso están las carpas (`shelters` en la isla, o rainIsland() en levels/sections.js): debajo no se moja.
+    rain: {
+      drizzle: 0.2, // intensidad en calma (0..1)
+      warnLevel: 0.35, // intensidad mientras avisa (se oscurece la nube, trueno): hora de correr a la carpa
+      wetRate: 40, // % de mojado por segundo con intensidad 1 (aguacero); llovizna = wetRate × drizzle = 8 %/s
+      slip: 0.7, // multiplicador de agarre para quien pisa la isla mojada (bajo la carpa no resbala)
+      shelterMargin: 0.45, // la caja cuenta como cubierta aunque su centro quede hasta esto fuera de la carpa
+      period: 7, // segundos por ciclo
+      warnTime: 1.5,
+      activeTime: 3,
+    },
+
+    // Viento: ráfagas de lado que empujan a la pareja, inclinan la caja y se llevan contenido.
+    wind: {
+      breeze: 0.12, // intensidad en calma
+      warnLevel: 0.3,
+      pushSpeed: 2.6, // m/s que empuja con intensidad 1 (se compensa caminando en contra)
+      leanDeg: 16, // inclinación extra de la caja con intensidad 1
+      drainRate: 4, // % de contenido por segundo con intensidad 1
+      syncRelief: 0.8, // desincronizados pierden hasta (1 + esto)× más contenido
+      period: 5.5,
+      warnTime: 0.9,
+      activeTime: 2.2,
+    },
+  },
+
   water: {
     killDepth: 0.4, // pies por debajo del agua = splash
     voidY: -12,

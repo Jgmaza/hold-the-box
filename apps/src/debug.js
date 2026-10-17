@@ -8,7 +8,7 @@ export class DebugPanel {
     this.game = game;
     const gui = (this.gui = new GUI({ title: 'No Sueltes La Caja · debug (F2)' }));
 
-    const live = (this.live = { estado: '', caja: '', inclinación: 0, sincronía: 0, contenido: 0, mojado: 0, npcs: '', fps: 0 });
+    const live = (this.live = { estado: '', caja: '', inclinación: 0, sincronía: 0, contenido: 0, mojado: 0, npcs: '', clima: '', fps: 0 });
     const f0 = gui.addFolder('En vivo');
     for (const k of Object.keys(live)) f0.add(live, k).listen().disable();
 
@@ -114,6 +114,23 @@ export class DebugPanel {
       f.add(t, 'wet', 0, 40, 1).name('mojado +');
     }
 
+    const WC = CONFIG.weather;
+    const f9 = gui.addFolder('Clima').close();
+    f9.add(WC, 'enabled').name('activo');
+    const fr = f9.addFolder('lluvia').close();
+    fr.add(WC.rain, 'wetRate', 0, 30, 0.5).name('mojado %/s (aguacero)');
+    fr.add(WC.rain, 'drizzle', 0, 1, 0.05).name('llovizna');
+    fr.add(WC.rain, 'slip', 0.2, 1, 0.05).name('agarre (resbala)');
+    fr.add(WC.rain, 'period', 2, 15, 0.5).name('ciclo (s)');
+    fr.add(WC.rain, 'activeTime', 0.5, 8, 0.1).name('aguacero (s)');
+    const fw = f9.addFolder('viento').close();
+    fw.add(WC.wind, 'pushSpeed', 0, 8, 0.1).name('empuje m/s');
+    fw.add(WC.wind, 'leanDeg', 0, 40, 0.5).name('inclina caja °');
+    fw.add(WC.wind, 'drainRate', 0, 20, 0.5).name('contenido %/s');
+    fw.add(WC.wind, 'syncRelief', 0, 3, 0.1).name('castigo desincronía');
+    fw.add(WC.wind, 'period', 2, 15, 0.5).name('ciclo (s)');
+    fw.add(WC.wind, 'activeTime', 0.5, 8, 0.1).name('ráfaga (s)');
+
     this._frames = 0;
     this._t0 = performance.now();
   }
@@ -135,6 +152,8 @@ export class DebugPanel {
     l.mojado = +b.wetness.toFixed(1);
     const npcs = g.npcs.list;
     l.npcs = npcs.length ? `${npcs.filter((n) => n.state === 'alert' || n.state === 'attack').length}/${npcs.length} atacando` : '—';
+    const z = g.weather.current;
+    l.clima = z ? `${z.type}:${z.phase} ${z.intensity.toFixed(2)}` : '—';
     this._frames++;
     const now = performance.now();
     if (now - this._t0 > 500) {

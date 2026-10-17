@@ -39,7 +39,9 @@ export class Box {
     this.state = 'upright';
     this.criticalTime = 0;
     this.leakRate = 0; // %/s actual (la vista dibuja gotas con esto)
-    this.wetRate = 0; // %/s que entra este paso (chorros)
+    this.wetRate = 0; // %/s que entra este paso (chorros + lluvia)
+    // Fuerzas de afuera que el mundo fija cada paso (clima: viento): inclinación extra (grados) y vaciado (%/s).
+    this.external = { roll: 0, pitch: 0, drain: 0 };
     this.wettingSources = 0;
     this.dropped = false;
     this.dropVel = v3();
@@ -154,8 +156,9 @@ export class Box {
     const inertiaRoll = -T.inertiaGain * (this._accel.x * ax + this._accel.z * az);
     const inertiaPitch = -T.inertiaGain * (this._accel.x * fx + this._accel.z * fz);
 
-    this.target.roll = clamp(heightDeg + (dragDeg + inertiaRoll) * disturb, -T.maxDeg, T.maxDeg);
-    this.target.pitch = clamp((twistDeg + strainDeg + inertiaPitch) * disturb, -T.maxDeg, T.maxDeg);
+    const ext = this.external;
+    this.target.roll = clamp(heightDeg + (dragDeg + inertiaRoll) * disturb + ext.roll, -T.maxDeg, T.maxDeg);
+    this.target.pitch = clamp((twistDeg + strainDeg + inertiaPitch) * disturb + ext.pitch, -T.maxDeg, T.maxDeg);
 
     // --- Golpes al aterrizar fuerte.
     for (const p of [p1, p2]) {
@@ -189,16 +192,16 @@ export class Box {
     if (next === 'critical' && this.invuln <= 0) this.criticalTime += dt;
     else this.criticalTime = Math.max(0, this.criticalTime - dt * T.criticalRecover);
 
-    // --- Huequito: fuga proporcional a la inclinación.
-    if (mag > L.thresholdDeg && this.invuln <= 0) {
+    // --- Huequito: fuga proporcional a la inclinación + lo que se lleva el viento (external.drain).
+    let leak = ext.drain;
+    if (mag > L.thresholdDeg) {
       const severity = clamp((mag - L.thresholdDeg) / (T.criticalDeg - L.thresholdDeg), 0, L.maxSeverity);
-      this.leakRate = L.ratePerSec * severity;
-      this.integrity = clamp(this.integrity - this.leakRate * dt, 0, 100);
-    } else {
-      this.leakRate = 0;
+      leak += L.ratePerSec * severity;
     }
+    this.leakRate = this.invuln > 0 ? 0 : leak;
+    this.integrity = clamp(this.integrity - this.leakRate * dt, 0, 100);
 
-    // --- Mojado: entra por chorros (wetRate lo fija el mundo cada paso) o se seca.
+    // --- Mojado: entra por chorros y lluvia (wetRate lo fija el mundo cada paso) o se seca.
     if (this.wetRate > 0) {
       this.wetness = clamp(this.wetness + this.wetRate * dt, 0, 100);
     } else if (this.wetness < 100) {
@@ -231,6 +234,7 @@ export class Box {
     this.rollVel = this.pitchVel = 0;
     this.criticalTime = 0;
     this.leakRate = 0;
+    this.external.roll = this.external.pitch = this.external.drain = 0;
     this.sync = this.syncRaw = 1;
     this._groupVel = null;
     this._accel.x = this._accel.z = 0;

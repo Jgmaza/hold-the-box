@@ -87,6 +87,7 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 | [`docs/BRANCHES.md`](./docs/BRANCHES.md) | `main` / `dev` / `work/*` |
 | [`GAME_DESIGN_DOCUMENT.md`](./GAME_DESIGN_DOCUMENT.md) | Fantasía |
 | [`docs/mechanics.md`](./docs/mechanics.md) | Mecánicas |
+| [`docs/clima.md`](./docs/clima.md) | Clima: lluvia / viento y cómo instanciar secciones |
 | [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Decisiones diseño |
 | [`prompts/shared/`](./prompts/shared/) | Prompts identidad |
 | [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs |
