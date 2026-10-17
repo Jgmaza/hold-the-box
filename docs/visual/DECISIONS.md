@@ -71,11 +71,19 @@ Luis propone valores iniciales; Danel los expone en `apps/`:
 
 ---
 
+## Ronda 4 — UI + polish + audio
+
+- **HUD:** barra de vida de la caja (sobre caja o arriba) — A
+- **Fail:** placeholder para burla + Restart ya — C
+- **Timer:** solo pitch/demo, apagable — C
+- **Audio:** SFX de caja + loop en paralelo (mínimos) — C
+- Entrevista de prompts compartidos: **cerrada** (A)
+
 ## Estado prompts compartidos
 
 | Archivo | Estado |
 |---|---|
-| `art.md` | OK (R1+R2) |
-| `level_design.md` | OK (R1+R2) |
-| `gameplay.md` | OK (R3) |
-| `ui.md` / `polish.md` | Pendiente Ronda 4 |
+| `art.md` | OK |
+| `level_design.md` | OK |
+| `gameplay.md` | OK |
+| `ui.md` / `polish.md` | OK (R4) |
