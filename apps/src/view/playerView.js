@@ -87,41 +87,46 @@ export class PlayerView {
   }
 
   /**
-   * Estira brazos desde el hombro hasta la cara cercana de la caja.
+   * Estira brazos hasta los costados de la caja (agarre lateral a media-alta altura).
    * El cuerpo ya mira al compañero (-Z local ≈ hacia la caja).
    */
   _updateCarryArms(box) {
     if (this.sprite || !this.armRigs?.length || box?.dropped) return;
 
     const p = this.player;
-    const halfW = CONFIG.box.size.w * 0.48;
-    // P1 está del lado -axis; P2 del +axis. Agarre = cara de la caja más cercana.
+    const S = CONFIG.box.size;
+    const halfW = S.w * 0.5;
+    // P1 = lado -axis; P2 = +axis. Manos en la cara cercana, NO debajo.
     const sideSign = p.id === 1 ? -1 : 1;
+    // Agarre a ~60% de la altura de la caja (costado superior), nunca bajo el piso de la caja.
+    const gripY = box.center.y + S.h * 0.12;
     const gripX = box.center.x + sideSign * box.axis.x * halfW;
-    const gripY = box.center.y;
     const gripZ = box.center.z + sideSign * box.axis.z * halfW;
 
-    const shoulderY = p.pos.y + 0.98;
+    const shoulderLocalY = 0.98;
+    const shoulderWorldY = p.pos.y + shoulderLocalY;
     const dx = gripX - p.pos.x;
-    const dy = gripY - shoulderY;
+    const dy = gripY - shoulderWorldY;
     const dz = gripZ - p.pos.z;
-    // Distancia horizontal al agarre (el yaw del body ya apunta al compañero).
     const horiz = Math.hypot(dx, dz);
-    const reach = Math.max(0.45, Math.min(2.4, horiz - 0.05));
-    const pitchDeg = (Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI;
+    const reach = Math.max(0.45, Math.min(2.4, horiz));
+    // PlayCanvas: +rotX baja el extremo -Z; si el agarre está arriba, pitch negativo.
+    const pitchDeg = -(Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI;
+    const handLocalY = shoulderLocalY + dy;
 
     for (const { side, arm, hand } of this.armRigs) {
-      // Hombros abiertos; manos más juntas sobre la cara de la caja.
-      const shX = side * 0.3;
-      const handX = side * 0.12;
+      // Manos abiertas en el ancho de la cara (left/right del jugador = forward del box).
+      const shX = side * 0.32;
+      const handX = side * (S.d * 0.28);
       const midX = (shX + handX) / 2;
+      const midY = (shoulderLocalY + handLocalY) / 2;
 
-      arm.setLocalPosition(midX, 0.98 + dy * 0.35, -reach * 0.5);
-      arm.setLocalEulerAngles(-pitchDeg * 0.85, 0, side * 4);
+      arm.setLocalPosition(midX, midY, -reach * 0.5);
+      arm.setLocalEulerAngles(pitchDeg, 0, side * 3);
       arm.setLocalScale(0.11, 0.11, reach);
 
-      hand.setLocalPosition(handX, 0.98 + dy * 0.7, -reach);
-      hand.setLocalScale(0.15, 0.15, 0.15);
+      hand.setLocalPosition(handX, handLocalY, -reach);
+      hand.setLocalScale(0.16, 0.16, 0.16);
     }
   }
 
