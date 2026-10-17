@@ -1,6 +1,7 @@
 // Arranque: PlayCanvas + simulación + vista + UI + audio. Orden de cada frame:
 //   teclas globales → input de jugadores → simulación (paso fijo) → vista → UI
 import * as pc from 'playcanvas';
+import { BOX_CHOICES, selectBox } from './config.js';
 import { Input } from './input.js';
 import { DEFAULT_LEVEL, LEVELS } from './levels/index.js';
 import { buildPalette } from './palette.js';
@@ -49,6 +50,11 @@ function globalKeys() {
   if (input.wasPressed('KeyR')) {
     if (s === 'failed') game.retry();
     else if (s === 'paused' || s === 'won') game.restart();
+  }
+  if (s === 'title') {
+    if (input.wasPressed('Digit1')) selectBox(BOX_CHOICES[0].id);
+    if (input.wasPressed('Digit2')) selectBox(BOX_CHOICES[1].id);
+    if (BOX_CHOICES[2] && input.wasPressed('Digit3')) selectBox(BOX_CHOICES[2].id);
   }
   if (input.wasPressed(['F2', 'Backquote'])) openDebug();
 }

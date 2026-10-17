@@ -62,6 +62,28 @@ export class DebugPanel {
     f5.add(L, 'ratePerSec', 0, 30, 0.5);
     f5.add(L, 'sweeperDamage', 0, 40, 1);
 
+    const Cat = CONFIG.box.cat;
+    const fCat = gui.addFolder('Gato');
+    fCat.add(Cat, 'enabled').name('gato activo');
+    fCat.add(Cat, 'ragePerSec', 0, 8, 0.1).name('rabia / s');
+    fCat.add(Cat, 'calmMul', 0.2, 1.5, 0.05).name('freno si van juntos');
+    fCat.add(Cat, 'desyncMul', 1, 4, 0.1).name('prisa si se separan');
+    fCat.add(Cat, 'warnRage', 1, 80, 1).name('pata (rabia)');
+    fCat.add(Cat, 'scratchRage', 1, 90, 1).name('arañazo (rabia)');
+    fCat.add(Cat, 'damageRage', 1, 100, 1).name('romper (rabia)');
+    fCat.add(Cat, 'chipPerSec', 0, 20, 0.5).name('daño lento %/s');
+    fCat.add(Cat, 'cooldown', 0.5, 12, 0.1).name('pausa arañazo (s)');
+    fCat.add(Cat, 'goalDrainPerSec', 0, 40, 1).name('meta quietos %/s');
+    fCat.add(Cat, 'hurrySpeed', 0, 4, 0.1).name('prisa para salvarse');
+    fCat.add(Cat, 'knock', 0, 8, 0.1).name('empujón');
+    fCat.add(Cat, 'kick', 0, 500, 10).name('sacudida');
+
+    const BombCfg = CONFIG.box.bomb;
+    const fBomb = gui.addFolder('Bomba');
+    fBomb.add(BombCfg, 'enabled').name('bomba activa');
+    fBomb.add(BombCfg, 'fuseTime', 10, 180, 1).name('mecha (s)');
+    fBomb.add(BombCfg, 'warnTime', 3, 40, 1).name('aviso (s)');
+
     const W = CONFIG.box.wet;
     const f6 = gui.addFolder('Mojado').close();
     f6.add(W, 'fallPenalty', 0, 100, 1);

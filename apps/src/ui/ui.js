@@ -1,12 +1,13 @@
 // UI provisional en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
 // Zharick: puedes reemplazar este archivo/estilos; el contrato está en apps/README.md (sección UI).
-import { CONFIG } from '../config.js';
+import { BOX_CHOICES, CONFIG, selectBox } from '../config.js';
 import './ui.css';
 
 const TIPS = {
   dropped: 'Tip: si la caja se pone roja, frenen un momento y muévanse al mismo ritmo.',
   empty: 'Tip: el huequito gotea cuando la caja va inclinada. Caminen juntos y salten juntos.',
   soaked: 'Tip: esperen a que los chorros se apaguen (burbujas = va a salir agua) y no se caigan al agua.',
+  exploded: 'Tip: la mecha no espera. Crucen juntos antes de que llegue a cero.',
 };
 
 const fmtTime = (t) => {
@@ -36,7 +37,46 @@ export class UI {
     }
     this._lastJump = { 1: -10, 2: -10 };
     this._bind(game.events);
+    this._buildBoxPick();
     this.show(game.state);
+  }
+
+  _buildBoxPick() {
+    const pick = this.$('.box-pick');
+    for (const box of BOX_CHOICES) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.box = box.id;
+      btn.innerHTML = `<b>${box.name}</b><span>${box.blurb}</span>`;
+      btn.addEventListener('click', () => {
+        if (this.game.state !== 'title') return;
+        selectBox(box.id);
+        this._paintBoxPick();
+      });
+      pick.appendChild(btn);
+    }
+    selectBox(CONFIG.box.profile);
+    this._paintBoxPick();
+  }
+
+  _paintBoxPick() {
+    const id = CONFIG.box.profile;
+    for (const btn of this.root.querySelectorAll('.box-pick button')) {
+      btn.classList.toggle('on', btn.dataset.box === id);
+    }
+    const name = this.$('.box-name');
+    if (!name) return;
+    let label = 'VIP';
+    if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
+    if (CONFIG.box.bomb.enabled) {
+      const t = Math.max(0, this.game.bomb.timeLeft);
+      const m = Math.floor(t / 60);
+      const s = Math.floor(t % 60);
+      label = `BOMBA ${m}:${String(s).padStart(2, '0')}`;
+    }
+    name.textContent = label;
+    name.dataset.box = id;
+    name.classList.toggle('urgent', CONFIG.box.bomb.enabled && this.game.bomb.timeLeft <= CONFIG.box.bomb.warnTime);
   }
 
   show(state) {
@@ -72,9 +112,15 @@ export class UI {
     ev.on('game:splash', () => this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
     ev.on('hazard:hit', () => this.toast('¡Rodillo! La caja se sacude', 'bad'));
+    ev.on('cat:warn', (e) => this.toast(`El gato asoma la pata hacia P${e.player}`, 'bad'));
+    ev.on('cat:scratch', (e) => this.toast(`¡El gato arañó a P${e.player}!`, 'bad'));
+    ev.on('cat:shred', () => this.toast('¡El gato está rompiendo la caja!', 'bad'));
+    ev.on('cat:goal', () => this.toast('¡Quietos en la meta! El gato vacía la caja', 'bad'));
+    ev.on('bomb:warn', () => this.toast('¡La mecha está corta!', 'bad'));
     ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
     ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
     ev.on('box:impact', (e) => {
+      if (e.cause === 'cat') return;
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
       this.flash('integrity');
     });
@@ -104,7 +150,11 @@ export class UI {
   update() {
     const g = this.game;
     const b = g.box;
-    if (g.state === 'title') return;
+    if (g.state === 'title') {
+      this._paintBoxPick();
+      return;
+    }
+    this._paintBoxPick();
 
     this._meter('integrity', b.integrity, b.integrity < 35);
     this._meter('wetness', b.wetness, b.wetness > 65);
@@ -152,6 +202,7 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
     </div>
     <div class="timer">00:00.0</div>
+    <div class="box-name" data-box="vip">VIP</div>
     <div class="level" data-state="upright"><div class="dial"><div class="dot"></div></div><span class="state">ESTABLE</span></div>
     <div class="warning"><strong>¡CUIDADO!</strong><div class="drop"><i></i></div></div>
     <div class="toasts"></div>
@@ -166,6 +217,8 @@ const TEMPLATE = /* html */ `
         <div class="p1"><div class="who">P1 · traje</div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover · <kbd>Espacio</kbd> saltar</div>
         <div class="p2"><div class="who">P2 · gorra</div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> mover · <kbd>Enter</kbd> saltar</div>
       </div>
+      <p class="pick-label">Elige la caja · clic, o teclas <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
+      <div class="box-pick"></div>
       <div class="rules">
         <span>Muévanse al mismo ritmo: la caja va derecha y más rápido.</span>
         <span>Salten juntos. Si se inclina, gotea por el huequito.</span>

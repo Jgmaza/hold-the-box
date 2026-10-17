@@ -77,6 +77,42 @@ export const CONFIG = {
       sweeperDamage: 8,
     },
 
+    // Qué caja está elegida en el título: 'vip', 'gato' o 'bomba'.
+    profile: 'vip',
+
+    // Gato inquieto. La rabia sube con el tiempo (juntos la frenan, no la borran).
+    // Desincronizarse la acelera. En la terraza, quedarse quieto vacía la caja.
+    // `enabled` solo está activo cuando eligieron la caja del gato.
+    cat: {
+      enabled: false,
+      syncThreshold: 0.72, // por debajo de esto la rabia sube más rápido
+      ragePerSec: 2.4, // rabia por segundo antes de los multiplicadores
+      calmMul: 0.75, // caminar juntos: más lento, pero sigue subiendo
+      desyncMul: 2.5, // separados o inclinados
+      warnRage: 16, // asoma la pata (~9 s juntos, ~3 s separados)
+      scratchRage: 22, // primer arañazo (~12 s juntos, ~4 s separados)
+      damageRage: 55, // a partir de aquí también baja la integridad
+      chipPerSec: 1.2, // % de contenido por segundo en esa etapa
+      swipeHold: 0.55, // un solo zarpazo, no varios seguidos
+      cooldown: 6.5, // pausa entre arañazos; la rabia no se reinicia
+      knock: 3.4, // empujón horizontal al jugador arañado (m/s)
+      knockUp: 1.1,
+      controlTime: 0.45, // segundos con poco control tras el arañazo
+      kick: 240, // golpe angular a la caja hacia ese lado (grados/s)
+      goalLead: 10, // metros antes de la meta (la terraza) donde aprieta
+      hurrySpeed: 1.4, // m/s hacia la meta; por debajo cuenta como quedarse
+      goalDrainPerSec: 20, // % de contenido por segundo si se quedan en ese tramo
+      goalRagePerSec: 12, // rabia extra mientras se quedan ahí
+    },
+
+    // Bomba: la mecha corre siempre. Llegar a la meta la apaga. En cero, explota.
+    bomb: {
+      enabled: false,
+      fuseTime: 90, // segundos para llegar
+      warnTime: 20, // a partir de aquí la chispa se apura y la caja se pone roja
+    },
+
+    // Se moja: más peso, menos agarre, menos estabilidad.
     // v2 (#13): mayor mojado — sube más rápido, seca lento, castiga más el control.
     wet: {
       fallPenalty: 45, // antes 30
@@ -201,3 +237,19 @@ export const CONFIG = {
     godMode: false, // sin derrotas (para probar el nivel)
   },
 };
+
+/** Las cajas que se pueden elegir antes de empezar. */
+export const BOX_CHOICES = [
+  { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
+  { id: 'gato', name: 'Caja del gato', blurb: 'Se ve el gato. Si se separan, saca las garras.' },
+  { id: 'bomba', name: 'Caja bomba', blurb: 'Mecha de 90 s. Si no llegan, explota.' },
+];
+
+/** Activa una caja. VIP no tiene gato ni mecha. */
+export function selectBox(id) {
+  const choice = BOX_CHOICES.find((b) => b.id === id) ?? BOX_CHOICES[0];
+  CONFIG.box.profile = choice.id;
+  CONFIG.box.cat.enabled = choice.id === 'gato';
+  CONFIG.box.bomb.enabled = choice.id === 'bomba';
+  return choice;
+}

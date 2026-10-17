@@ -18,8 +18,17 @@
 //   geyser:hit      {}                       un chorro empezó a mojar la caja
 //   box:state / box:impact / box:wet / box:drop  (ver sim/box.js)
 //   npc:alert / npc:windup / npc:shoot / npc:hit / npc:splash  (ver sim/npcs/npcService.js)
+//   cat:warn        { player }               la pata asoma hacia ese jugador
+//   cat:scratch     { player }               arañazo; el tropiezo lo hace sim/cat.js
+//   cat:shred       {}                       la rabia ya resta contenido
+//   cat:goal        {}                       se quedaron en la meta y el gato vacía la caja
+//   bomb:beep       { timeLeft }            tic de la mecha
+//   bomb:warn       { timeLeft }            entran los últimos segundos
+//   bomb:explode    {}                      se acabó el tiempo
 import { CONFIG } from '../config.js';
+import { Bomb } from './bomb.js';
 import { Box } from './box.js';
+import { Cat } from './cat.js';
 import { solveCarry } from './carry.js';
 import { depenetrate, makeAABB } from './collision.js';
 import { Emitter } from './events.js';
@@ -31,6 +40,7 @@ export const FAIL_LABELS = {
   dropped: '¡Soltaron la caja!',
   empty: '¡Se vació la caja por el huequito!',
   soaked: '¡La caja se deshizo de lo mojada!',
+  exploded: '¡Explotó la bomba!',
 };
 
 export const RATING_LABELS = {
@@ -50,6 +60,8 @@ export class Game {
     this.players = [this.p1, this.p2];
     this.box = new Box(this.events);
     this.npcs = new NpcService(level, { world: this.world, box: this.box, events: this.events, seed });
+    this.cat = new Cat();
+    this.bomb = new Bomb();
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
     this.time = 0; // reloj del mundo (obstáculos)
@@ -70,6 +82,8 @@ export class Game {
     this.result = null;
     this._wasWetting = false;
     this.box.reset();
+    this.cat.reset();
+    this.bomb.reset();
   }
 
   get currentSpawn() {
@@ -82,6 +96,7 @@ export class Game {
     this.world.syncMovers(this.time);
     this.box.snapTo(this.p1, this.p2);
     this.npcs.reset();
+    this.cat.reset();
   }
 
   // ---------------------------------------------------------------- acciones (UI / teclado)
@@ -103,6 +118,8 @@ export class Game {
   retry() {
     if (this.state !== 'failed') return;
     this.box.reset(this.checkpointSnapshot);
+    this.cat.reset();
+    this.bomb.reset();
     this.box.invuln = CONFIG.respawn.invulnTime;
     this.failReason = null;
     this._placeAtSpawn(this.currentSpawn);
@@ -173,6 +190,8 @@ export class Game {
     if (this.state !== 'playing') return;
 
     this.runTime += dt;
+    this.bomb.update(dt, this);
+    if (this.bomb.exploded && this._checkFail()) return;
     if (this.respawnTimer > 0) return this._stepRespawn(dt);
 
     const cols = this.world.colliders;
@@ -218,6 +237,7 @@ export class Game {
     this._wasWetting = wetting > 0;
 
     this.box.update(dt, p1, p2);
+    this.cat.update(dt, this);
 
     if (CONFIG.debug.godMode) {
       this.box.criticalTime = 0;
@@ -267,7 +287,8 @@ export class Game {
     if (CONFIG.debug.godMode) return false;
     const b = this.box;
     let reason = null;
-    if (b.dropped) reason = 'dropped';
+    if (this.bomb.exploded) reason = 'exploded';
+    else if (b.dropped) reason = 'dropped';
     else if (b.integrity <= 0) reason = 'empty';
     else if (b.wetness >= 100) reason = 'soaked';
     if (!reason) return false;
