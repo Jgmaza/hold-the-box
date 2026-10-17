@@ -17,6 +17,7 @@ Leer: `docs/visual/DECISIONS.md` + `docs/visual/refs/`.
 
 | Archivo | Estado |
 |---|---|
+| `guia_desarrollo.md` | **Guía oficial GameJamPlus** (Luis) |
 | `art.md` | OK |
 | `level_design.md` | OK |
 | `gameplay.md` | OK — core caja; Luis tunear / Danel code |

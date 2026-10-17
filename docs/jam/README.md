@@ -4,7 +4,8 @@ Aquí va lo que pide / entrega la organización del jam (brief, reglas, assets o
 
 | Archivo | Qué es | Quién lo trajo |
 |---|---|---|
-| `No_Sueltes_La_Caja_Prompt_Game_Jam.docx` | Prompt / kit del jam (copia local del Lead) | Jose · pendiente confirmar si es el mismo que Luis |
+| [`PROMPTS/shared/guia_desarrollo.md`](../../PROMPTS/shared/guia_desarrollo.md) | **Guía oficial GameJamPlus** (sobrevivência) | Luis (@turriago) |
+| `No_Sueltes_La_Caja_Prompt_Game_Jam.docx` | Prompt / kit del proyecto | Jose |
 
 ## Cómo subir más material
 
