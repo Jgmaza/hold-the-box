@@ -1,26 +1,40 @@
-# Prompts — Luis (audio + color)
+# Prompts — Luis (caja feel + audio + color)
 
-## Paleta
+## Tunear feel (después de un playtest)
 ```
-Juego cooperativo caribeño colombiano, estética cartoon tipo Fall Guys / Moving Out.
-Propón paleta hex: cielo, mar, plataformas madera, caja cartón Old Parr, UI, peligro (rojo/negro rodillos), meta.
-Incluye contrastes AA prácticos para carteles blancos/amarillos sobre escena brillante.
-```
-
-## Brief BGM
-```
-Describe un loop de gameplay 70 BPM–110 BPM, vibe fiesta costera, no infantil extremo,
-sin vocales, fácil de loopar. Lista instrumentos y mood en 5 bullets para producir o pedir a un generador.
-```
-
-## Lista SFX
-```
-Lista SFX mínimos para jam con descripción corta de cada uno (ataque, duración, tono):
-pasos x2 personajes, salto, aterrizaje, caja inclinada (warning), gotas/mojado, splash fail, meta, victoria, derrota.
+Eres designer de feel coop tipo Moving Out + Overcooked.
+Contexto: docs/visual/DECISIONS.md Ronda 3. Caja 100 HP, daño variable,
+slow solo al desync, permisivo al inicio, sin heal.
+Aquí van mis notas de playtest:
+"""
+(pega notas)
+"""
+Propón nuevos valores para la tabla de deliveries/luis/BOX_FEEL.md.
+Explica en 1 línea cada cambio. No pidas reescribir el código, solo números.
 ```
 
-## Master corto
+## Defaults permisivos (primera pasada)
 ```
-Dame checklist de export para web game: loudness aprox, mono vs stereo para SFX,
-evitar clipping, nombres de archivo. Objetivo: PlayCanvas en browser.
+Propón defaults jam-friendly para: syncSlowThreshold, desyncSlowMultiplier,
+dropDamage, impactDamage, earlyGameForgiveness, jumpDesyncPenalty, tiltWarnAngle.
+boxMaxHp=100. Prioriza "gracioso" sobre "hardcore". Formato tabla markdown.
+```
+
+## Narrativa corta VIP/FRÁGIL
+```
+Escribe 5 líneas de narrativa family-friendly: por qué la caja VIP/FRÁGIL importa,
+sin marcas reales, tono caribeño humorístico tipo Overcooked. Para pitch y carteles.
+```
+
+## Paleta mediodía caribe
+```
+Paleta hex sol de mediodía caribeño para primitivas PlayCanvas:
+cielo, agua, madera, caja cartón, VIP stamp, UI, peligro rodillos, meta.
+Alto contraste para carteles laterales.
+```
+
+## SFX mínimos
+```
+Lista SFX con nombre de archivo sugerido: warning inclinación, drop caja,
+daño HP, splash fail, meta, victoria, derrota, pasos. Vibe party caribe, no terror.
 ```

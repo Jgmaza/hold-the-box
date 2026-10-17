@@ -38,15 +38,21 @@ movimiento, salto, gravedad, colisiones. Parámetros tuneables.
 Documenta enganche en la escena. No toques aún la caja compleja.
 ```
 
-## 3) Caja compartida + inclinación
+## 3) Caja compartida + vida (core — leer feel de Luis)
 ```
 [PEGA PREFIJO]
 
-Sistema de caja compartida: ambos aplican fuerza/dirección.
-Desbalance → inclinación. Coordinación → más estabilidad y velocidad.
-Estados explícitos: upright | tilting | critical.
-API clara para que huequito/mojada se enganchen después.
-Piensa como Opus 5.5: diseño de sistema primero, luego código mínimo sólido.
+Lee docs/visual/DECISIONS.md Ronda 3 y prompts/shared/gameplay.md.
+También deliveries/luis/BOX_FEEL.md si existe.
+
+Sistema de caja compartida (no se suelta):
+- Velocidad base normal; slow SOLO si desync (parámetro syncSlowThreshold + desyncSlowMultiplier).
+- Estirón extremo → puede caer al piso → daño variable a HP (boxMaxHp=100).
+- earlyGameForgiveness alto al inicio (permisivo).
+- Sin heal. Ambos saltan; jumpDesyncPenalty si solo uno salta.
+- Estados: upright | tilting | critical | dropped.
+- Expón TODOS los números como script attributes para que Luis tunée.
+- Huequito/mojada: solo hooks vacíos, no implementar aún.
 ```
 
 ## 4) Huequito

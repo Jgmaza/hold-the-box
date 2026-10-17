@@ -1,15 +1,19 @@
 # Mecánicas
 
-## Caja compartida
-Ambos jugadores sostienen la caja. Cada uno aporta fuerza/dirección. Coordinación = más velocidad y estabilidad.
+Fuente viva: `docs/visual/DECISIONS.md` · Feel owner: **Luis (Turriago)** · Código: **Danel**
 
-## Propuesta de valor: la caja complica
-La caja tiene estados, no solo posición:
+## Caja compartida (MVP)
+- No se suelta. Ambos influyen siempre.
+- Velocidad normal; **slow solo si hay desync**.
+- Estirón fuerte → puede caer al piso → **daño a HP** (100, daño variable).
+- Sin curación. Inicio **permisivo** (`earlyGameForgiveness`).
+- Salto libre; si solo uno salta → más riesgo.
+- Números en `deliveries/luis/BOX_FEEL.md` (tuneables).
 
-1. **Inclinación** — si un lado tira más, se tuerce; riesgo de soltar o de activar el hueco.
-2. **Huequito** — inclinación extrema o golpes fuertes → pierde contenido / “integridad”.
-3. **Mojada** — contacto con agua → más peso, más resbalosa, peor control; exceso = fail.
-4. **Estabilidad** — mismo input/ritmo entre jugadores → caja quieta y traslado limpio.
+## Post-MVP (no bloquear demo)
+1. **Huequito** / **mojada**
+2. Burla al fallar
+3. Mods visuales / skins
 
 ## Obstáculos del nivel
 - Huecos entre plataformas

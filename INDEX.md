@@ -28,7 +28,7 @@ La raíz (`GAME_DESIGN_DOCUMENT.md`, `MVP_SCOPE.md`, `TASK_BOARD.md`) es referen
 |---|---|
 | **Jose** | [`team/jose/README.md`](./team/jose/README.md) |
 | **Danel** | [`team/danel/README.md`](./team/danel/README.md) · código en `apps/` · **Opus 5.5** |
-| **Luis** | [`team/luis/README.md`](./team/luis/README.md) |
+| **Luis** | [`team/luis/README.md`](./team/luis/README.md) · feel caja + audio/color |
 | **Zharick** | [`team/zharick/README.md`](./team/zharick/README.md) |
 | **Juanes** | [`team/juanes/README.md`](./team/juanes/README.md) |
 | **Matias** | [`team/matias/README.md`](./team/matias/README.md) |

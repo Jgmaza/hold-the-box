@@ -3,10 +3,11 @@
 ## Debe existir
 ✅ Dos jugadores locales
 ✅ Movimiento + salto
-✅ Caja compartida (ambos influyen)
-✅ Inclinación básica de la caja (desbalance = riesgo)
-✅ Agua / caída = fail o daño
-✅ Al menos 1 complicación de caja: **huequito** O **se moja** (ideal ambas en forma simple)
+✅ Caja compartida (ambos influyen; no se suelta)
+✅ Desync → slow; estirón → puede caer al piso → daño a **HP (100)**
+✅ Inicio permisivo; parámetros tuneables (owner feel: Luis)
+✅ Agua / caída total = fail + restart
+⬜ Huequito / se moja = **post-demo** (no bloquean primer show)
 ✅ Plataforma móvil
 ✅ Obstáculo tipo rodillo
 ✅ Respawn

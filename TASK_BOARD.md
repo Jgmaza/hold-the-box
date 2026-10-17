@@ -35,8 +35,9 @@
 
 ---
 
-## Dev Soundtrack + Colorimetría — Luis
-**Rol:** identidad sonora y look de color del juego.
+## Dev Soundtrack + Colorimetría + **Feel de caja** — Luis (Turriago)
+**Rol:** identidad sonora, color, y **owner del core** (cómo se siente la caja / HP / sync).  
+Implementa Danel; tunear Luis → `deliveries/luis/BOX_FEEL.md`.
 
 ### Soundtrack / SFX
 - Loop de gameplay (caribe / party, no molesto en repetición)

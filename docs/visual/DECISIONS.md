@@ -1,68 +1,81 @@
 # Decisiones de diseño (congeladas en entrevista Lead)
 
 Fuente de verdad para `prompts/shared/*` y para el equipo.  
-Refs visuales: [`refs/`](./refs/)
+Refs: [`refs/`](./refs/)
+
+**Owner del feel de la caja (core):** Luis / [@turriago](https://github.com/turriago)  
+**Implementación PlayCanvas:** Danel / [@danelmott](https://github.com/danelmott)  
+Los números son **tuneables** según playtest de Luis — no hardcodear magia sin exponer parámetros.
 
 ---
 
 ## Ronda 1 — Identidad, feel, cámara, tono
 
-### Jugabilidad (feel)
-- Norte: **Moving Out**, pero **no pueden soltar** lo que cargan.
-- El reto es **cuidar la caja**, no solo llegar.
-- Cooperación con roce amistoso tipo **Overcooked**.
-
-### Estética vs movimiento
-- **Trazos / look:** Fall Guys (formas legibles, cartoon party, colores vivos).
-- **Movimiento / layout:** recorrido **recto hacia adelante** con profundidad.
-- Refs: [`refs/concept-camera-path.jpeg`](./refs/concept-camera-path.jpeg), [`refs/concept-art-base.jpg`](./refs/concept-art-base.jpg)
-
-### Física de caja (MVP primero)
-- Desbalance fuerte (uno adelante, otro atrás) → caja puede **caer al piso** → **daña vida**.
-- MVP = sistema de **vida / integridad**.
-- Post: huequito, mojada, etc.
-
-### Cámara
-- Una cámara coop, mismo PC, 3ª persona con profundidad, sigue dúo + caja.
-
-### Tono
-- Family-friendly primero; “mods” / upgrade visual si hay tiempo.
-
-### Fantasía (20 s)
-Gracioso cooperar y discutir amistosamente por la caja (Overcooked).
-
-### Fail
-- MVP: restart claro.
-- Post: burla (NPCs gozando lo de la caja).
+- Jugabilidad: **Moving Out** sin soltar; reto = cuidar la caja; roce **Overcooked**.
+- Look: trazos **Fall Guys**; path **recto** con profundidad.
+- Cámara: una coop, mismo PC, 3ª persona profunda.
+- Tono: family-friendly primero; mods visuales después.
+- Fantasía: gracioso cooperar y discutir amistosamente.
+- Fail MVP: restart; post: burla.
 
 ---
 
-## Ronda 2 — Estado del arte visual
+## Ronda 2 — Visual
 
-### Personajes
-- Estilo **1: humanos stylized** (cabeza un poco grande, como la ref).
-- Bien caricaturescos, legibles a distancia.
-- **Mods futuros (si sobra tiempo):** skins tipo figuras públicas caricaturizadas (ej. “Abelardo / Petro”) — **no bloquean MVP**; base = dúo traje + casual genérico family-friendly.
-
-### Caja (MVP)
-- **1:** cartón genérico con sello **“VIP / FRÁGIL”** (sin marca real).
-
-### Fidelidad al primer build
-- **2:** Capa A (primitivas + colores) **+ 2–3 carteles** de Matias en los lados.
-
-### Luz / atmósfera
-- **Sol de mediodía caribeño** (turquesa, soleado, donde estamos). No neon party oscuro.
-
-### Señales
-- A los lados del path, **exacto como Overcooked**: humor + personalidad del nivel, no solo tutorial seco.
+- Personajes: humanos stylized caricaturescos (como la ref).
+- Mods futuros opcionales (skins caricaturescas de figuras públicas) — no MVP.
+- Caja MVP: cartón + sello **VIP / FRÁGIL**.
+- Build 1: Capa A + 2–3 carteles laterales.
+- Luz: sol de mediodía caribeño.
+- Señales: a los lados, vibe Overcooked.
 
 ---
 
-## Implicaciones prompts compartidos
+## Ronda 3 — Control, vida, ownership
+
+### Velocidad / peso
+- **C:** misma velocidad base; se sienten **más lentos solo si están desincronizados**.
+
+### Castigo por desbalance
+- **C:** muy **permisivo al inicio** (casi no castiga); subir dureza con tuneo de Luis después del primer playtest.
+
+### Vida de la caja
+- **C:** **100 HP** con **daño variable** (caída al piso, golpes, etc.).
+- Sin recuperación de vida en MVP (**A:** no heal).
+
+### Salto
+- **A:** ambos pueden saltar; si uno salta solo → alto riesgo de desbalance/daño.
+
+### Ownership
+- Luis (Turriago) **diseña y tuneará** la mecánica de caja + narrativa/feel asociados.
+- Danel implementa sistemas **exponiendo parámetros** (script attrs / config) para que Luis itere sin reescribir todo.
+- Jose valida alcance MVP vs post (hueco, mojada, burla).
+
+---
+
+## Parámetros que deben ser tuneables (lista mínima)
+
+Luis propone valores iniciales; Danel los expone en `apps/`:
+
+| Parámetro | Rol |
+|---|---|
+| `syncSlowThreshold` | Desde qué desfase se aplica slow |
+| `desyncSlowMultiplier` | Cuánto frenan al desincronizar |
+| `tiltWarnAngle` / stretch limit | Aviso visual antes de caer |
+| `dropDamage` | Daño al caer al piso |
+| `impactDamage` | Daño por golpes menores |
+| `boxMaxHp` | Default 100 |
+| `earlyGameForgiveness` | Multiplicador de daño/permisividad al inicio |
+| `jumpDesyncPenalty` | Extra riesgo/daño si solo uno salta |
+| `cameraFollow*` | Suavizado cámara coop (con Danel) |
+
+---
+
+## Estado prompts compartidos
 
 | Archivo | Estado |
 |---|---|
-| `art.md` | Reescrito con R1+R2 |
-| `level_design.md` | Reescrito con path + señales Overcooked |
-| `gameplay.md` | Pendiente Ronda 3 (feel/control/vida) |
-| `ui.md` / `polish.md` | Después de R3 |
+| `art.md` | OK (R1+R2) |
+| `level_design.md` | OK (R1+R2) |
+| `gameplay.md` | OK (R3) |
+| `ui.md` / `polish.md` | Pendiente Ronda 4 |

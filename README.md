@@ -12,7 +12,7 @@ Ahí está el índice general. Luego entras a `team/<tu-nombre>/` para tus tarea
 |---|---|---|
 | Lead | Jose | `team/jose/` |
 | Gameplay (`apps/`) | Danel · [@danelmott](https://github.com/danelmott) | `team/danel/` |
-| Audio + color | Luis · [@turriago](https://github.com/turriago) | `team/luis/` |
+| Audio + color + **feel caja** | Luis · [@turriago](https://github.com/turriago) | `team/luis/` |
 | Dev apoyo | Zharick | `team/zharick/` |
 | Dibujo personajes/caja | Juanes | `team/juanes/` |
 | Dibujo señales/props | Matias · [@matiasaguilar633](https://github.com/matiasaguilar633) | `team/matias/` |

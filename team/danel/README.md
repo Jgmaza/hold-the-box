@@ -11,6 +11,9 @@ GitHub: [@danelmott](https://github.com/danelmott)
 ## Tu rol
 **Owner de `apps/`.** Aquí va el vibe coding. Jose revisa; tú ejecutas.
 
+**Feel de la caja:** lo diseña/tunea **Luis (Turriago)** (`deliveries/luis/BOX_FEEL.md` + `prompts/shared/gameplay.md`).  
+Tú implementas sistemas y **expones parámetros** — no dejes magia hardcodeada sin attrs.
+
 ## Visual (léelo)
 [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md)
 

@@ -6,7 +6,7 @@ Vienes del [`INDEX.md`](../INDEX.md). Elige tu nombre:
 |---|---|---|
 | **Jose** | Lead | [`jose/`](./jose/) |
 | **Danel** | Dev Estrella · `apps/` · Opus 5.5 | [`danel/`](./danel/) |
-| **Luis** | Soundtrack + Color | [`luis/`](./luis/) |
+| **Luis** | Soundtrack + Color + **feel caja (core)** | [`luis/`](./luis/) |
 | **Zharick** | Dev Apoyo | [`zharick/`](./zharick/) |
 | **Juanes** | Dibujo: personajes + caja | [`juanes/`](./juanes/) |
 | **Matias** | Dibujo: señales + props | [`matias/`](./matias/) |

@@ -5,22 +5,21 @@
 | Persona | Archivo |
 |---|---|
 | Jose | `team/jose/prompts.md` |
-| Danel | `team/danel/prompts.md` ← **Opus 5.5** |
-| Luis | `team/luis/prompts.md` |
+| Danel | `team/danel/prompts.md` ← **Opus 5.5** · implementa |
+| Luis | `team/luis/prompts.md` ← **feel caja** + audio/color |
 | Zharick | `team/zharick/prompts.md` |
 | Juanes | `team/juanes/prompts.md` |
 | Matias | `team/matias/prompts.md` |
 
 ## 2) Compartidos (identidad del juego)
 
-`prompts/shared/` — anclan estética y fantasía (entrevista Lead + refs).  
-Leer antes: `docs/visual/DECISIONS.md` + `docs/visual/refs/`.
+Leer: `docs/visual/DECISIONS.md` + `docs/visual/refs/`.
 
-| Archivo | Cubierto |
+| Archivo | Estado |
 |---|---|
-| `art.md` | Look Fall Guys strokes + humanos stylized + caja VIP/FRÁGIL + sol caribe |
-| `level_design.md` | Path recto, cámara profunda, señales tipo Overcooked |
-| `gameplay.md` | Pendiente Ronda 3 (feel/vida) |
-| `ui.md` / `polish.md` | Después |
+| `art.md` | OK |
+| `level_design.md` | OK |
+| `gameplay.md` | OK — core caja; Luis tunear / Danel code |
+| `ui.md` / `polish.md` | Pendiente Ronda 4 |
 
 Índice: [`../INDEX.md`](../INDEX.md)
