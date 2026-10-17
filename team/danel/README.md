@@ -24,14 +24,17 @@ Tú implementas sistemas y **expones parámetros** — no dejes magia hardcodead
 
 ## Tareas código
 
-- [ ] Scaffold PlayCanvas en `apps/`
-- [ ] P1 + P2 movimiento/salto
-- [ ] Cámara
-- [ ] Caja compartida + inclinación ← **corazón del demo**
-- [ ] Fail (agua) + meta + win
-- [ ] Huequito y/o se moja
-- [ ] Plataforma móvil, rodillo, respawn
-- [ ] Integrar `deliveries/` cuando existan
+- [x] Scaffold PlayCanvas en `apps/`
+- [x] P1 + P2 movimiento/salto
+- [x] Cámara
+- [x] Caja compartida + inclinación ← **corazón del demo**
+- [x] Fail (agua) + meta + win
+- [x] Huequito y se moja (+ chorros)
+- [x] Plataforma móvil, rodillo, respawn (+ elevador, puente de tablones)
+- [x] Integrar `deliveries/` (listo: los PNG/audio/paleta entran solos al subirlos; mientras, placeholders)
+- [ ] Playtest 2P y afinar números con `?debug`
+
+Cómo correrlo y estructura: [`apps/README.md`](../../apps/README.md).
 
 ## Reglas
 - Ramas `apps/danel-*`
