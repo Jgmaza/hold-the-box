@@ -45,14 +45,13 @@ Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reini
 
 ## Cómo funciona (resumen)
 
-- **Unión:** los jugadores se mueven solos, pero un resorte los mantiene a ~1.6 m (la caja va entre ellos). Si uno camina y el otro no, arrastra al otro y van lentos. El que pisa suelo pesa más, así que puede "rescatar" al que se cae.
+- **Unión:** resorte entre jugadores (~**2.0 m** rest, max ~2.9 m — brazos largos v2 / #13). Si uno camina y el otro no, arrastra al otro y van lentos. El que pisa suelo pesa más y puede “rescatar” al que se cae.
 - **Sincronía** (0..1): qué tan alineados van los inputs. Más sincronía = más velocidad (×1.15) y la caja se endereza más rápido.
-- **Inclinación** (2 ejes, en grados):
-  - Sube con la diferencia de altura entre los dos (saltar solo, escalones), con el arrastre, con los empujes opuestos (la caja se tuerce) y con tirar hacia afuera (se desarma).
-  - También la mueven la inercia, los aterrizajes fuertes y el rodillo.
-  - Estados: `upright` (< 12°) · `tilting` · `critical` (≥ 28°). **Más de 1 s en critical → ¡Soltaron la caja! (derrota).**
+- **Inclinación** (v2 más inestable):
+  - Sube con diferencia de altura, arrastre, empujes opuestos, tensión hacia afuera, inercia, aterrizajes y rodillo.
+  - Estados: `upright` (< **10°**) · `tilting` · `critical` (≥ **22°**). **~0.7 s** en critical → sueltan la caja (derrota).
 - **Huequito:** el contenido baja mientras la caja va inclinada (> 15°) y con los golpes. 0% → derrota.
-- **Se moja:** caer al agua suma +30%, los chorros mojan mientras la caja está encima, y se seca despacio. Mojada = más lenta, salta menos, resbala más y es menos estable. 100% → derrota.
+- **Se moja (v2 más agresivo):** caer al agua ~**+45%**, chorros mojan más rápido, seca lento. Mojada = más lenta, salta menos, resbala más, menos estable. 100% → derrota.
 - **Agua:** si alguien cae, los dos reaparecen en el último checkpoint y la caja se moja (castiga sin matar al instante).
 - **Meta:** al entrar la caja, victoria con tiempo, contenido %, mojado % y calificación (perfecta / aceptable / dañada).
 - **NPCs** (en niveles con `npcs`: al inicio del Muelle hay una isla por NPC, unidas por puentes seguros con checkpoint; también la arena `?level=npcs`): pasean al azar por su plataforma, ven la caja y la atacan. No hay vida de personaje: el daño va a la caja.
