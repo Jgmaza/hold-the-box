@@ -1,6 +1,6 @@
 # Decisiones de diseño (congeladas en entrevista Lead)
 
-Fuente de verdad para reescribir `prompts/shared/*`.  
+Fuente de verdad para `prompts/shared/*` y para el equipo.  
 Refs visuales: [`refs/`](./refs/)
 
 ---
@@ -10,49 +10,59 @@ Refs visuales: [`refs/`](./refs/)
 ### Jugabilidad (feel)
 - Norte: **Moving Out**, pero **no pueden soltar** lo que cargan.
 - El reto es **cuidar la caja**, no solo llegar.
-- Cooperación con roce amistoso tipo **Overcooked** (reírse / pelearse un poco por sincronizar).
+- Cooperación con roce amistoso tipo **Overcooked**.
 
 ### Estética vs movimiento
-- **Trazos / look:** cercano a **Fall Guys** (formas legibles, cartoon party, colores vivos).
-- **Movimiento / layout:** recorrido **recto hacia adelante** con profundidad (no arena caótica).
-- Ref principal de cámara + path: [`refs/concept-camera-path.jpeg`](./refs/concept-camera-path.jpeg)
-- Ref concepto base: [`refs/concept-art-base.jpg`](./refs/concept-art-base.jpg)
+- **Trazos / look:** Fall Guys (formas legibles, cartoon party, colores vivos).
+- **Movimiento / layout:** recorrido **recto hacia adelante** con profundidad.
+- Refs: [`refs/concept-camera-path.jpeg`](./refs/concept-camera-path.jpeg), [`refs/concept-art-base.jpg`](./refs/concept-art-base.jpg)
 
 ### Física de caja (MVP primero)
-- Física **simple** para poder mostrar pronto.
-- Si un jugador se adelanta mucho y el otro queda atrás → la caja puede **caer al piso** y eso **daña** la caja.
-- MVP: caja ligada a un sistema de **vida / integridad** (más que huecos/mojado todavía).
-- Post-MVP / nice: huequito, se moja, etc. (no bloquean el primer demo).
+- Desbalance fuerte (uno adelante, otro atrás) → caja puede **caer al piso** → **daña vida**.
+- MVP = sistema de **vida / integridad**.
+- Post: huequito, mojada, etc.
 
 ### Cámara
-- **Una sola cámara cooperativa** (mismo PC, 2 jugadores).
-- 3ª persona con **profundidad**: detrás/arriba, mirando hacia la META, ambos en 3D.
-- Sigue el centro del dúo + caja (estilo de la imagen ref).
+- Una cámara coop, mismo PC, 3ª persona con profundidad, sigue dúo + caja.
 
-### Tono / marcas
-- **B) Family-friendly primero:** mismo vibe, sin depender de marcas/personas reales.
-- Si sobra tiempo: “mods” / upgrade visual (versión más cercana a la imagen original).
+### Tono
+- Family-friendly primero; “mods” / upgrade visual si hay tiempo.
 
-### Fantasía (20 segundos)
-> Debe sentirse **gracioso** jugar y cooperar con tu amigo, y poder **discutir amistosamente** por pasar la caja — como Overcooked.
+### Fantasía (20 s)
+Gracioso cooperar y discutir amistosamente por la caja (Overcooked).
 
 ### Fail
-- Ideal a futuro: animación de **burla** (otros gozando lo de la caja mientras ellos fallan).
-- **Inicial / MVP:** restart claro (splash o caída → reintentar). Sin bloquear por cinemática de burla.
+- MVP: restart claro.
+- Post: burla (NPCs gozando lo de la caja).
 
 ---
 
-## Implicaciones para prompts compartidos (borrador profe)
+## Ronda 2 — Estado del arte visual
 
-| Prompt | Debe anclar |
+### Personajes
+- Estilo **1: humanos stylized** (cabeza un poco grande, como la ref).
+- Bien caricaturescos, legibles a distancia.
+- **Mods futuros (si sobra tiempo):** skins tipo figuras públicas caricaturizadas (ej. “Abelardo / Petro”) — **no bloquean MVP**; base = dúo traje + casual genérico family-friendly.
+
+### Caja (MVP)
+- **1:** cartón genérico con sello **“VIP / FRÁGIL”** (sin marca real).
+
+### Fidelidad al primer build
+- **2:** Capa A (primitivas + colores) **+ 2–3 carteles** de Matias en los lados.
+
+### Luz / atmósfera
+- **Sol de mediodía caribeño** (turquesa, soleado, donde estamos). No neon party oscuro.
+
+### Señales
+- A los lados del path, **exacto como Overcooked**: humor + personalidad del nivel, no solo tutorial seco.
+
+---
+
+## Implicaciones prompts compartidos
+
+| Archivo | Estado |
 |---|---|
-| `art.md` | Fall Guys strokes + path recto + family-friendly; refs en `docs/visual/refs/` |
-| `gameplay.md` | Moving Out sin soltar; vida de caja; desbalance = daño; no online |
-| `level_design.md` | Corredor con profundidad hacia META; lectura clara; 1 cámara |
-| `ui.md` | Textos ES; tono gracioso coop; start/fail restart primero |
-| `polish.md` | Burla fail = post; primero feedback de vida/inclinación |
-
----
-
-## Pendiente — Ronda 2 (visual / estado del arte)
-Ver preguntas del Lead/profe en chat; respuestas se suman aquí.
+| `art.md` | Reescrito con R1+R2 |
+| `level_design.md` | Reescrito con path + señales Overcooked |
+| `gameplay.md` | Pendiente Ronda 3 (feel/control/vida) |
+| `ui.md` / `polish.md` | Después de R3 |

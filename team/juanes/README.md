@@ -14,10 +14,10 @@ Danel usa tus PNG como texturas/refs sobre cajas 3D simples.
 
 ## Tareas (prioridad)
 
-- [ ] `caja-normal.png`
+- [ ] `caja-normal.png` (cartón + sello **VIP / FRÁGIL**, sin marca real)
 - [ ] `caja-inclinada.png`
-- [ ] `caja-huequito.png`
-- [ ] `caja-mojada.png`
+- [ ] `caja-danada.png` (vida baja — prioridad MVP)
+- [ ] `caja-huequito.png` / `caja-mojada.png` (después del demo)
 - [ ] `p1-frente.png` + `p1-cargar.png` (traje + gafas)
 - [ ] `p2-frente.png` + `p2-cargar.png` (gorra + camiseta)
 

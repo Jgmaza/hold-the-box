@@ -74,7 +74,9 @@ Orden Danel: bootstrap → 2P mover → **caja + inclinación** → fail + meta.
 | [`docs/controls.md`](./docs/controls.md) | Controles |
 | [`docs/pitch.md`](./docs/pitch.md) | Pitch corto |
 | [`docs/visual/PLAN.md`](./docs/visual/PLAN.md) | Estrategia visual jam |
+| [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Feel/cámara/arte congelados |
 | [`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md) | Cómo digitalizar dibujos |
+| [`prompts/shared/`](./prompts/shared/) | Prompts de identidad (art, level, …) |
 | [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs del equipo |
 | [`team/SKILLS.md`](./team/SKILLS.md) | Skills Cursor por persona |
 
