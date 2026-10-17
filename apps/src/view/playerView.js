@@ -115,10 +115,11 @@ export class PlayerView {
     return false;
   }
 
-  /** El que sí saltó (aire) mientras el otro quedó en piso. */
+  /** El que está arriba: espejo exacto de `_isJumpDesyncLoser` visto desde el compañero. */
   _isJumpDesyncWinner(partner) {
     const p = this.player;
-    return !p.grounded && partner.grounded;
+    if (p.grounded) return false;
+    return partner.grounded || p.pos.y - partner.pos.y > 0.35;
   }
 
   /** El que quedó abajo: agita los brazos (anclados al hombro) mientras rabia. */
@@ -158,10 +159,12 @@ export class PlayerView {
     const halfW = S.w * 0.5;
     const sideSign = p.id === 1 ? -1 : 1;
     const gripYOffset = opts.gripYOffset ?? S.h * 0.1;
+    // inset < 1 mete las manos bajo la caja en vez de quedarse en la esquina.
+    const reachW = halfW * (opts.inset ?? 1);
 
     const gripY = box.center.y + gripYOffset;
-    const gripX = box.center.x + sideSign * box.axis.x * halfW;
-    const gripZ = box.center.z + sideSign * box.axis.z * halfW;
+    const gripX = box.center.x + sideSign * box.axis.x * reachW;
+    const gripZ = box.center.z + sideSign * box.axis.z * reachW;
 
     const shWorldY = p.pos.y + 1.02;
     const dx = gripX - p.pos.x;
@@ -224,7 +227,7 @@ export class PlayerView {
         this._updateFlailArms(dt);
       } else if (winner) {
         // Saltó bien: manos debajo / soportando la caja.
-        this._poseArmsToBox(box, { gripYOffset: -CONFIG.box.size.h * 0.42 });
+        this._poseArmsToBox(box, { gripYOffset: -CONFIG.box.size.h * 0.5 - 0.07, inset: 0.6 });
       } else {
         // Sync normal: costados.
         this._poseArmsToBox(box, { gripYOffset: CONFIG.box.size.h * 0.1 });
