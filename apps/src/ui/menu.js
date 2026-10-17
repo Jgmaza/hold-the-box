@@ -189,7 +189,6 @@ export class Menu {
       panel.classList.toggle('ready', c.ready);
       panel.classList.toggle('alt', s.alt(slot));
       panel.querySelector('.m-char-name').textContent = def.name;
-      panel.querySelector('.m-char-blurb').textContent = def.blurb;
       panel.querySelector('.ready-btn').textContent = c.ready ? '✔ ¡LISTO!' : 'LISTO';
       for (const b of panel.querySelectorAll('[data-dir]')) b.disabled = c.ready;
     }
@@ -289,7 +288,6 @@ const slotPanel = (slot, keys) => /* html */ `
       <div class="m-char"><b class="m-char-name"></b><span class="m-alt">color alterno</span></div>
       <button type="button" class="btn icon light" data-slot="${slot}" data-dir="1" aria-label="Siguiente">▶</button>
     </div>
-    <p class="m-char-blurb"></p>
     <button type="button" class="btn ready-btn" data-ready="${slot}">LISTO</button>
     <p class="m-keys">${keys}</p>
   </div>`;
@@ -319,7 +317,6 @@ const TEMPLATE = /* html */ `
           <span class="l2">LA CAJA</span>
         </div>
       </div>
-      <p class="m-tag">Cooperativo local para 2 · la caja es el problema</p>
       <nav class="m-home">
         <button type="button" class="btn big" data-act="play"><span class="ico">▶</span>Jugar</button>
         <button type="button" class="btn light" data-act="controls"><span class="ico">🎮</span>Controles</button>
