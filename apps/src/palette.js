@@ -22,6 +22,9 @@ export const DEFAULT_PALETTE = {
   trunk: '#8b5a2b',
   foam: '#e8f8ff',
   content: '#e0a030', // lo que gotea por el huequito
+  npcEasy: '#4cc38a', // cangrejo
+  npcMedium: '#f2a03d', // niño con pistola de agua
+  npcHard: '#9b4dca', // perro mojado
 };
 
 // Palabra con la que empieza la fila en PALETTE.md → clave.
@@ -48,6 +51,9 @@ const LABELS = [
   ['palmera', 'leaf'],
   ['tronco', 'trunk'],
   ['contenido', 'content'],
+  ['npc easy', 'npcEasy'],
+  ['npc medium', 'npcMedium'],
+  ['npc hard', 'npcHard'],
 ];
 
 const strip = (s) =>

@@ -97,6 +97,83 @@ export const CONFIG = {
     sweeperKickDeg: 320, // golpe angular a la caja (grados/s)
   },
 
+  // NPCs (solo en niveles que declaren `npcs`, ver src/sim/npcs/). Atacan la CAJA: botan contenido o la mojan.
+  // Cada dificultad es más difícil de pasar: más rápido, ve más lejos y más ancho, reacciona antes, pega más.
+  npcs: {
+    enabled: true,
+    edgeMargin: 0.6, // distancia mínima al borde de su plataforma (nunca se caen)
+    idleMin: 0.6, // segundos quieto mirando alrededor
+    idleMax: 2.2,
+    turnRate: 300, // grados/s
+    loseSightFactor: 1.4, // ya alertado, los sigue viendo hasta visionRange × esto
+    heightTolerance: 1.5, // no ve una caja mucho más arriba / abajo que la suya
+
+    // Cangrejo: lento, ve poco y solo de frente. Si lo tocan, pellizca → se bota contenido. Se salta JUNTOS.
+    easy: {
+      radius: 0.4,
+      height: 0.45, // pies por encima de esto = lo saltaron
+      wanderSpeed: 1.2,
+      chaseSpeed: 1.8,
+      chaseTime: 2.5, // segundos persiguiendo antes de rendirse
+      visionRange: 3,
+      visionFov: 100,
+      reaction: 0.6, // segundos desde que ve la caja hasta que ataca
+      cooldown: 2,
+      knock: 4,
+      lift: 2,
+      kickDeg: 160, // golpe angular a la caja (grados/s)
+      damage: 4, // % de contenido
+      wet: 0, // % de mojado
+    },
+
+    // Niño con pistola de agua: guarda distancia, avisa y dispara un chorro en arco a la caja → se moja.
+    // Apunta con algo de adelanto: si van rápido y coordinados, lo esquivan.
+    medium: {
+      radius: 0.3,
+      height: 1.1,
+      wanderSpeed: 1.8,
+      keepDistance: 3.5, // retrocede si la caja se le acerca más que esto
+      visionRange: 6,
+      visionFov: 150,
+      reaction: 0.45,
+      windup: 0.7, // aviso antes de disparar
+      cooldown: 2.2,
+      shotSpeed: 9,
+      shotGravity: 6,
+      shotRadius: 0.25,
+      shotLife: 2,
+      lead: 0.5, // 0 = apunta a donde está la caja, 1 = a donde va a estar
+      kickDeg: 60,
+      damage: 0,
+      wet: 14,
+    },
+
+    // Perro mojado: ve en 360° y de lejos, persigue rápido, frena (aviso) y embiste en línea recta.
+    // Si choca: empujón fuerte, sacudida grande, se bota contenido Y se moja. Si falla, queda aturdido.
+    hard: {
+      alwaysChase: true, // persigue SIEMPRE: no necesita verlos, no se rinde y entre ataques los sigue (no pasea)
+      radius: 0.45,
+      height: 0.8,
+      wanderSpeed: 2.6,
+      chaseSpeed: 4,
+      chaseTime: 4,
+      visionRange: 8,
+      visionFov: 360,
+      reaction: 0.25,
+      dashRange: 4, // a esta distancia de la caja deja de perseguir y embiste
+      windup: 0.35,
+      dashSpeed: 11,
+      dashTime: 0.45,
+      stunTime: 0.9, // aturdido tras fallar: la ventana para pasar
+      cooldown: 3,
+      knock: 9,
+      lift: 3,
+      kickDeg: 340,
+      damage: 9,
+      wet: 12,
+    },
+  },
+
   water: {
     killDepth: 0.4, // pies por debajo del agua = splash
     voidY: -12,

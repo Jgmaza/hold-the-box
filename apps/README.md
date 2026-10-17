@@ -20,6 +20,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Servidor local con recarga automática (también al subir archivos a `deliveries/`) |
+| `npm run dev` → `/?level=npcs` | **Arena de prueba de NPCs** (easy / medium / hard). `&seed=N` repite el mismo azar |
 | `npm test` | Tests de la simulación (sin navegador) |
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve `dist/` para probar el build |
@@ -53,6 +54,10 @@ Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reini
 - **Se moja (v2 más agresivo):** caer al agua ~**+45%**, chorros mojan más rápido, seca lento. Mojada = más lenta, salta menos, resbala más, menos estable. 100% → derrota.
 - **Agua:** si alguien cae, los dos reaparecen en el último checkpoint y la caja se moja (castiga sin matar al instante).
 - **Meta:** al entrar la caja, victoria con tiempo, contenido %, mojado % y calificación (perfecta / aceptable / dañada).
+- **NPCs** (en niveles con `npcs`: al inicio del Muelle hay una isla por NPC, unidas por puentes seguros con checkpoint; también la arena `?level=npcs`): pasean al azar por su plataforma, ven la caja y la atacan. No hay vida de personaje: el daño va a la caja.
+  - **easy** (cangrejo): lento, ve 3 m de frente. Si toca a alguien, pellizca → −contenido. Se salta juntos.
+  - **medium** (pistola de agua): ve 6 m, avisa y dispara un chorro en arco → +mojado. Se esquiva moviéndose juntos y rápido.
+  - **hard** (perro mojado): persigue **siempre** a la pareja (`alwaysChase`, sin necesidad de verla, dentro de su isla). Espera en el borde y, cuando la caja pisa su isla, avisa y embiste → empujón + −contenido + mojado. Si falla queda aturdido: ahí se pasa.
 
 Todo número ajustable está en [`src/config.js`](./src/config.js). Con `?debug` se cambian en vivo; el botón *Copiar CONFIG* copia los valores para pegarlos en el archivo.
 
@@ -76,18 +81,25 @@ apps/
       player.js         movimiento, salto (coyote + buffer), colisiones
       carry.js          resorte entre los dos jugadores
       hazards.js        plataforma móvil, rodillo, chorro
+      npcs/             NPCs que atacan la caja
+        npcService.js   NpcService: único punto de entrada desde game.js (crea, actualiza, aplica daño)
+        npc.js          base: paseo aleatorio en su plataforma, visión, estados
+        npcEasy.js  npcMedium.js  npcHard.js   cómo ataca cada dificultad
       world.js          colliders del nivel y triggers
       collision.js      AABB
+    levels/index.js     niveles disponibles (?level=muelle | npcs)
     levels/level1.js    "El Muelle" descrito como datos
+    levels/npcArena.js  arena de prueba de NPCs
     view/               PlayCanvas: dibuja el estado de la sim
       gameView.js       escena, luz, une todo
       levelView.js      plataformas, agua, obstáculos, carteles, props, meta
       playerView.js     jugadores (o sprite de Juanes)
       boxView.js        caja (orientación, huequito, mojado, texturas de Juanes)
+      npcView.js        NPCs (formas por dificultad, cono de visión, "!") y chorros
       camera.js  particles.js  signs.js (texturas con canvas)  gfx.js  audio.js
       deliveries.js     qué hay en deliveries/ (import.meta.glob)
     ui/                 UI provisional en HTML/CSS (de Zharick)
-  test/                 tests de colisiones, escenarios de juego y paleta
+  test/                 tests de colisiones, escenarios de juego, NPCs y paleta
 ```
 
 ---
@@ -102,6 +114,7 @@ apps/
 - `geysers`: chorro `{ x, z, baseY, radius, offset }`.
 - `checkpoints`: zona + `spawn: { p1, p2 }`.
 - `goal`: zona de meta.
+- `npcs` (opcional): `{ difficulty: 'easy' | 'medium' | 'hard', platform: '<id>', x, z }`. Pasea solo dentro de esa plataforma. Números en `CONFIG.npcs`.
 - `signs`, `props`: decoración.
 
 El nivel avanza hacia **−Z** y el agua está en `y = 0`. Los tests verifican que los spawns y la meta estén sobre suelo.
@@ -139,6 +152,10 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `box:impact` | `{ amount, cause, integrity }` |
 | `box:wet` | `{ amount, cause, wetness }` |
 | `box:drop` | `{ tilt }` |
+| `npc:alert` / `npc:windup` | `{ id, difficulty }` (vio la caja / va a atacar) |
+| `npc:shoot` | `{ id, x, y, z }` (medium disparó) |
+| `npc:hit` | `{ id, difficulty, player, x, y, z }` (+ `box:impact` / `box:wet` con `cause: 'npc-easy' \| 'npc-medium' \| 'npc-hard'`) |
+| `npc:splash` | `{ x, y, z }` (un chorro cayó al piso) |
 
 Acciones: `game.togglePause()`, `game.retry()`, `game.restart()`. Los colores llegan como variables CSS (`--ui`, `--danger`, `--goal`, `--water`, `--box`) desde la paleta de Luis.
 
@@ -178,6 +195,7 @@ Los PNG van con fondo transparente (ver [`docs/visual/pipeline-papel.md`](../doc
   - derrotas por contenido y por mojado;
   - reintento desde checkpoint;
   - checkpoints y meta.
+- NPCs: paseo dentro de su plataforma, semilla, visión, los 3 ataques, esquivar y la arena.
 - Sanidad del nivel 1 y lectura de la paleta.
 
 ---
