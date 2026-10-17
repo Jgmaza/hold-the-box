@@ -5,6 +5,10 @@ PlayCanvas · coop local 2 jugadores · la caja se inclina, puede tener huequito
 
 ---
 
+## Mañana / primer demo
+
+👉 **[`docs/START_TOMORROW.md`](./docs/START_TOMORROW.md)** — orden del vertical slice (Danel Opus 5.5 + roles)
+
 ## Empieza aquí según quién eres
 
 👉 **[`team/START_HERE.md`](./team/START_HERE.md)**

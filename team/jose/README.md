@@ -12,6 +12,9 @@ No eres el executor principal de código. Diriges alcance, calidad y pitch.
 - [ ] Pitch final (`docs/pitch.md` + demo)
 - [ ] Invitar al equipo al repo GitHub y aclarar dueños de carpeta
 
+## Mañana
+Arranque del día: **`docs/START_TOMORROW.md`** (criterio demo + mensaje para Danel).
+
 ## Skills (Cursor)
 `create-rule`, `create-skill`, `create-subagent`, `goal`, `split-to-prs`, `review` / `review-bugbot`, `share`, `automate`, `autopilot`, `loop` — detalle en `team/SKILLS.md`.
 

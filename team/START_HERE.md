@@ -22,6 +22,9 @@ El juego (PlayCanvas) vive en `apps/` — lo construye principalmente **Danel**.
 4. Sube entregables a `deliveries/<tu-nombre>/` (arte, audio, paletas, capturas).
 5. Dudas de alcance → Jose. Dudas de código en `apps/` → Danel.
 
+## Mañana — primer demo
+Plan del día: **[`../docs/START_TOMORROW.md`](../docs/START_TOMORROW.md)**
+
 ## Skills + modelo
 Ver **[`SKILLS.md`](./SKILLS.md)** — qué skill usa cada quien.  
 **Danel:** Claude **Opus 5.5** + skill `.cursor/skills/no-sueltes-playcanvas/`.
