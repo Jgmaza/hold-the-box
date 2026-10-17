@@ -15,7 +15,7 @@ Ahí está el índice general. Luego entras a `team/<tu-nombre>/` para tus tarea
 | Audio + color | Luis · [@turriago](https://github.com/turriago) | `team/luis/` |
 | Dev apoyo | Zharick | `team/zharick/` |
 | Dibujo personajes/caja | Juanes | `team/juanes/` |
-| Dibujo señales/props | Matias | `team/matias/` |
+| Dibujo señales/props | Matias · [@matiasaguilar633](https://github.com/matiasaguilar633) | `team/matias/` |
 
 **Visual:** diseño solo dibuja en papel → PNG. No Blender. Ver [`docs/visual/PLAN.md`](./docs/visual/PLAN.md).
 

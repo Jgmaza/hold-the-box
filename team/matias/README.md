@@ -1,6 +1,6 @@
 # Matias — Diseño 2 (señales + meta + props)
 
-GitHub: _(pendiente)_
+GitHub: [@matiasaguilar633](https://github.com/matiasaguilar633)
 
 ## Cómo empezar (3 pasos)
 
