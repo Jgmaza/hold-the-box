@@ -33,8 +33,9 @@
 ## Tip
 En el juego se leen de lejos: prioriza silueta y texto gordo sobre sombreado fino.
 
-## Prompts
-`team/matias/prompts.md`
+## Skills / herramientas
+Briefs: `team/matias/prompts.md`. Digitalizar: `docs/design-pipeline.md`.  
+Mapa: `team/SKILLS.md` (diseño no codea).
 
 ## Done cuando
 Hay set de señales/meta/props en `deliveries/matias/` listos para que Danel los ponga en el nivel.

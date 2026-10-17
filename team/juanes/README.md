@@ -34,8 +34,9 @@
 ## Referencia visual
 Concepto base del juego: dos tipos cargando la caja Old Parr en plataformas sobre el agua, vibe caribeña cartoon.
 
-## Prompts
-`team/juanes/prompts.md` — para pedir refs o limpiar ideas (tú sigues dibujando a mano).
+## Skills / herramientas
+Casi no usas skills de código. Briefs: `team/juanes/prompts.md` (+ `canvas` si abres Cursor).  
+Digitalizar: `docs/design-pipeline.md` (Photopea). Mapa: `team/SKILLS.md`.
 
 ## Done cuando
 Danel tiene referencias claras de P1, P2 y estados de la caja en `deliveries/juanes/`.

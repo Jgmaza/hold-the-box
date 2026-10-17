@@ -1,48 +1,110 @@
-# Prompts — Danel (PlayCanvas / gameplay)
+# Prompts — Danel · **Claude Opus 5.5**
 
-Copia el bloque que necesites en Cursor. Trabaja siempre dentro de `apps/`.
+## Setup del chat (hazlo siempre)
 
-## Bootstrap
-```
-Eres senior PlayCanvas. Crea estructura limpia y modular en apps/ para un platformer
-cooperativo local 2 jugadores. Incluye README de setup. Sin multiplayer online.
-Stack: PlayCanvas. Controles: P1 WASD+Space, P2 flechas+Enter.
-```
+1. En Cursor, modelo: **Claude Opus 5.5** (Opus 5.5 / `claude-opus-5-5`).
+2. Abre el workspace del repo; trabaja solo en `apps/`.
+3. Menciona el skill del proyecto: *usa `no-sueltes-playcanvas`*.
+4. Pega **un** bloque de abajo por sesión (no mezcles 5 mecánicas a la vez).
 
-## Movimiento + salto
+### Prefijo universal (anteponer a cada prompt)
 ```
-Implementa controladores P1/P2 con movimiento, salto, gravedad y colisiones.
-Código modular, fácil de tunear (speed, jump force). Documenta cómo enganchar en la escena.
-```
-
-## Caja compartida + inclinación
-```
-Crea el sistema de caja compartida: ambos jugadores aplican fuerza/dirección.
-Si hay desbalance, la caja se inclina. Coordinación = más estabilidad y velocidad.
-Expón estados: upright / tilting / critical.
+Model: Claude Opus 5.5.
+Skill: no-sueltes-playcanvas.
+Eres lead implementer de No Sueltes La Caja. Owner de apps/. Jam speed, código modular.
+Lee MVP_SCOPE.md + docs/mechanics.md + este pedido. No inventes multiplayer online,
+inventario, powerups ni ranking. Placeholders OK si falta arte en deliveries/.
+Al final: resumen de archivos tocados + cómo probar en 3 pasos.
 ```
 
-## Huequito
+---
+
+## 1) Bootstrap PlayCanvas
 ```
-Añade mecánica de huequito en la caja: si inclinación > umbral o impacto fuerte,
-pierde "integridad"/contenido. Feedback visual simple + fail si llega a 0.
-Manténlo jam-friendly (pocos parámetros).
+[PEGA PREFIJO]
+
+Crea / completa estructura limpia en apps/ para PlayCanvas coop local 2P.
+README de setup (cómo abrir, correr, dónde van scripts).
+Esqueleto de escenas/scripts: Player, Box, Level, GameState.
+Sin gameplay completo aún: bases sólidas para iterar con Opus.
 ```
 
-## Se moja
+## 2) Movimiento + salto (P1/P2)
 ```
-Contacto con agua: caja pasa a estado wet (más peso / menos grip).
-Exceso de mojado o caída total = fail. Placeholders OK si no hay VFX aún.
+[PEGA PREFIJO]
+
+Implementa controladores P1 (WASD+Space) y P2 (flechas+Enter):
+movimiento, salto, gravedad, colisiones. Parámetros tuneables.
+Documenta enganche en la escena. No toques aún la caja compleja.
 ```
 
-## Nivel mínimo jugable
+## 3) Caja compartida + inclinación
 ```
-Arma un nivel corto: plataformas, 1 plataforma móvil, 1 rodillo, agua debajo, meta.
-Respawn simple. Prioriza fun y claridad sobre fidelidad visual.
+[PEGA PREFIJO]
+
+Sistema de caja compartida: ambos aplican fuerza/dirección.
+Desbalance → inclinación. Coordinación → más estabilidad y velocidad.
+Estados explícitos: upright | tilting | critical.
+API clara para que huequito/mojada se enganchen después.
+Piensa como Opus 5.5: diseño de sistema primero, luego código mínimo sólido.
 ```
 
-## Integrar asset pack
+## 4) Huequito
 ```
-Integra PNGs/audio desde deliveries/ como placeholders en la escena.
-No bloquees gameplay si falta un archivo: log warning y sigue.
+[PEGA PREFIJO]
+
+Mecánica huequito: inclinación > umbral o impacto fuerte reduce integridad.
+Feedback visual simple. Integridad 0 → fail.
+Pocos parámetros, jam-friendly. Reutiliza estados de la caja.
 ```
+
+## 5) Se moja
+```
+[PEGA PREFIJO]
+
+Contacto con agua → estado wet (más peso / menos grip).
+Exceso de mojado o inmersión total → fail.
+VFX placeholder OK. No rompas inclinación/huequito existentes.
+```
+
+## 6) Nivel mínimo jugable
+```
+[PEGA PREFIJO]
+
+Nivel corto (~3 min mental): plataformas, 1 móvil, 1 rodillo, agua, meta, respawn.
+Prioriza lectura del riesgo de la caja sobre belleza.
+Win/fail claros.
+```
+
+## 7) Integrar deliveries
+```
+[PEGA PREFIJO]
+
+Integra PNGs/audio desde deliveries/juanes|matias|luis como placeholders.
+Si falta archivo: warning y continúa. No bloquees el loop jugable.
+```
+
+## 8) Sesión “destrabar” (cuando algo falle)
+```
+[PEGA PREFIJO]
+
+Hay un bug/bloqueo (describo abajo). Con Opus 5.5: diagnostica causa raíz,
+propón el fix mínimo, implementa solo eso, y dame cómo reproducir/verificar.
+No refactors amplios.
+
+Bug:
+"""
+(pega síntoma + pasos)
+"""
+```
+
+---
+
+## Anti-patrones (Opus gasta mal aquí)
+- Pedir “haz el juego completo” en un solo prompt
+- Mezclar UI de Zharick + audio de Luis + físicas en el mismo chat
+- Cambiar alcance (online, tienda) “porque sobra tiempo”
+- Reescribir todo `apps/` si solo falla un umbral de tilt
+
+## Skills útiles
+Ver `team/SKILLS.md` sección Danel: `no-sueltes-playcanvas`, `review-bugbot`, `split-to-prs`, `loop`.

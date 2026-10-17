@@ -22,6 +22,9 @@ Cada carpeta tiene:
 - `README.md` → tus tareas
 - `prompts.md` → prompts listos para IA
 
+Skills por persona → [`team/SKILLS.md`](./team/SKILLS.md)  
+**Danel → Claude Opus 5.5** + [`.cursor/skills/no-sueltes-playcanvas/`](./.cursor/skills/no-sueltes-playcanvas/)
+
 Entregables → [`deliveries/`](./deliveries/)  
 Juego → [`apps/`](./apps/)
 

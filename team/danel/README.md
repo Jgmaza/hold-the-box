@@ -22,8 +22,11 @@ Eres el **owner de `apps/`**. Aquí va el vibe coding pesado. Jose revisa; tú e
 3. Lee `docs/mechanics.md` antes de improvisar sistemas nuevos.
 4. Si un asset no llega, usa placeholder y sigue.
 
-## Prompts
-Usa `team/danel/prompts.md` en Cursor sobre `apps/`.
+## Modelo + skills
+- **Modelo:** Claude **Opus 5.5** (obligatorio en Agent para `apps/`)
+- **Skill repo:** `.cursor/skills/no-sueltes-playcanvas/`
+- **Otros:** ver `team/SKILLS.md` (review-bugbot, split-to-prs, loop, create-rule)
+- **Prompts:** `team/danel/prompts.md` (llevan prefijo Opus 5.5)
 
 ## Done cuando
 Dos jugadores pueden cargar la caja, sentir el riesgo (inclinación/agua/hueco) y llegar a la meta o fallar de forma clara.

@@ -28,8 +28,9 @@ bgm-victory.ogg
 bgm-fail.ogg
 ```
 
-## Prompts
-`team/luis/prompts.md`
+## Skills
+`canvas` (paleta/moodboard), prompts en `team/luis/prompts.md`.  
+No necesitas Opus; ver `team/SKILLS.md`.
 
 ## Done cuando
 Danel puede dropear audio + hex en `apps/` sin adivinar intenciones.
