@@ -1,6 +1,6 @@
 // Dibujo de un jugador. Capa A: cápsula + cabeza + accesorios.
 // Brazos: pivote en el hombro del torso → se estiran a la caja; el puño va siempre en la punta.
-// Desync de salto: el que falló tiembla poco + signo de rabia; el que saltó bien sigue agarrando.
+// Desync de salto: el que quedó abajo agita los brazos + signo de rabia; el que saltó bien sostiene la caja por debajo.
 import { CONFIG } from '../config.js';
 import { imageUrl } from './deliveries.js';
 import { angerMarkCanvas, signCanvas } from './signs.js';
@@ -121,18 +121,27 @@ export class PlayerView {
     return !p.grounded && partner.grounded;
   }
 
-  /**
-   * Frustración suave: sigue apuntando a la caja con un temblor mínimo + globo de rabia.
-   * No es “brazos locos”.
-   */
-  _updateFrustratedArms(dt, box) {
-    this.flailT += dt * 8;
-    const wobble = Math.sin(this.flailT) * 6; // grados, suave
-    this._poseArmsToBox(box, {
-      gripYOffset: CONFIG.box.size.h * 0.08,
-      pitchAdd: wobble,
-      flareAdd: Math.cos(this.flailT * 1.1) * 4,
-    });
+  /** El que quedó abajo: agita los brazos (anclados al hombro) mientras rabia. */
+  _updateFlailArms(dt) {
+    this.flailT += dt * 12;
+    const t = this.flailT;
+
+    for (const { side, shoulder, arm, fist } of this.armRigs) {
+      shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
+
+      const pitch = -55 + Math.sin(t * 2.1 + side) * 30;
+      const yaw = side * 30 + Math.cos(t * 2.6 + side * 0.7) * 22;
+      const roll = Math.sin(t * 3.0 + side * 1.3) * 18;
+      shoulder.setLocalEulerAngles(pitch, yaw, roll);
+
+      const len = 0.55 + Math.abs(Math.sin(t * 1.6 + side)) * 0.15;
+      arm.setLocalPosition(0, 0, -len * 0.5);
+      arm.setLocalEulerAngles(0, 0, 0);
+      arm.setLocalScale(0.12, 0.12, len);
+
+      fist.setLocalPosition(0, 0, -len);
+      fist.setLocalScale(0.15, 0.15, 0.15);
+    }
   }
 
   /**
@@ -212,8 +221,7 @@ export class PlayerView {
 
     if (box && !this.sprite && this.armRigs?.length) {
       if (loser) {
-        // Rabia suave: sigue hacia la caja, temblor mínimo.
-        this._updateFrustratedArms(dt, box);
+        this._updateFlailArms(dt);
       } else if (winner) {
         // Saltó bien: manos debajo / soportando la caja.
         this._poseArmsToBox(box, { gripYOffset: -CONFIG.box.size.h * 0.42 });
