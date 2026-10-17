@@ -17,6 +17,12 @@ const fmtTime = (t) => {
 
 const STATE_LABEL = { upright: 'ESTABLE', tilting: 'INCLINADA', critical: '¡SE CAE!' };
 
+const NPC_HIT = {
+  easy: ['¡Pellizco! Se botó contenido', 'bad'],
+  medium: ['¡Chorro! Se moja la caja', 'wet'],
+  hard: ['¡Embestida! Contenido y agua', 'bad'],
+};
+
 export class UI {
   constructor(root, game, palette) {
     this.root = root;
@@ -67,6 +73,7 @@ export class UI {
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
     ev.on('hazard:hit', () => this.toast('¡Rodillo! La caja se sacude', 'bad'));
     ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
+    ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
     ev.on('box:impact', (e) => {
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
       this.flash('integrity');

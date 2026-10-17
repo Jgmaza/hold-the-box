@@ -4,8 +4,12 @@ import { BoxView } from './boxView.js';
 import { FollowCamera } from './camera.js';
 import { Gfx } from './gfx.js';
 import { LevelView } from './levelView.js';
+import { NpcViews } from './npcView.js';
 import { Particles } from './particles.js';
 import { PlayerView } from './playerView.js';
+
+// Qué salpica cuando un NPC le pega a la caja: contenido (se bota) y/o agua (se moja).
+const NPC_HIT_COLORS = { easy: ['content'], medium: ['water'], hard: ['content', 'water'] };
 
 export class GameView {
   constructor(app, game, palette) {
@@ -21,6 +25,7 @@ export class GameView {
     this.particles.waterLevel = game.world.waterLevel;
     this.players = [new PlayerView(this.gfx, game.p1, 'p1'), new PlayerView(this.gfx, game.p2, 'p2')];
     this.box = new BoxView(this.gfx, game.box, this.particles);
+    this.npcs = new NpcViews(this.gfx, game.npcs, this.particles);
     this._bind(game.events);
     this.camera.snap(game);
   }
@@ -66,6 +71,11 @@ export class GameView {
       this.camera.shake = Math.max(this.camera.shake, 0.6);
     });
     events.on('box:impact', () => (this.camera.shake = Math.max(this.camera.shake, 0.4)));
+    events.on('npc:hit', (e) => {
+      for (const color of NPC_HIT_COLORS[e.difficulty]) this.particles.burst(e.x, e.y, e.z, 12, { color, speed: 3, up: 4, life: 0.7, size: 0.1 });
+      this.camera.shake = Math.max(this.camera.shake, e.difficulty === 'hard' ? 0.8 : 0.4);
+    });
+    events.on('npc:splash', (e) => this.particles.burst(e.x, e.y + 0.05, e.z, 8, { color: 'foam', speed: 2, up: 3, life: 0.5, size: 0.08 }));
     events.on('box:drop', () => (this.camera.shake = 1));
     events.on('game:checkpoint', () => {
       const c = this.game.box.center;
@@ -86,6 +96,7 @@ export class GameView {
     this.players[0].update(dt, game.p2, camPos);
     this.players[1].update(dt, game.p1, camPos);
     this.box.update(dt, this.time);
+    this.npcs.update(dt, this.time, camPos);
     this.particles.update(dt);
   }
 }
