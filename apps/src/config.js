@@ -23,11 +23,12 @@ export const CONFIG = {
   },
 
   // Unión entre los dos jugadores (la caja los obliga a ir juntos).
+  // v2 (#13): brazos más largos — más reach, un poco más “elásticos”.
   carry: {
-    restDistance: 1.6,
-    minDistance: 1.0,
-    maxDistance: 2.2,
-    stiffness: 14, // fuerza del resorte que los devuelve a restDistance (1/s)
+    restDistance: 2.0, // antes 1.6
+    minDistance: 1.2, // antes 1.0
+    maxDistance: 2.9, // antes 2.2
+    stiffness: 11, // antes 14 — un poco más elástico con brazos largos
     groundedWeight: 0.8, // el que pisa suelo "pesa" más: rescata al que se cae
     airWeight: 0.2,
     handHeight: 1.15, // altura del centro de la caja sobre los pies
@@ -43,26 +44,27 @@ export const CONFIG = {
       speedMax: 1.15, // ... con sincronía 1 (coordinarse = ir más rápido)
     },
 
+    // v2 (#13): mayor desestabilización — entra antes a tilting/critical, más kick.
     tilt: {
-      stiffnessLow: 16, // rigidez del resorte que endereza la caja (desincronizados)
+      stiffnessLow: 12, // antes 16 — más floja si van desync
       stiffnessHigh: 42, // ... (sincronizados)
-      dampingRatio: 0.75,
-      heightGain: 0.85, // cuánto inclina la diferencia de altura entre jugadores
+      dampingRatio: 0.7, // antes 0.75
+      heightGain: 1.1, // antes 0.85
       bothAirborneFactor: 0.5, // si los dos están en el aire, la diferencia pesa menos
-      dragLeanDeg: 12, // la caja se va hacia el que se queda quieto
-      twistDeg: 30, // uno empuja adelante y el otro atrás: se tuerce
-      tensionDeg: 36, // los dos tiran hacia afuera: se desarma
+      dragLeanDeg: 18, // antes 12
+      twistDeg: 40, // antes 30
+      tensionDeg: 48, // antes 36
       squeezeDeg: 14, // los dos empujan hacia adentro
-      wobbleFreq: 9, // temblor visible cuando hay tensión (rad/s)
-      inertiaGain: 0.18, // grados por m/s² de aceleración del grupo
+      wobbleFreq: 10, // antes 9
+      inertiaGain: 0.26, // antes 0.18
       inertiaSmoothing: 0.12,
-      landKickSpeed: 9, // aterrizajes más rápidos que esto sacuden la caja
-      landKickGain: 14,
-      tiltingDeg: 12, // upright < tiltingDeg <= tilting < criticalDeg <= critical
-      criticalDeg: 28,
-      dropGrace: 1.0, // segundos en critical antes de soltar la caja
-      criticalRecover: 1.5, // qué tan rápido baja el contador al salir de critical
-      maxDeg: 65,
+      landKickSpeed: 8.5, // antes 9 — aterrizajes un poco más fáciles de sacudir
+      landKickGain: 18, // antes 14
+      tiltingDeg: 10, // antes 12
+      criticalDeg: 22, // antes 28
+      dropGrace: 0.7, // antes 1.0
+      criticalRecover: 1.2, // antes 1.5
+      maxDeg: 70, // antes 65
     },
 
     // Huequito: el contenido se fuga con la inclinación y los golpes.
@@ -75,16 +77,16 @@ export const CONFIG = {
       sweeperDamage: 8,
     },
 
-    // Se moja: más peso, menos agarre, menos estabilidad.
+    // v2 (#13): mayor mojado — sube más rápido, seca lento, castiga más el control.
     wet: {
-      fallPenalty: 30, // % al caer al agua
-      geyserRate: 38, // % por segundo bajo un chorro
-      dryRate: 0.6, // % por segundo cuando no se moja
-      speedPenalty: 0.25, // a 100% mojada: -25% velocidad
-      jumpPenalty: 0.1,
-      gripPenalty: 0.5,
-      stabilityPenalty: 0.7,
-      disturbanceGain: 0.5,
+      fallPenalty: 45, // antes 30
+      geyserRate: 55, // antes 38
+      dryRate: 0.35, // antes 0.6
+      speedPenalty: 0.4, // antes 0.25
+      jumpPenalty: 0.2, // antes 0.1
+      gripPenalty: 0.7, // antes 0.5
+      stabilityPenalty: 1.0, // antes 0.7
+      disturbanceGain: 0.75, // antes 0.5
     },
   },
 
