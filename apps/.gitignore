@@ -1,4 +1,7 @@
 dist/
+*.zip
+no-sueltes-la-caja-itch.zip
+
 node_modules/
 # tests de tuneo locales (no se suben)
 test/_*.test.js
