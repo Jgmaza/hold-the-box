@@ -1,0 +1,66 @@
+// Arranque: PlayCanvas + simulación + vista + UI + audio. Orden de cada frame:
+//   teclas globales → input de jugadores → simulación (paso fijo) → vista → UI
+import * as pc from 'playcanvas';
+import { Input } from './input.js';
+import level1 from './levels/level1.js';
+import { buildPalette } from './palette.js';
+import { Game } from './sim/game.js';
+import { UI } from './ui/ui.js';
+import { GameAudio } from './view/audio.js';
+import { PALETTE_MD, reportDeliveries } from './view/deliveries.js';
+import { GameView } from './view/gameView.js';
+
+const canvas = document.getElementById('app');
+const app = new pc.Application(canvas, {
+  graphicsDeviceOptions: { antialias: true, alpha: false },
+});
+app.graphicsDevice.maxPixelRatio = Math.min(window.devicePixelRatio, 2);
+app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+app.setCanvasResolution(pc.RESOLUTION_AUTO);
+window.addEventListener('resize', () => app.resizeCanvas());
+
+const palette = buildPalette(PALETTE_MD);
+if (palette._custom.length) console.info('[paleta] colores de Luis:', palette._custom.join(', '));
+reportDeliveries();
+
+const game = new Game(level1);
+const view = new GameView(app, game, palette);
+const ui = new UI(document.getElementById('ui'), game, palette);
+const audio = new GameAudio(app);
+audio.bind(game.events);
+const input = new Input(window);
+
+let debug = null;
+const openDebug = async () => {
+  if (debug) return debug.toggle();
+  const { DebugPanel } = await import('./debug.js');
+  debug = new DebugPanel(game);
+};
+if (new URLSearchParams(location.search).has('debug')) openDebug();
+
+function globalKeys() {
+  const s = game.state;
+  if (input.wasPressed(['KeyP', 'Escape']) && (s === 'playing' || s === 'paused')) game.togglePause();
+  else if (input.wasPressed('Escape') && (s === 'failed' || s === 'won')) game.restart();
+  if (input.wasPressed('KeyR')) {
+    if (s === 'failed') game.retry();
+    else if (s === 'paused' || s === 'won') game.restart();
+  }
+  if (input.wasPressed(['F2', 'Backquote'])) openDebug();
+}
+
+app.on('update', (dt) => {
+  globalKeys();
+  game.setInputs(input.player('p1'), input.player('p2'));
+  game.update(dt);
+  view.update(dt);
+  ui.update(dt);
+  debug?.update();
+  input.endFrame();
+});
+
+app.start();
+
+// Para depurar desde la consola del navegador: window.game.box, window.game.teleport(1)...
+window.game = game;
+window.app = app;
