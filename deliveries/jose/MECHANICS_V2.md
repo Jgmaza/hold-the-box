@@ -41,12 +41,17 @@ Sigue siendo Overcooked-funny, no Dark Souls.
 | `stabilityPenalty` | 0.7 | **1.0** |
 | `disturbanceGain` | 0.5 | **0.75** |
 
+## Visual brazos
+Los brazos de Capa A (cápsulas) se **estiran cada frame** hasta la cara cercana de la caja (`playerView.js`), para que con `restDistance` 2.0 no se vea el hueco.
+
+Si Juanes sube `p*-cargar.png`, el billboard tapa los brazos procedimentales — conviene pose de carga con brazos largos en el dibujo.
+
 ## Cómo playtestear
 ```bash
 cd apps && npm run dev
 # opcional: http://localhost:5173/?debug
 ```
-Probar: caminar desync, salto solo de uno, caer al agua, chorro.
+Probar: caminar desync, salto solo de uno, caer al agua, chorro. Ver que las manos toquen la caja.
 
 ## Siguiente
 Luis puede retocar números en `BOX_FEEL.md` tras playtest. Danel review en PR a `dev`.

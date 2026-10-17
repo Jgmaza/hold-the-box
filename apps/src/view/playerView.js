@@ -1,5 +1,7 @@
 // Dibujo de un jugador. Capa A: cápsula + cabeza + accesorios.
-// Si Juanes entrega p1-cargar.png / p1-frente.png (o p2-...), se usa como recorte de papel (billboard).
+// Brazos se estiran hasta la caja (carry v2 / brazos largos).
+// Si Juanes entrega p1-cargar.png / p1-frente.png (o p2-...), se usa como billboard.
+import { CONFIG } from '../config.js';
 import { imageUrl } from './deliveries.js';
 import { signCanvas } from './signs.js';
 
@@ -18,26 +20,36 @@ export class PlayerView {
     const suit = gfx.solid(colorKey);
     gfx.prim('capsule', suit, { parent: P, pos: [0, 0.6, 0], scale: [0.6, 0.6, 0.6], name: 'torso' });
     gfx.prim('sphere', gfx.solid('skin'), { parent: P, pos: [0, 1.36, 0], scale: [0.5, 0.5, 0.5], name: 'head' });
-    // Brazos hacia adelante (-Z = hacia la caja).
+
+    // Brazos dinámicos: se reescalan cada frame hasta agarrar la caja.
+    this.armRigs = [];
     for (const side of [-1, 1]) {
-      gfx.prim('box', suit, { parent: P, pos: [side * 0.24, 0.98, -0.3], scale: [0.12, 0.12, 0.42], name: 'arm' });
-      gfx.prim('sphere', gfx.solid('skin'), { parent: P, pos: [side * 0.24, 0.98, -0.52], scale: [0.13, 0.13, 0.13], name: 'hand' });
+      const arm = gfx.prim('box', suit, {
+        parent: P,
+        pos: [side * 0.28, 0.98, -0.35],
+        scale: [0.11, 0.11, 0.5],
+        name: side < 0 ? 'arm-L' : 'arm-R',
+      });
+      const hand = gfx.prim('sphere', gfx.solid('skin'), {
+        parent: P,
+        pos: [side * 0.28, 0.98, -0.62],
+        scale: [0.14, 0.14, 0.14],
+        name: side < 0 ? 'hand-L' : 'hand-R',
+      });
+      this.armRigs.push({ side, arm, hand });
     }
 
     if (player.id === 1) {
-      // P1: traje + gafas + corbata
       gfx.prim('box', gfx.solid('dark', { gloss: 0.8 }), { parent: P, pos: [0, 1.4, -0.22], scale: [0.4, 0.09, 0.08], name: 'gafas' });
       gfx.prim('box', gfx.solid('#ffffff'), { parent: P, pos: [0, 1.0, -0.27], scale: [0.18, 0.2, 0.05], name: 'camisa' });
       gfx.prim('box', gfx.solid('danger'), { parent: P, pos: [0, 0.95, -0.3], scale: [0.07, 0.26, 0.04], name: 'corbata' });
     } else {
-      // P2: gorra + camiseta
       const cap = gfx.solid('cap');
       gfx.prim('cylinder', cap, { parent: P, pos: [0, 1.53, 0], scale: [0.52, 0.14, 0.52], name: 'gorra' });
       gfx.prim('box', cap, { parent: P, pos: [0, 1.47, -0.27], scale: [0.34, 0.04, 0.26], name: 'visera' });
       gfx.prim('box', gfx.solid('#ffffff'), { parent: P, pos: [0, 0.82, -0.29], scale: [0.2, 0.2, 0.03], name: 'logo' });
     }
 
-    // Etiqueta P1 / P2 sobre la cabeza.
     const label = signCanvas(`P${player.id}`, { style: player.id === 1 ? 'info' : 'warn', aspect: 1.4 });
     this.label = gfx.prim('box', gfx.textured(gfx.textureFromCanvas(label), { unlit: true }), {
       parent: this.root,
@@ -74,22 +86,58 @@ export class PlayerView {
     this.squashVel -= Math.min(10, 2 + speed * 0.5);
   }
 
-  update(dt, partner, camPos) {
+  /**
+   * Estira brazos desde el hombro hasta la cara cercana de la caja.
+   * El cuerpo ya mira al compañero (-Z local ≈ hacia la caja).
+   */
+  _updateCarryArms(box) {
+    if (this.sprite || !this.armRigs?.length || box?.dropped) return;
+
+    const p = this.player;
+    const halfW = CONFIG.box.size.w * 0.48;
+    // P1 está del lado -axis; P2 del +axis. Agarre = cara de la caja más cercana.
+    const sideSign = p.id === 1 ? -1 : 1;
+    const gripX = box.center.x + sideSign * box.axis.x * halfW;
+    const gripY = box.center.y;
+    const gripZ = box.center.z + sideSign * box.axis.z * halfW;
+
+    const shoulderY = p.pos.y + 0.98;
+    const dx = gripX - p.pos.x;
+    const dy = gripY - shoulderY;
+    const dz = gripZ - p.pos.z;
+    // Distancia horizontal al agarre (el yaw del body ya apunta al compañero).
+    const horiz = Math.hypot(dx, dz);
+    const reach = Math.max(0.45, Math.min(2.4, horiz - 0.05));
+    const pitchDeg = (Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI;
+
+    for (const { side, arm, hand } of this.armRigs) {
+      // Hombros abiertos; manos más juntas sobre la cara de la caja.
+      const shX = side * 0.3;
+      const handX = side * 0.12;
+      const midX = (shX + handX) / 2;
+
+      arm.setLocalPosition(midX, 0.98 + dy * 0.35, -reach * 0.5);
+      arm.setLocalEulerAngles(-pitchDeg * 0.85, 0, side * 4);
+      arm.setLocalScale(0.11, 0.11, reach);
+
+      hand.setLocalPosition(handX, 0.98 + dy * 0.7, -reach);
+      hand.setLocalScale(0.15, 0.15, 0.15);
+    }
+  }
+
+  update(dt, partner, camPos, box) {
     const p = this.player;
     this.root.setPosition(p.pos.x, p.pos.y, p.pos.z);
 
-    // Mirar hacia el compañero (la caja está entre los dos).
     const dx = partner.pos.x - p.pos.x;
     const dz = partner.pos.z - p.pos.z;
     const yaw = (Math.atan2(-dx, -dz) * 180) / Math.PI;
 
-    // Squash & stretch (resorte).
     this.squashVel += (-(this.squash - 1) * 180 - this.squashVel * 14) * dt;
     this.squash += this.squashVel * dt;
     const sq = Math.max(0.6, Math.min(1.4, this.squash));
     const side = 1 / Math.sqrt(sq);
 
-    // Balanceo al caminar.
     const speed = Math.hypot(p.actualVel.x, p.actualVel.z);
     if (p.grounded && speed > 0.5) this.bob += dt * (8 + speed * 1.6);
     const bobY = p.grounded ? Math.abs(Math.sin(this.bob)) * Math.min(1, speed / 5) * 0.07 : 0;
@@ -98,6 +146,8 @@ export class PlayerView {
     this.body.setLocalPosition(0, bobY, 0);
     this.body.setLocalEulerAngles(0, yaw, lean);
     this.body.setLocalScale(side, sq, side);
+
+    if (box) this._updateCarryArms(box);
 
     if (this.sprite || this.label) {
       const yawCam = (Math.atan2(camPos.x - p.pos.x, camPos.z - p.pos.z) * 180) / Math.PI;

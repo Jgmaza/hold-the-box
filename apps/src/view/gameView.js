@@ -83,8 +83,8 @@ export class GameView {
     this.camera.update(dt, game);
     const camPos = this.camera.entity.getPosition();
     this.level.update(dt, game.time, game, camPos);
-    this.players[0].update(dt, game.p2, camPos);
-    this.players[1].update(dt, game.p1, camPos);
+    this.players[0].update(dt, game.p2, camPos, game.box);
+    this.players[1].update(dt, game.p1, camPos, game.box);
     this.box.update(dt, this.time);
     this.particles.update(dt);
   }
