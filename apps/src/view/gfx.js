@@ -3,11 +3,22 @@ import * as pc from 'playcanvas';
 import { hexToRgb } from '../palette.js';
 
 export class Gfx {
-  constructor(app, palette) {
+  /** `root`: entidad padre por defecto de todo lo que se crea (una partida o el menú se borran de una). */
+  constructor(app, palette, root = app.root) {
     this.app = app;
     this.device = app.graphicsDevice;
     this.palette = palette;
+    this.root = root;
     this._mats = new Map();
+    this._owned = [];
+  }
+
+  /** Libera materiales y texturas creados aquí (la raíz la borra quien la creó). */
+  destroy() {
+    for (const m of this._mats.values()) m.destroy();
+    for (const r of this._owned) r.destroy();
+    this._mats.clear();
+    this._owned.length = 0;
   }
 
   color(keyOrHex, mul = 1) {
@@ -46,6 +57,7 @@ export class Gfx {
   /** Material nuevo (no cacheado) para cosas que cambian de color en vivo. */
   dynamic(keyOrHex, opts = {}) {
     const m = new pc.StandardMaterial();
+    this._owned.push(m);
     m.diffuse = this.color(keyOrHex);
     m.gloss = opts.gloss ?? 0.25;
     m.useMetalness = true;
@@ -57,6 +69,7 @@ export class Gfx {
   /** Material con textura. `cutout`: recorte por alfa (PNG transparentes). */
   textured(texture, { unlit = false, cutout = false, twoSided = false, tint = null } = {}) {
     const m = new pc.StandardMaterial();
+    this._owned.push(m);
     if (unlit) {
       m.useLighting = false;
       m.diffuse = new pc.Color(0, 0, 0);
@@ -82,7 +95,9 @@ export class Gfx {
     return m;
   }
 
-  textureFromCanvas(canvas) {
+  /** `repeat`: la textura se repite (pisos con tiling) en vez de estirarse en el borde. */
+  textureFromCanvas(canvas, { repeat = false } = {}) {
+    const wrap = repeat ? pc.ADDRESS_REPEAT : pc.ADDRESS_CLAMP_TO_EDGE;
     const t = new pc.Texture(this.device, {
       width: canvas.width,
       height: canvas.height,
@@ -90,11 +105,12 @@ export class Gfx {
       mipmaps: true,
       minFilter: pc.FILTER_LINEAR_MIPMAP_LINEAR,
       magFilter: pc.FILTER_LINEAR,
-      addressU: pc.ADDRESS_CLAMP_TO_EDGE,
-      addressV: pc.ADDRESS_CLAMP_TO_EDGE,
-      anisotropy: 4,
+      addressU: wrap,
+      addressV: wrap,
+      anisotropy: 8,
     });
     t.setSource(canvas);
+    this._owned.push(t);
     return t;
   }
 
@@ -122,14 +138,14 @@ export class Gfx {
     e.setLocalPosition(pos[0], pos[1], pos[2]);
     e.setLocalScale(scale[0], scale[1], scale[2]);
     e.setLocalEulerAngles(rot[0], rot[1], rot[2]);
-    (parent ?? this.app.root).addChild(e);
+    (parent ?? this.root).addChild(e);
     return e;
   }
 
   group(name, parent = null, pos = [0, 0, 0]) {
     const e = new pc.Entity(name);
     e.setLocalPosition(pos[0], pos[1], pos[2]);
-    (parent ?? this.app.root).addChild(e);
+    (parent ?? this.root).addChild(e);
     return e;
   }
 }

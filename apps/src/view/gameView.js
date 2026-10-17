@@ -2,6 +2,7 @@
 import * as pc from 'playcanvas';
 import { BoxView } from './boxView.js';
 import { FollowCamera } from './camera.js';
+import { DEFAULT_CHARS, usesAlt } from './characters.js';
 import { Gfx } from './gfx.js';
 import { LevelView } from './levelView.js';
 import { NpcViews } from './npcView.js';
@@ -13,10 +14,14 @@ import { WeatherViews } from './weatherView.js';
 const NPC_HIT_COLORS = { easy: ['content'], medium: ['water'], hard: ['content', 'water'] };
 
 export class GameView {
-  constructor(app, game, palette) {
+  /** @param {{ chars?: { p1: string, p2: string } }} opts  personajes escogidos en el menú */
+  constructor(app, game, palette, { chars = DEFAULT_CHARS } = {}) {
     this.app = app;
     this.game = game;
-    this.gfx = new Gfx(app, palette);
+    // Todo cuelga de esta raíz: al volver al menú se borra la partida entera.
+    this.root = new pc.Entity('partida');
+    app.root.addChild(this.root);
+    this.gfx = new Gfx(app, palette, this.root);
     this.time = 0;
 
     this._setupScene();
@@ -24,7 +29,7 @@ export class GameView {
     this.level = new LevelView(this.gfx, game.world);
     this.particles = new Particles(this.gfx);
     this.particles.waterLevel = game.world.waterLevel;
-    this.players = [new PlayerView(this.gfx, game.p1, 'p1'), new PlayerView(this.gfx, game.p2, 'p2')];
+    this.players = ['p1', 'p2'].map((slot) => new PlayerView(this.gfx, game[slot], { charId: chars[slot], alt: usesAlt(chars, slot) }));
     this.box = new BoxView(this.gfx, game.box, this.particles, game.cat, game.bomb);
     this.npcs = new NpcViews(this.gfx, game.npcs, this.particles);
     this.weather = new WeatherViews(this.gfx, game.weather, { particles: this.particles, scene: app.scene, sun: this.sun });
@@ -54,7 +59,7 @@ export class GameView {
       shadowIntensity: 0.75,
     });
     sun.setLocalEulerAngles(50, 25, 0);
-    app.root.addChild(sun);
+    this.root.addChild(sun);
     this.sun = sun;
   }
 
@@ -99,6 +104,11 @@ export class GameView {
       const c = this.game.box.center;
       for (const color of ['goal', 'ui', 'danger', 'p2']) this.particles.burst(c.x, c.y + 1, c.z, 18, { color, speed: 5, up: 9, life: 1.6, size: 0.15 });
     });
+  }
+
+  destroy() {
+    this.root.destroy();
+    this.gfx.destroy();
   }
 
   update(dt) {

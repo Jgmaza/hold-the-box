@@ -121,6 +121,11 @@ export class GameAudio {
     if (this.available.has(name)) this.entity.sound.stop(name);
   }
 
+  /** Al salir al menú: corta música y loops de la partida. */
+  stopAll() {
+    for (const name of this.available) this.entity.sound.stop(name);
+  }
+
   /** Cada frame: el loop del clima sube y baja con la intensidad (llovizna ↔ aguacero, brisa ↔ ráfaga). */
   update(game) {
     const zone = game.weather.current;
