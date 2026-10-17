@@ -1,5 +1,8 @@
 # Plan visual — sin pedirles Blender a diseño
 
+Decisiones de feel/cámara/tono: [`DECISIONS.md`](./DECISIONS.md)  
+Refs de IA / WhatsApp: [`refs/`](./refs/)
+
 ## Decisión de jam (congelada)
 
 | Pregunta | Respuesta |

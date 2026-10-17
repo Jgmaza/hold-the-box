@@ -44,6 +44,8 @@ Cada carpeta de persona tiene:
 **Juanes y Matias NO modelan en 3D.** Solo dibujan en papel.
 
 Plan completo: **[`docs/visual/PLAN.md`](./docs/visual/PLAN.md)**  
+Decisiones (feel/cámara/tono): **[`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md)**  
+Refs visuales: **[`docs/visual/refs/`](./docs/visual/refs/)**  
 Pipeline papel → PNG: **[`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md)**
 
 Resumen:
