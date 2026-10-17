@@ -15,6 +15,7 @@ export class PlayerView {
     this.squash = 1;
     this.squashVel = 0;
     this.bob = 0;
+    this.flailT = 0;
 
     const P = this.parts;
     const suit = gfx.solid(colorKey);
@@ -100,6 +101,43 @@ export class PlayerView {
   }
 
   /**
+   * ¿Este jugador “falló” el salto sincronizado? (el otro sí saltó / va más alto)
+   * Solo afecta la mimica de brazos; la física no cambia.
+   */
+  _isJumpDesyncLoser(partner) {
+    const p = this.player;
+    const heightGap = partner.pos.y - p.pos.y;
+    // Compañero en el aire y yo en piso, o me quedé claramente más abajo.
+    if (!partner.grounded && p.grounded) return true;
+    if (!partner.grounded && heightGap > 0.35) return true;
+    return false;
+  }
+
+  /** Brazos locos de pánico: siguen anclados al hombro, no bajan a “soltar” la caja. */
+  _updateFlailArms(dt) {
+    this.flailT += dt * 20;
+    const t = this.flailT;
+
+    for (const { side, shoulder, arm, fist } of this.armRigs) {
+      shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
+
+      const pitch = -25 + Math.sin(t * 2.3 + side) * 50;
+      const yaw = side * 35 + Math.cos(t * 2.9 + side * 0.7) * 45;
+      const roll = Math.sin(t * 3.4 + side * 1.3) * 40;
+      shoulder.setLocalEulerAngles(pitch, yaw, roll);
+
+      // Largo corto-medio (agitando), no estirarse hacia abajo.
+      const len = 0.5 + Math.abs(Math.sin(t * 1.8 + side)) * 0.28;
+      arm.setLocalPosition(0, 0, -len * 0.5);
+      arm.setLocalEulerAngles(0, 0, 0);
+      arm.setLocalScale(0.12, 0.12, len);
+
+      fist.setLocalPosition(0, 0, -len);
+      fist.setLocalScale(0.15, 0.15, 0.15);
+    }
+  }
+
+  /**
    * Hombro queda en el torso; brazo crece en -Z del hombro; puño = punta del brazo.
    */
   _updateCarryArms(box) {
@@ -165,7 +203,10 @@ export class PlayerView {
     this.body.setLocalEulerAngles(0, yaw, lean);
     this.body.setLocalScale(side, sq, side);
 
-    if (box) this._updateCarryArms(box);
+    if (box && !this.sprite && this.armRigs?.length) {
+      if (this._isJumpDesyncLoser(partner)) this._updateFlailArms(dt);
+      else this._updateCarryArms(box);
+    }
 
     if (this.sprite || this.label) {
       const yawCam = (Math.atan2(camPos.x - p.pos.x, camPos.z - p.pos.z) * 180) / Math.PI;
