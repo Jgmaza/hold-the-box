@@ -17,8 +17,6 @@
 | Juanes | `work/juanes` |
 | Matias | `work/matias` |
 
-La rama histórica de Danel `apps/danel-vertical-slice` ya se integró en `dev`. Nuevo trabajo de Danel → `work/danel`.
-
 ## Flujo
 
 ```

@@ -69,14 +69,14 @@ Smoke del build: `npm run preview` → http://127.0.0.1:4173/
 
 ## GitHub Pages (automático)
 
-No hace falta push manual a `gh-pages`. Tras merge a `main`:
+Tras merge a `main`:
 
 1. Actions → workflow **Deploy Pages**  
 2. Si sale verde → https://jgmaza.github.io/no-sueltes-la-caja/
 
 Redeploy manual (mismo commit de `main`): Actions → Deploy Pages → **Run workflow**.
 
-La rama legacy `gh-pages` deja de ser la fuente; Pages usa **GitHub Actions**.
+Pages usa **GitHub Actions** (no hay rama de deploy).
 
 ---
 
