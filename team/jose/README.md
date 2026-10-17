@@ -24,7 +24,7 @@ Foco: no inflar sistemas, coordinar entregas, **promover a `main`** y subir itch
 **GitHub Pages (automático)**  
 1. Smoke en `dev`  
 2. PR **`dev` → `main`**  
-3. Esperar **2 aprobaciones** + CI verde  
+3. CI verde (tus PRs los mergeas como admin; los del equipo los apruebas tú como QA)  
 4. Merge → Actions **Deploy Pages**  
 5. Verificar https://jgmaza.github.io/no-sueltes-la-caja/
 

@@ -22,11 +22,11 @@ Guía única del flujo: [`ONBOARDING.md`](./ONBOARDING.md).
 ## Flujo
 
 ```
-work/<persona>  →  PR a dev  →  sync automático a work/*
+work/<persona>  →  PR a dev (aprueba Jose + CI)  →  sync automático a work/*
                       ↓
                  playtest
                       ↓
-         PR dev → main (2 approvals + CI)  →  Pages
+         PR dev → main (aprueba Jose + CI)  →  Pages
 ```
 
 ### Modo de trabajo: `dev` alimenta a todos

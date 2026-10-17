@@ -86,10 +86,10 @@ Detalle de ramas: [`BRANCHES.md`](./BRANCHES.md).
 | Push a `dev` | **Sync work from dev** | Las `work/*` reciben `dev` |
 | Merge a `main` | **Deploy Pages** | Se publica el juego en GitHub Pages |
 
-### Reglas de `main` (producción)
+### Reglas de `dev` y `main`
 
-- Solo por **pull request** desde `dev`
-- Mínimo **2 aprobaciones**
+- Solo por **pull request** (`work/*` → `dev`, `dev` → `main`)
+- **Aprueba solo Jose** (Lead + QA, code owner en `.github/CODEOWNERS`)
 - Check **CI / test** verde
 - Al mergear → deploy automático a Pages
 

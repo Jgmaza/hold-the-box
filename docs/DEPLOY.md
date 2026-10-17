@@ -21,12 +21,12 @@ El slice jugable vive en `apps/` (PlayCanvas + Vite).
 
 ```
 work/<persona> → PR a dev → playtest
-dev → PR a main (mín. 2 aprobaciones + CI verde) → merge → Deploy Pages automático
+dev → PR a main (aprobación de Jose + CI verde) → merge → Deploy Pages automático
 ```
 
-Reglas de `main`:
+Reglas de `dev` y `main`:
 - Solo entra por **pull request** (no push directo)
-- Mínimo **2 reviews** aprobando
+- **Aprueba solo Jose** (Lead + QA, code owner)
 - Check **CI / test** debe pasar
 
 El workflow [`.github/workflows/deploy-pages.yml`](../.github/workflows/deploy-pages.yml) corre en cada push a `main` (es decir, tras el merge del PR).
@@ -87,7 +87,7 @@ Pages usa **GitHub Actions** (no hay rama de deploy).
 
 - [ ] Smoke 2P en `dev` local o preview
 - [ ] CI verde en el PR a `main`
-- [ ] 2 aprobaciones del equipo
+- [ ] QA y aprobación de Jose
 - [ ] Sin depender de `?debug` para jugar
 - [ ] Fail/win entendibles
 - [ ] (Jam) Página itch creada + URL anotada
