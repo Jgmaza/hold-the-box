@@ -1,5 +1,8 @@
 # Deploy — Jose
 
+Onboarding del equipo (Git + CI/CD): [`ONBOARDING.md`](./ONBOARDING.md).  
+Material oficial del jam: [`jam/`](./jam/).
+
 El slice jugable vive en `apps/` (PlayCanvas + Vite).
 
 ## ¿Dónde se despliega?

@@ -20,8 +20,10 @@ La raíz (`GAME_DESIGN_DOCUMENT.md`, `MVP_SCOPE.md`, `TASK_BOARD.md`) es referen
 
 ## 2) Flujo en 3 pasos (todos)
 
+**Cómo Git + CI/CD + dónde subir:** [`docs/ONBOARDING.md`](./docs/ONBOARDING.md)
+
 ```
-① Este INDEX  →  ② team/<tu-nombre>/README.md  →  ③ Haz la tarea y súbela a deliveries/ (o apps/ si eres Danel)
+① ONBOARDING + este INDEX  →  ② team/<tu-nombre>/README.md  →  ③ deliveries/ o apps/ → PR a dev
 ```
 
 | Tu nombre | Abre esto ahora |
@@ -50,20 +52,26 @@ Scope real: **[`MVP_SCOPE.md`](./MVP_SCOPE.md)**
 | **Juanes / Matias** | Visuales **de este juego** (papel→PNG) |
 | **Zharick** | Pulir UI |
 | **Danel** | Estabilizar + integrar deliveries |
-| **Jose** | **Desplegar** + alcance + pitch → [`docs/DEPLOY.md`](./docs/DEPLOY.md) |
+| **Jose** | **Desplegar** + alcance + pitch → [`docs/DEPLOY.md`](./docs/DEPLOY.md) · jam en [`docs/jam/`](./docs/jam/) |
 
 ## 4) Visual
 
 **Juanes/Matias NO modelan en 3D.** Papel → PNG.  
 [`docs/visual/PLAN.md`](./docs/visual/PLAN.md) · [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) · [`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md) · [`docs/visual/refs/`](./docs/visual/refs/)
 
-## 5) Correr / ramas
+## 5) Correr / ramas / CI-CD
 
 ```bash
-git checkout dev && cd apps && npm install && npm run dev
+git checkout work/<tu-nombre> && git pull
+# jugar lo integrado:
+git checkout dev && git pull && cd apps && npm install && npm run dev
 ```
 
-Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
+| Doc | Para qué |
+|---|---|
+| [`docs/ONBOARDING.md`](./docs/ONBOARDING.md) | **Cómo trabajar** (Git, sync, CI/CD) |
+| [`docs/BRANCHES.md`](./docs/BRANCHES.md) | Detalle de ramas |
+| [`docs/DEPLOY.md`](./docs/DEPLOY.md) | Pages + itch (Jose) |
 
 ---
 
@@ -71,9 +79,11 @@ Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
 
 | Doc | Para qué |
 |---|---|
+| [`docs/ONBOARDING.md`](./docs/ONBOARDING.md) | Onboarding + CI/CD |
 | [`MVP_SCOPE.md`](./MVP_SCOPE.md) | Piso real post-slice |
 | [`TASK_BOARD.md`](./TASK_BOARD.md) | Roles fase actual |
 | [`docs/DEPLOY.md`](./docs/DEPLOY.md) | Deploy (Jose) |
+| [`docs/jam/`](./docs/jam/) | Material oficial del jam |
 | [`docs/BRANCHES.md`](./docs/BRANCHES.md) | `main` / `dev` / `work/*` |
 | [`GAME_DESIGN_DOCUMENT.md`](./GAME_DESIGN_DOCUMENT.md) | Fantasía |
 | [`docs/mechanics.md`](./docs/mechanics.md) | Mecánicas |

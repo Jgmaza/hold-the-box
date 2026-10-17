@@ -4,9 +4,11 @@ Game Jam 2026 · Better Together · PlayCanvas · coop local 2P
 
 ## Empieza aquí
 
-# → **[`INDEX.md`](./INDEX.md)** · Scope: **[`MVP_SCOPE.md`](./MVP_SCOPE.md)**
+1. **[`docs/ONBOARDING.md`](./docs/ONBOARDING.md)** — Git, sync desde `dev`, CI/CD, dónde subir  
+2. **[`INDEX.md`](./INDEX.md)** — tu carpeta y fase actual  
+3. Scope: **[`MVP_SCOPE.md`](./MVP_SCOPE.md)**
 
-Vertical slice **ya shipped** (tilt + huequito + mojado + nivel). Fase: tunear cajas, vestir, desplegar.
+Vertical slice **ya shipped**. Fase: tunear cajas, vestir, desplegar (Pages + itch).
 
 | Rol | Persona | Carpeta |
 |---|---|---|
@@ -19,8 +21,10 @@ Vertical slice **ya shipped** (tilt + huequito + mojado + nivel). Fase: tunear c
 
 ```bash
 git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
-cd no-sueltes-la-caja && git checkout dev
-cd apps && npm install && npm run dev   # → http://localhost:5173
+cd no-sueltes-la-caja
+git checkout work/<tu-nombre> && git pull
+# jugar integración:
+git checkout dev && git pull && cd apps && npm install && npm run dev
 ```
 
-Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
+Prod: https://jgmaza.github.io/no-sueltes-la-caja/ · Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
