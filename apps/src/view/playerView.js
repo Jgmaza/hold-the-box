@@ -1,5 +1,5 @@
 // Dibujo de un jugador. Capa A: cápsula + cabeza + accesorios.
-// Brazos se estiran hasta la caja (carry v2 / brazos largos).
+// Brazos: pivote en el hombro del torso → se estiran a la caja; el puño va siempre en la punta.
 // Si Juanes entrega p1-cargar.png / p1-frente.png (o p2-...), se usa como billboard.
 import { CONFIG } from '../config.js';
 import { imageUrl } from './deliveries.js';
@@ -18,25 +18,36 @@ export class PlayerView {
 
     const P = this.parts;
     const suit = gfx.solid(colorKey);
+    const skin = gfx.solid('skin');
     gfx.prim('capsule', suit, { parent: P, pos: [0, 0.6, 0], scale: [0.6, 0.6, 0.6], name: 'torso' });
-    gfx.prim('sphere', gfx.solid('skin'), { parent: P, pos: [0, 1.36, 0], scale: [0.5, 0.5, 0.5], name: 'head' });
+    gfx.prim('sphere', skin, { parent: P, pos: [0, 1.36, 0], scale: [0.5, 0.5, 0.5], name: 'head' });
 
-    // Brazos dinámicos: se reescalan cada frame hasta agarrar la caja.
+    // Rig: hombro FIJO al torso → brazo y puño hijos (crecen en -Z local del hombro).
     this.armRigs = [];
     for (const side of [-1, 1]) {
+      const shoulder = gfx.group(side < 0 ? 'shoulder-L' : 'shoulder-R', P);
+      // Pegado al costado del torso (cápsula ~radio 0.3).
+      shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
+
+      const joint = gfx.prim('sphere', skin, {
+        parent: shoulder,
+        pos: [0, 0, 0],
+        scale: [0.18, 0.18, 0.18],
+        name: 'joint',
+      });
       const arm = gfx.prim('box', suit, {
-        parent: P,
-        pos: [side * 0.28, 0.98, -0.35],
-        scale: [0.11, 0.11, 0.5],
-        name: side < 0 ? 'arm-L' : 'arm-R',
+        parent: shoulder,
+        pos: [0, 0, -0.25],
+        scale: [0.12, 0.12, 0.5],
+        name: 'arm',
       });
-      const hand = gfx.prim('sphere', gfx.solid('skin'), {
-        parent: P,
-        pos: [side * 0.28, 0.98, -0.62],
-        scale: [0.14, 0.14, 0.14],
-        name: side < 0 ? 'hand-L' : 'hand-R',
+      const fist = gfx.prim('sphere', skin, {
+        parent: shoulder,
+        pos: [0, 0, -0.52],
+        scale: [0.15, 0.15, 0.15],
+        name: 'fist',
       });
-      this.armRigs.push({ side, arm, hand });
+      this.armRigs.push({ side, shoulder, joint, arm, fist });
     }
 
     if (player.id === 1) {
@@ -87,8 +98,7 @@ export class PlayerView {
   }
 
   /**
-   * Estira brazos hasta los costados de la caja (agarre lateral a media-alta altura).
-   * El cuerpo ya mira al compañero (-Z local ≈ hacia la caja).
+   * Hombro queda en el torso; brazo crece en -Z del hombro; puño = punta del brazo.
    */
   _updateCarryArms(box) {
     if (this.sprite || !this.armRigs?.length || box?.dropped) return;
@@ -96,37 +106,38 @@ export class PlayerView {
     const p = this.player;
     const S = CONFIG.box.size;
     const halfW = S.w * 0.5;
-    // P1 = lado -axis; P2 = +axis. Manos en la cara cercana, NO debajo.
     const sideSign = p.id === 1 ? -1 : 1;
-    // Agarre a ~60% de la altura de la caja (costado superior), nunca bajo el piso de la caja.
-    const gripY = box.center.y + S.h * 0.12;
+
+    // Cara cercana de la caja, altura de costado (no debajo).
+    const gripY = box.center.y + S.h * 0.1;
     const gripX = box.center.x + sideSign * box.axis.x * halfW;
     const gripZ = box.center.z + sideSign * box.axis.z * halfW;
 
-    const shoulderLocalY = 0.98;
-    const shoulderWorldY = p.pos.y + shoulderLocalY;
+    // Hombro en mundo ≈ pies + offset local (body yaw ya orienta al compañero).
+    const shWorldY = p.pos.y + 1.02;
     const dx = gripX - p.pos.x;
-    const dy = gripY - shoulderWorldY;
+    const dy = gripY - shWorldY;
     const dz = gripZ - p.pos.z;
     const horiz = Math.hypot(dx, dz);
-    const reach = Math.max(0.45, Math.min(2.4, horiz));
-    // PlayCanvas: +rotX baja el extremo -Z; si el agarre está arriba, pitch negativo.
+    const len = Math.max(0.4, Math.min(2.35, Math.hypot(horiz, dy)));
+    // +rotX en PlayCanvas baja el extremo -Z → invertimos para subir hacia la caja.
     const pitchDeg = -(Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI;
-    const handLocalY = shoulderLocalY + dy;
 
-    for (const { side, arm, hand } of this.armRigs) {
-      // Manos abiertas en el ancho de la cara (left/right del jugador = forward del box).
-      const shX = side * 0.32;
-      const handX = side * (S.d * 0.28);
-      const midX = (shX + handX) / 2;
-      const midY = (shoulderLocalY + handLocalY) / 2;
+    for (const { side, shoulder, arm, fist } of this.armRigs) {
+      // Hombro siempre anclado al muñeco (no se mueve con el reach).
+      shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
+      // Ligera apertura L/R para no cruzar brazos; el largo va en -Z.
+      const flare = side * 10;
+      shoulder.setLocalEulerAngles(pitchDeg, flare, 0);
 
-      arm.setLocalPosition(midX, midY, -reach * 0.5);
-      arm.setLocalEulerAngles(pitchDeg, 0, side * 3);
-      arm.setLocalScale(0.11, 0.11, reach);
+      // Brazo: pivote en hombro → centro a mitad de camino en -Z.
+      arm.setLocalPosition(0, 0, -len * 0.5);
+      arm.setLocalEulerAngles(0, 0, 0);
+      arm.setLocalScale(0.12, 0.12, len);
 
-      hand.setLocalPosition(handX, handLocalY, -reach);
-      hand.setLocalScale(0.16, 0.16, 0.16);
+      // Puño (bolita): exactamente en la punta del brazo (-Z = len).
+      fist.setLocalPosition(0, 0, -len);
+      fist.setLocalScale(0.15, 0.15, 0.15);
     }
   }
 
