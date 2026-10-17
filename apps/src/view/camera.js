@@ -11,7 +11,7 @@ export class FollowCamera {
       nearClip: 0.1,
       farClip: 400,
     });
-    app.root.addChild(this.entity);
+    gfx.root.addChild(this.entity);
     this.target = new pc.Vec3();
     this.look = new pc.Vec3(); // objetivo suavizado (evita tirones al saltar)
     this.pos = new pc.Vec3();

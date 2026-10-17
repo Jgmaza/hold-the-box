@@ -1,7 +1,9 @@
 // Dibujo del nivel con primitivas (Capa A) + carteles/props con PNG de Matias si existen (Capa B).
 import * as pc from 'playcanvas';
 import { imageUrl } from './deliveries.js';
-import { checkerCanvas, signCanvas } from './signs.js';
+import { bush, palm, seeded } from './nature.js';
+import { Parts } from './parts.js';
+import { checkerCanvas, plankCanvas, signCanvas } from './signs.js';
 
 export class LevelView {
   constructor(gfx, world) {
@@ -41,7 +43,12 @@ export class LevelView {
     const plank = def.kind === 'plank';
     const top = 0.14;
     g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 0.75 }), { parent: this.root, pos: [cx, a.min.y + (h - top) / 2, cz], scale: [w, h - top, d], name: def.id });
-    g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 1.08 }), { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
+    // Piso de tablones: textura clara teñida con el color de la madera, 2 m por repetición.
+    this._plankTex ??= g.textureFromCanvas(plankCanvas(), { repeat: true });
+    const floor = g.textured(this._plankTex, { tint: g.color(plank ? 'plank' : 'wood', 1.12) });
+    floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
+    floor.update();
+    g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
     if (!plank) {
       // Pilotes en las esquinas (se ven en el agua).
       for (const [px, pz] of [[a.min.x, a.min.z], [a.max.x, a.min.z], [a.min.x, a.max.z], [a.max.x, a.max.z]]) {
@@ -139,18 +146,11 @@ export class LevelView {
     if (p.type === 'palm') {
       const art = imageUrl('matias/prop-palmera.png');
       if (art) return this._billboard(art, [p.x, p.top, p.z], 3.6);
-      const palm = g.group('palmera', this.root, [p.x, p.top, p.z]);
-      const lean = (p.x > 0 ? -1 : 1) * 8;
-      palm.setLocalEulerAngles(0, 0, lean);
-      for (let i = 0; i < 5; i++) {
-        g.prim('cylinder', g.solid('trunk', { mul: i % 2 ? 0.9 : 1 }), { parent: palm, pos: [0, 0.35 + i * 0.62, 0], scale: [0.3 - i * 0.025, 0.62, 0.3 - i * 0.025] });
-      }
-      for (let i = 0; i < 6; i++) {
-        const leaf = g.group('hoja', palm, [0, 3.2, 0]);
-        leaf.setLocalEulerAngles(0, i * 60, 0);
-        g.prim('box', g.solid('leaf', { mul: i % 2 ? 0.85 : 1 }), { parent: leaf, pos: [0.8, -0.15, 0], rot: [0, 0, -22], scale: [1.7, 0.08, 0.5] });
-      }
-      g.prim('sphere', g.solid('trunk', { mul: 0.7 }), { parent: palm, pos: [0.15, 3.0, 0.1], scale: [0.22, 0.22, 0.22] });
+      // Se curva hacia afuera del camino; la semilla sale de la posición (siempre la misma palmera ahí).
+      const rand = seeded(Math.abs(Math.round(p.x * 31 + p.z * 17)) + 1);
+      const P = (this.parts ??= new Parts(g));
+      palm(P, this.root, [p.x, p.top, p.z], { height: 3.4, lean: 0.22, yaw: p.x > 0 ? 0 : 180, rand });
+      bush(P, this.root, [p.x + (p.x > 0 ? -0.5 : 0.5), p.top, p.z + 0.4], 0.6, rand);
     } else if (p.type === 'bar') {
       const bar = g.group('bar', this.root, [p.x, p.top, p.z]);
       g.prim('box', g.solid('wood', { mul: 0.6 }), { parent: bar, pos: [0, 0.55, 0], scale: [2.6, 1.1, 0.8] });

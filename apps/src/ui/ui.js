@@ -1,6 +1,7 @@
-// UI provisional en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
-// Zharick: puedes reemplazar este archivo/estilos; el contrato está en apps/README.md (sección UI).
-import { BOX_CHOICES, CONFIG, selectBox } from '../config.js';
+// UI de la partida en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
+// El título / selección vive en ui/menu.js. Zharick: el contrato está en apps/README.md (sección UI).
+import { CONFIG } from '../config.js';
+import './theme.css';
 import './ui.css';
 
 const TIPS = {
@@ -36,9 +37,11 @@ const NPC_HIT = {
 };
 
 export class UI {
-  constructor(root, game, palette) {
+  /** @param {{ onMenu?: () => void }} opts  `onMenu`: botón "Menú" de pausa / victoria / derrota */
+  constructor(root, game, palette, { onMenu = () => {} } = {}) {
     this.root = root;
     this.game = game;
+    this.onMenu = onMenu;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box']) root.style.setProperty(`--${k}`, palette[k]);
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
@@ -47,36 +50,34 @@ export class UI {
       this.meters[el.dataset.k] = { el, bar: el.querySelector('i'), val: el.querySelector('b') };
     }
     this._lastJump = { 1: -10, 2: -10 };
+    this._timers = new Set();
     this._bind(game.events);
-    this._buildBoxPick();
+    this._bindButtons();
     this.show(game.state);
   }
 
-  _buildBoxPick() {
-    const pick = this.$('.box-pick');
-    for (const box of BOX_CHOICES) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.box = box.id;
-      btn.innerHTML = `<b>${box.name}</b><span>${box.blurb}</span>`;
-      btn.addEventListener('click', () => {
-        if (this.game.state !== 'title') return;
-        selectBox(box.id);
-        this._paintBoxPick();
-      });
-      pick.appendChild(btn);
-    }
-    selectBox(CONFIG.box.profile);
-    this._paintBoxPick();
+  _bindButtons() {
+    const acts = {
+      resume: () => this.game.togglePause(),
+      restart: () => this.game.restart(),
+      retry: () => this.game.retry(),
+      menu: () => this.onMenu(),
+    };
+    // Sin foco en el botón tras el clic: si no, Espacio/Enter lo volverían a pulsar.
+    this.root.addEventListener('mousedown', this._noFocus = (e) => e.target.closest('button') && e.preventDefault());
+    this.root.addEventListener('click', this._onClick = (e) => acts[e.target.closest('[data-act]')?.dataset.act]?.());
   }
 
-  _paintBoxPick() {
+  destroy() {
+    this.root.removeEventListener('mousedown', this._noFocus);
+    this.root.removeEventListener('click', this._onClick);
+    for (const t of this._timers) clearTimeout(t);
+    this.root.innerHTML = '';
+  }
+
+  _paintBoxName() {
     const id = CONFIG.box.profile;
-    for (const btn of this.root.querySelectorAll('.box-pick button')) {
-      btn.classList.toggle('on', btn.dataset.box === id);
-    }
     const name = this.$('.box-name');
-    if (!name) return;
     let label = 'VIP';
     if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
     if (CONFIG.box.bomb.enabled) {
@@ -102,7 +103,11 @@ export class UI {
     const box = this.$('.toasts');
     box.appendChild(t);
     while (box.children.length > 3) box.firstChild.remove();
-    setTimeout(() => t.remove(), 2000);
+    const timer = setTimeout(() => {
+      this._timers.delete(timer);
+      t.remove();
+    }, 2000);
+    this._timers.add(timer);
   }
 
   flash(k) {
@@ -113,10 +118,6 @@ export class UI {
   }
 
   _bind(ev) {
-    ev.on('game:ready', (r) => {
-      this.$('.p1').classList.toggle('ready', r.p1);
-      this.$('.p2').classList.toggle('ready', r.p2);
-    });
     ev.on('game:start', () => this.show('playing'));
     ev.on('game:pause', (e) => this.show(e.paused ? 'paused' : 'playing'));
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
@@ -166,11 +167,8 @@ export class UI {
   update() {
     const g = this.game;
     const b = g.box;
-    if (g.state === 'title') {
-      this._paintBoxPick();
-      return;
-    }
-    this._paintBoxPick();
+    if (g.state === 'title') return;
+    this._paintBoxName();
 
     this._meter('integrity', b.integrity, b.integrity < 35);
     this._meter('wetness', b.wetness, b.wetness > 65);
@@ -234,29 +232,15 @@ const TEMPLATE = /* html */ `
   </div>
   <div class="fade"></div>
 
-  <section class="screen" data-screen="title">
-    <div class="card">
-      <h1>NO SUELTES<br /><span class="accent">LA CAJA</span></h1>
-      <p class="tag">Cooperativo local para 2 · la caja es el problema</p>
-      <div class="controls">
-        <div class="p1"><div class="who">P1 · traje</div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover · <kbd>Espacio</kbd> saltar</div>
-        <div class="p2"><div class="who">P2 · gorra</div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> mover · <kbd>Enter</kbd> saltar</div>
-      </div>
-      <p class="pick-label">Elige la caja · clic, o teclas <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
-      <div class="box-pick"></div>
-      <div class="rules">
-        <span>Muévanse al mismo ritmo: la caja va derecha y más rápido.</span>
-        <span>Salten juntos. Si se inclina, gotea por el huequito.</span>
-        <span>No la mojen, no la dejen caer... y lleguen a la META.</span>
-      </div>
-      <p class="cta">Los dos pulsen SALTAR para empezar</p>
-    </div>
-  </section>
-
   <section class="screen" data-screen="paused">
     <div class="card">
       <h2>PAUSA</h2>
-      <p><kbd>P</kbd> / <kbd>Esc</kbd> continuar · <kbd>R</kbd> reiniciar nivel</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="resume">Continuar</button>
+        <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>P</kbd> / <kbd>Esc</kbd> continuar · <kbd>R</kbd> reiniciar · <kbd>M</kbd> menú</p>
     </div>
   </section>
 
@@ -269,7 +253,11 @@ const TEMPLATE = /* html */ `
         <div>Contenido<b class="integrity">100%</b></div>
         <div>Mojado<b class="wetness">0%</b></div>
       </div>
-      <p class="cta"><kbd>Espacio</kbd> / <kbd>Enter</kbd> jugar otra vez</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="restart">Otra vez</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> otra vez · <kbd>M</kbd> menú</p>
     </div>
   </section>
 
@@ -277,8 +265,12 @@ const TEMPLATE = /* html */ `
     <div class="card">
       <h2>¡Soltaron la caja!</h2>
       <p class="tip"></p>
-      <p class="cta"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span></p>
-      <p><kbd>Esc</kbd> reiniciar el nivel</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="retry">Reintentar</button>
+        <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span> · <kbd>Esc</kbd> reiniciar · <kbd>M</kbd> menú</p>
     </div>
   </section>
 `;

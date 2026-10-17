@@ -135,6 +135,10 @@ export class DebugPanel {
     this._t0 = performance.now();
   }
 
+  destroy() {
+    this.gui.destroy();
+  }
+
   toggle() {
     this.visible = !(this.visible ?? true);
     this.gui.show(this.visible);
