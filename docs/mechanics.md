@@ -23,6 +23,9 @@ Burla al fallar · mods/skins · más perfiles de caja
 - Plataformas móviles
 - Agua debajo (castigo permanente)
 - Clima: isla de **lluvia** (el aguacero empapa la caja; hay que meterse bajo las carpas) e isla de **viento** (ráfagas que empujan, inclinan y se llevan contenido). Se agrega a cualquier isla con `weather` en la plataforma, o en una línea con `rainIsland()` / `windIsland()`: ver [`clima.md`](./clima.md).
+- **Rieles asimétricos**: dos tablones largos (uno por jugador) con piedras, huecos y topes **desfasados** — hay que coordinar saltos. `railsPair()` en `levels/sections.js`; arena `?level=rieles`. Ver [`rieles.md`](./rieles.md).
+- **Mapas de campaña** (menú): Nivel 1 El Muelle → Nivel 2 La Bahía → Nivel 3 La Tormenta (`?level=muelle|bahia|tormenta`). Misma caja y controles; crecen en largo, peligros apilados y checkpoints más separados.
+- **Escenografía**: modelos Kenney en las orillas (`dressLevel`); ver [`escenografia.md`](./escenografia.md). Agua con olas en [`agua.md`](./agua.md).
 - NPCs easy / medium / hard que botan contenido o mojan la caja. Al inicio del Muelle hay **una isla por NPC** (easy → medium → hard) unidas por puentes seguros con checkpoint, y más en la arena de prueba (`?level=npcs`). Ver `apps/README.md`.
 
 ## Controles

@@ -1,9 +1,11 @@
 // Dibujo del nivel con primitivas (Capa A) + carteles/props con PNG de Matias si existen (Capa B).
 import * as pc from 'playcanvas';
+import { buildBackdrop } from './backdrop.js';
 import { imageUrl } from './deliveries.js';
 import { bush, palm, seeded } from './nature.js';
 import { Parts } from './parts.js';
 import { checkerCanvas, plankCanvas, signCanvas } from './signs.js';
+import { Water } from './water.js';
 
 export class LevelView {
   constructor(gfx, world) {
@@ -12,10 +14,13 @@ export class LevelView {
     this.root = gfx.group('level');
     this.billboards = []; // entidades que miran a la cámara
     this.flags = []; // banderas de checkpoint
+    this.floating = []; // barcos / botes Kenney (suben y bajan con el mar)
+    this._assets = new Map();
     const L = world.level;
 
-    this._water(world.waterLevel);
+    this.waterY = world.waterLevel;
     for (const s of world.statics) this._platform(s.def, s.aabb);
+    this._sea(world);
     this.movers = world.movers.map((m) => ({ sim: m, e: this._mover(m) }));
     this.sweepers = world.sweepers.map((s) => ({ sim: s, ...this._sweeper(s) }));
     this.geysers = world.geysers.map((g) => ({ sim: g, ...this._geyser(g) }));
@@ -27,10 +32,17 @@ export class LevelView {
 
   // ------------------------------------------------------------------ piezas
 
-  _water(y) {
-    const g = this.gfx;
-    this.water = g.prim('plane', g.solid('water', { gloss: 0.7 }), { parent: this.root, pos: [0, y, -50], scale: [500, 1, 500], shadows: false, name: 'agua' });
-    this.waterY = y;
+  /** Cielo + islas lejanas + agua con olas y espuma alrededor de cada plataforma e isla. */
+  _sea(world) {
+    const plats = world.statics.map((s) => s.aabb);
+    const zs = plats.flatMap((a) => [a.min.z, a.max.z]);
+    const clear = Math.max(...plats.map((a) => Math.max(Math.abs(a.min.x), Math.abs(a.max.x)))) + 10;
+    const P = (this.parts ??= new Parts(this.gfx));
+    const seed = [...(world.level.id ?? 'nivel')].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
+    const { sky, shores } = buildBackdrop(P, this.root, { minZ: Math.min(...zs), maxZ: Math.max(...zs), seaY: this.waterY, seed, clear });
+    this.sky = sky;
+    const docks = plats.map((a) => ({ x: (a.min.x + a.max.x) / 2, z: (a.min.z + a.max.z) / 2, w: a.max.x - a.min.x, d: a.max.z - a.min.z }));
+    this.water = new Water(this.gfx, { y: this.waterY, parent: this.root, shores: [...docks, ...shores] });
   }
 
   _platform(def, a) {
@@ -39,7 +51,19 @@ export class LevelView {
     const h = a.max.y - a.min.y;
     const d = a.max.z - a.min.z;
     const cx = (a.max.x + a.min.x) / 2;
+    const cy = (a.max.y + a.min.y) / 2;
     const cz = (a.max.z + a.min.z) / 2;
+    // Piedras / topes de los rieles: bloque compacto encima del tablón (sin postes).
+    if (def.kind === 'rock' || def.kind === 'bump') {
+      const mat = def.kind === 'rock' ? 'dark' : 'ui';
+      g.prim('box', g.solid(mat, { mul: def.kind === 'rock' ? 0.95 : 1.1 }), {
+        parent: this.root,
+        pos: [cx, cy, cz],
+        scale: [w, h, d],
+        name: def.id,
+      });
+      return;
+    }
     const plank = def.kind === 'plank';
     const top = 0.14;
     g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 0.75 }), { parent: this.root, pos: [cx, a.min.y + (h - top) / 2, cz], scale: [w, h - top, d], name: def.id });
@@ -55,7 +79,7 @@ export class LevelView {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [px, a.max.y - 0.3, pz], scale: [0.3, 0.9, 0.3] });
       }
     } else {
-      // Postes que sostienen el tablón.
+      // Postes que sostienen el tablón / riel.
       for (let z = a.min.z + 0.6; z < a.max.z; z += 3) {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [cx, (a.min.y + this.waterY) / 2 - 0.2, z], scale: [0.18, a.min.y - this.waterY + 0.6, 0.18] });
       }
@@ -106,15 +130,24 @@ export class LevelView {
     return { column, bubbles };
   }
 
-  /** Modelos del kit pirata. El GLB busca Textures/colormap.png a su lado. */
+  /** Modelos del kit pirata (un asset por modelo, compartido). El GLB busca Textures/colormap.png a su lado. */
   _scenery(items) {
+    this._assets = new Map();
+    this.floating = [];
     if (!items?.length) return;
     const base = import.meta.env.BASE_URL;
+    const assets = this.gfx.app.assets;
     for (const s of items) {
-      const asset = new pc.Asset(s.art, 'container', { url: `${base}kenney/${s.art}.glb` });
-      this.gfx.app.assets.add(asset);
-      asset.on('error', () => console.warn('[nivel] no se pudo cargar', s.art));
+      let asset = this._assets.get(s.art);
+      if (!asset) {
+        asset = new pc.Asset(`kenney-${s.art}`, 'container', { url: `${base}kenney/${s.art}.glb` });
+        asset.on('error', () => console.warn('[nivel] no se pudo cargar', s.art));
+        assets.add(asset);
+        assets.load(asset);
+        this._assets.set(s.art, asset);
+      }
       asset.ready((loaded) => {
+        if (this._dead) return;
         const ent = loaded.resource.instantiateRenderEntity();
         const scale = s.s ?? 0.36;
         ent.name = s.art;
@@ -122,9 +155,20 @@ export class LevelView {
         ent.setLocalEulerAngles(0, s.yaw ?? 0, 0);
         ent.setPosition(s.x, s.top, s.z);
         this.root.addChild(ent);
+        if (s.float) this.floating.push({ e: ent, s, phase: s.x * 0.37 + s.z * 0.11 });
       });
-      this.gfx.app.assets.load(asset);
     }
+  }
+
+  /** Libera los GLB (las entidades ya se borraron con la raíz de la partida). */
+  destroy() {
+    this._dead = true;
+    for (const asset of this._assets.values()) {
+      this.gfx.app.assets.remove(asset);
+      asset.unload();
+    }
+    this._assets.clear();
+    this.water?.destroy();
   }
 
   _sign(s) {
@@ -220,7 +264,12 @@ export class LevelView {
   // ------------------------------------------------------------------ frame
 
   update(dt, time, game, camPos) {
-    this.water.setLocalPosition(0, this.waterY + Math.sin(time * 0.8) * 0.04, -50);
+    this.water.update(time, camPos);
+    this.sky.setPosition(camPos.x, this.waterY, camPos.z);
+    for (const f of this.floating) {
+      f.e.setPosition(f.s.x, f.s.top + Math.sin(time * 1.1 + f.phase) * 0.06, f.s.z);
+      f.e.setLocalEulerAngles(Math.sin(time * 0.9 + f.phase) * 2.5, f.s.yaw ?? 0, Math.sin(time * 0.7 + f.phase * 1.3) * 3.5);
+    }
 
     for (const m of this.movers) m.e.setPosition(m.sim.pos.x, m.sim.pos.top, m.sim.pos.z);
     for (const s of this.sweepers) s.pivot.setLocalEulerAngles(0, -s.sim.angle, 0);

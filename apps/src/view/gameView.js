@@ -108,6 +108,7 @@ export class GameView {
 
   destroy() {
     this.root.destroy();
+    this.level.destroy();
     this.gfx.destroy();
   }
 

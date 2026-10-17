@@ -177,7 +177,7 @@ describe('obstáculos', () => {
   it('el elevador sube a los dos pegados al piso (sin rebotar)', () => {
     const g = playingGame();
     const el = g.world.movers.find((m) => m.def.id === 'elevador');
-    g.teleport({ p1: { x: -0.8, y: el.pos.top, z: -88 }, p2: { x: 0.8, y: el.pos.top, z: -88 } });
+    g.teleport({ p1: { x: -0.8, y: el.pos.top, z: el.pos.z }, p2: { x: 0.8, y: el.pos.top, z: el.pos.z } });
     let lands = 0;
     g.events.on('player:land', () => lands++);
     let maxTop = 0;
