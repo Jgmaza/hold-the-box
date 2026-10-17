@@ -1,14 +1,17 @@
 // Secciones de nivel listas para instanciar en una línea.
-// Clima → una plataforma (docs/clima.md). Rieles → array de plataformas (docs/rieles.md).
+// Clima → una plataforma (docs/clima.md), salvo el oleaje (isla + rompeolas). Rieles → array de plataformas (docs/rieles.md).
 //
 //   platforms: [
 //     ...,
 //     rainIsland({ id: 'isla-lluvia', from: 40, length: 14 }),
 //     windIsland({ id: 'isla-viento', from: 23, length: 14 }),
+//     ...waveIsland({ id: 'isla-olas', from: 9, length: 18 }),
 //     ...railsPair({ id: 'rieles', from: -44, length: 28 }),
 //   ]
 //
 // El nivel avanza hacia -Z: `from` es el borde de ENTRADA (z más alto) y la sección llega hasta `from - length`.
+
+import { propCollider } from './kenneyColliders.js';
 
 const SHELTER = { w: 3.6, d: 3 }; // tamaño de carpa en el que entra la pareja con la caja
 const EDGE = 0.8; // distancia mínima de la carpa al borde de la isla
@@ -73,6 +76,48 @@ export function windIsland({ id, from, length, dir = 'alternate', width = 10, x 
 }
 
 const round = (v) => Math.round(v * 100) / 100;
+
+const BREAKWATER = { w: 1, d: 3, h: 0.8, edge: 0.3 }; // rompeolas: bloque de roca en el borde de la isla
+
+/**
+ * Isla de oleaje: cada tanto una ola cruza de lado a lado (alternando izquierda / derecha).
+ * Los ROMPEOLAS se reparten solos a lo largo, alternando borde: detrás de uno del lado de donde viene la ola
+ * no pasa nada. Devuelve un ARRAY (isla + rompeolas, que chocan): usar spread. Ver docs/clima.md.
+ *
+ * @param {object} o
+ * @param {string} o.id
+ * @param {number} o.from        z del borde de entrada
+ * @param {number} o.length      largo (m, hacia -Z)
+ * @param {number} [o.breakwaters]  cuántos (por defecto uno cada ~6 m)
+ * @param {'alternate'|'random'|'left'|'right'} [o.dir='alternate']  de dónde vienen las olas
+ * @param {'left'|'right'} [o.firstSide='left']  borde del primer rompeolas
+ * @param {number} [o.width=10]
+ * @param {number} [o.x=0]
+ * @param {number} [o.top=1]
+ * @param {number} [o.strength]  multiplicador del oleaje en esta isla (CONFIG.weather.waves)
+ */
+export function waveIsland({ id, from, length, breakwaters, dir = 'alternate', firstSide = 'left', width = 10, x = 0, top = 1, strength } = {}) {
+  check(id, from, length, 'waveIsland');
+  const count = breakwaters ?? Math.max(1, Math.round(length / 6));
+  const step = length / count;
+  if (count < 1 || !Number.isInteger(count)) throw new Error(`[waveIsland] "${id}": breakwaters debe ser un entero ≥ 1 (llegó ${count})`);
+  if (BREAKWATER.d > step) throw new Error(`[waveIsland] "${id}": ${count} rompeolas de ${BREAKWATER.d} m no entran en ${length} m (máximo ${Math.floor(length / BREAKWATER.d)})`);
+  if (width < 7) throw new Error(`[waveIsland] "${id}": la isla de ${width} m es angosta (mínimo 7 m: la pareja tiene que caber detrás del rompeolas)`);
+
+  const first = firstSide === 'right' ? 1 : -1;
+  const offset = width / 2 - BREAKWATER.w / 2 - BREAKWATER.edge;
+  const list = [];
+  const blocks = [];
+  for (let i = 0; i < count; i++) {
+    const side = i % 2 === 0 ? first : -first;
+    const b = { x: round(x + side * offset), z: round(from - step * (i + 0.5)), w: BREAKWATER.w, d: BREAKWATER.d };
+    list.push(b);
+    blocks.push({ id: `${id}-rompeolas-${i}`, kind: 'breakwater', ...b, top: top + BREAKWATER.h, h: BREAKWATER.h + 0.2 });
+  }
+  const weather = { type: 'waves', dir, breakwaters: list };
+  if (strength !== undefined) weather.strength = strength;
+  return [{ id, x, z: round(from - length / 2), w: width, d: length, top, weather }, ...blocks];
+}
 
 // Rieles: obstáculos se REPARTEN solos según `length` (como las carpas de rainIsland).
 // Ver docs/rieles.md.
@@ -256,7 +301,8 @@ export function dressIsland(p, { set = 'beach', seed = 1, density = 1, lane = 2.
   const half = p.w / 2 - margin;
   if (p.kind || half - lane < 0.6) return [];
   const r = rng(seed);
-  const zones = [...keepOut, ...(p.weather?.shelters ?? []).map((s) => ({ x: s.x, z: s.z, w: s.w + 0.8, d: s.d + 0.8 }))];
+  const covers = [...(p.weather?.shelters ?? []), ...(p.weather?.breakwaters ?? [])];
+  const zones = [...keepOut, ...covers.map((s) => ({ x: s.x, z: s.z, w: s.w + 0.8, d: s.d + 0.8 }))];
   const zMax = p.z + p.d / 2 - margin;
   const zMin = p.z - p.d / 2 + margin;
   const step = 2.4 / density;
@@ -265,10 +311,20 @@ export function dressIsland(p, { set = 'beach', seed = 1, density = 1, lane = 2.
     for (let z = zMax - r() * step * 0.5; z > zMin; z -= step * (0.7 + r() * 0.6)) {
       const art = arts[Math.floor(r() * arts.length)];
       const big = SCENERY_BIG.has(art);
-      const x = p.x + side * (big ? half - 0.5 : lane + r() * (half - lane));
+      let x = p.x + side * (big ? half - 0.5 : lane + r() * (half - lane));
       if (big && half - lane < 1.4) continue;
       if (blockedBy(zones, x, z)) continue;
-      out.push({ art, x: round(x), z: round(z), top: p.top, yaw: big ? (side < 0 ? 90 : -90) : Math.round(r() * 360), s: SCENERY_SCALE });
+      const yaw = big ? (side < 0 ? 90 : -90) : Math.round(r() * 360);
+      // Si choca (kenneyColliders.js), se corre hacia la orilla hasta dejar libre el pasillo; si no cabe, no va.
+      const col = propCollider({ art, x, z, top: p.top, yaw, s: SCENERY_SCALE });
+      if (col) {
+        const near = side < 0 ? p.x - col.max.x : col.min.x - p.x; // borde del collider más cerca del centro
+        const far = side < 0 ? p.x - col.min.x : col.max.x - p.x;
+        const shift = Math.max(0, lane - near);
+        if (far + shift > p.w / 2 + 0.4) continue;
+        x += side * shift;
+      }
+      out.push({ art, x: round(x), z: round(z), top: p.top, yaw, s: SCENERY_SCALE });
     }
   }
   return out;

@@ -21,7 +21,7 @@ uniform vec4 uShoreRect;
 float waterShore(vec2 p) {
   vec2 uv = (p - uShoreRect.xy) * uShoreRect.zw;
   if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) return 0.0;
-  return texture2DLod(uShoreMap, uv, 0.0).r;
+  return textureLod(uShoreMap, uv, 0.0).r;
 }
 // x = altura normalizada (-1..1), yz = derivadas en x / z.
 vec3 waveSum(vec2 p, float t) {

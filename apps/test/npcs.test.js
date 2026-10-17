@@ -1,6 +1,6 @@
 // NPCs: paseo aleatorio, visión, los 3 ataques y la arena de prueba (sin navegador).
 import { afterEach, describe, expect, it } from 'vitest';
-import npcArena from '../src/levels/npcArena.js';
+import npcArena from './fixtures/npcArena.js';
 import { NPC_TYPES } from '../src/sim/npcs/npcService.js';
 import { CONFIG, Game, IDLE, RIGHT, jump, level1, run } from './helpers.js';
 

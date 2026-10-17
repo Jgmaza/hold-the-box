@@ -17,9 +17,11 @@ const SLOTS = {
   'sfx-lluvia': { volume: 0.5, loop: true },
   'sfx-viento': { volume: 0.5, loop: true },
   'sfx-trueno': { volume: 0.8 },
+  'sfx-olas': { volume: 0.5, loop: true },
+  'sfx-ola': { volume: 0.85 },
 };
 
-const WEATHER_LOOP = { rain: 'sfx-lluvia', wind: 'sfx-viento' };
+const WEATHER_LOOP = { rain: 'sfx-lluvia', wind: 'sfx-viento', waves: 'sfx-olas' };
 
 export class GameAudio {
   constructor(app) {
@@ -158,6 +160,7 @@ export class GameAudio {
     events.on('weather:enter', (e) => this.play(WEATHER_LOOP[e.type]));
     events.on('weather:exit', (e) => this.stop(WEATHER_LOOP[e.type]));
     events.on('weather:warn', (e) => e.type === 'rain' && this.play('sfx-trueno'));
+    events.on('weather:start', (e) => e.type === 'waves' && this.play('sfx-ola'));
     events.on('game:respawn', () => Object.values(WEATHER_LOOP).forEach((n) => this.stop(n)));
     events.on('box:drop', () => this.play('sfx-golpe'));
     events.on('game:checkpoint', () => this.play('sfx-meta'));

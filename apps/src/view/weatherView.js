@@ -3,6 +3,8 @@
 //           relámpagos en el aguacero y el cielo se pone gris mientras la caja está bajo la lluvia.
 //   Viento: rachas que cruzan la isla, hojas dando vueltas, pasto que se dobla, arena en la ráfaga,
 //           manga de viento que apunta hacia donde sopla y chevrones en el piso durante el aviso.
+//   Oleaje: en el aviso crece una loma de agua en el borde de donde viene; después la cresta (cuerpo de agua +
+//           labio de espuma) cruza la isla con spray, y revienta en espuma contra los rompeolas.
 // Piezas suaves de view/parts.js (las mismas de los NPCs).
 import * as pc from 'playcanvas';
 import { CONFIG } from '../config.js';
@@ -25,7 +27,8 @@ export class WeatherViews {
     this.sun = sun;
     this.parts = new Parts(gfx);
     this.root = gfx.group('clima');
-    this.views = service.zones.map((z) => new (z.type === 'rain' ? RainView : WindView)(this.parts, z, particles, this.root));
+    const VIEWS = { rain: RainView, wind: WindView, waves: WavesView };
+    this.views = service.zones.map((z) => new VIEWS[z.type](this.parts, z, particles, this.root));
     this.storm = 0; // 0..1 qué tan "bajo la tormenta" se ve la escena
     this.flash = 0; // relámpago
     this._base = {
@@ -412,6 +415,91 @@ class WindView {
 }
 
 // -------------------------------------------------------------------- utilidades
+
+// -------------------------------------------------------------------- oleaje
+
+class WavesView {
+  constructor(P, zone, particles, parent) {
+    this.P = P;
+    this.zone = zone;
+    this.particles = particles;
+    this.flash = 0;
+    const a = zone.area;
+    this.cz = (a.min.z + a.max.z) / 2;
+    this.d = a.max.z - a.min.z;
+    this.floor = zone.floorY;
+    this.rng = makeRng(hash(zone.id));
+    this.root = P.group(`olas-${zone.id}`, parent);
+
+    // Cresta: tubo de agua a lo largo de la isla + labio de espuma arriba, inclinado hacia donde avanza.
+    this.crest = P.group('cresta', this.root, [0, this.floor, this.cz]);
+    this.lean = P.group('inclinacion', this.crest);
+    const len = this.d / 2 + 0.6;
+    const water = P.mat('#2fb3d6', { opacity: 0.82, gloss: 0.9 });
+    const foam = P.mat('#f4fdff', { gloss: 0.3 });
+    P.limb(this.lean, water, [0, 0.15, -len], [0, 0.15, len], 0.62, { shadows: false, name: 'cuerpo' });
+    P.limb(this.lean, foam, [0.28, 0.72, -len], [0.28, 0.72, len], 0.2, { shadows: false, name: 'labio' });
+    this.blobs = [];
+    for (let i = 0; i < 14; i++) {
+      const z = -len + (i / 13) * len * 2;
+      const b = P.ball(this.lean, foam, [0.35, 0.78, z], [0.42, 0.32, 0.5], { shadows: false, name: 'espuma' });
+      this.blobs.push({ b, ph: this.rng.range(0, 6), z });
+    }
+    this.crest.enabled = false;
+    this._splashed = new Set();
+  }
+
+  update(dt, time) {
+    const z = this.zone;
+    const a = z.area;
+    const side = z.dir.x; // +1: viene de la izquierda y avanza hacia +X
+    const edge = side > 0 ? a.min.x - 1.2 : a.max.x + 1.2;
+
+    let x = edge;
+    let height = 0;
+    if (z.phase === 'warn') {
+      height = 0.35 + 0.65 * z.phaseT; // la loma crece en el borde
+    } else if (z.phase === 'active') {
+      x = z.crestX;
+      height = 1;
+    }
+    this.crest.enabled = height > 0.01;
+    if (!this.crest.enabled) {
+      this._splashed.clear();
+      return;
+    }
+    const k = Math.max(0.4, z.strength);
+    this.crest.setLocalPosition(x, this.floor - 0.55 + 0.25 * height, this.cz);
+    this.crest.setLocalEulerAngles(0, side > 0 ? 0 : 180, 0); // el labio siempre mira hacia donde avanza
+    this.crest.setLocalScale(1, height * k, 1);
+    this.lean.setLocalEulerAngles(0, 0, -12 - 8 * Math.sin(time * 3));
+    for (const { b, ph } of this.blobs) {
+      const w = 1 + 0.18 * Math.sin(time * 7 + ph);
+      b.setLocalScale(0.42 * w, 0.32 * w, 0.5);
+    }
+
+    if (z.phase !== 'active') return;
+    // Spray a lo largo de la cresta.
+    const n = Math.floor(dt * 40 + this.rng.next());
+    for (let i = 0; i < n; i++) {
+      const pz = this.cz + this.rng.range(-this.d / 2, this.d / 2);
+      this.particles.emit(x + side * 0.4, this.floor + 0.6, pz, side * this.rng.range(1, 3), this.rng.range(2, 4.5), this.rng.range(-0.6, 0.6), {
+        color: this.rng.next() < 0.6 ? 'foam' : 'water',
+        life: 0.6,
+        size: 0.1,
+      });
+    }
+    // Revienta contra cada rompeolas del lado de donde viene, una vez por ola.
+    for (const bw of z.breakwaters) {
+      const mid = (a.min.x + a.max.x) / 2;
+      const upwind = side > 0 ? bw.x < mid : bw.x > mid;
+      if (!upwind || this._splashed.has(bw) || Math.abs(x - bw.x) > 0.8) continue;
+      this._splashed.add(bw);
+      this.particles.burst(bw.x, this.floor + 1, bw.z, 30, { color: 'foam', speed: 2.5, up: 6, life: 0.9, size: 0.13 });
+      this.particles.burst(bw.x, this.floor + 0.8, bw.z, 14, { color: 'water', speed: 2, up: 4, life: 0.8, size: 0.1 });
+    }
+  }
+}
 
 const lerp = (a, b, t) => a + (b - a) * t;
 

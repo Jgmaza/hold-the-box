@@ -2,7 +2,7 @@
 import * as pc from 'playcanvas';
 import { buildBackdrop } from './backdrop.js';
 import { imageUrl } from './deliveries.js';
-import { bush, palm, seeded } from './nature.js';
+import { bush, palm, rock, seeded } from './nature.js';
 import { Parts } from './parts.js';
 import { checkerCanvas, plankCanvas, signCanvas } from './signs.js';
 import { Water } from './water.js';
@@ -53,6 +53,19 @@ export class LevelView {
     const cx = (a.max.x + a.min.x) / 2;
     const cy = (a.max.y + a.min.y) / 2;
     const cz = (a.max.z + a.min.z) / 2;
+    // Rompeolas (oleaje): rocas grandes apiladas que llenan su caja de colisión, con espuma al pie.
+    if (def.kind === 'breakwater') {
+      const P = (this.parts ??= new Parts(g));
+      const rand = seeded(Math.abs(Math.round(cx * 13 + cz * 7)) + 3);
+      const n = Math.max(2, Math.round(d / 1.1));
+      const size = Math.min(w, h) * 1.15;
+      for (let i = 0; i < n; i++) {
+        const z = a.min.z + (d * (i + 0.5)) / n;
+        rock(P, this.root, [cx + (rand() - 0.5) * 0.15, a.max.y - h * 0.95, z], size, rand);
+      }
+      P.ball(this.root, g.solid('foam', { opacity: 0.7, gloss: 0 }), [cx, a.max.y - h + 0.03, cz], [w * 1.6, 0.05, d * 1.15], { shadows: false, name: 'espuma-rompeolas' });
+      return;
+    }
     // Piedras / topes de los rieles: bloque compacto encima del tablón (sin postes).
     if (def.kind === 'rock' || def.kind === 'bump') {
       const mat = def.kind === 'rock' ? 'dark' : 'ui';

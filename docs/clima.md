@@ -68,6 +68,24 @@ rainIsland({ id: 'lluvia-der', from: 0, length: 14, firstSide: 'right' })      /
 | `width`, `x`, `top` | `10`, `0`, `1` | igual que en la lluvia |
 | `strength` | `1` | multiplicador del viento solo en esta isla |
 
+### `waveIsland(opciones)`: oleaje con rompeolas
+
+Devuelve un **array** (la isla + los rompeolas, que chocan): hay que hacer spread.
+
+```js
+...waveIsland({ id: 'isla-olas', from: -214, length: 18 }),            // 3 rompeolas (uno cada ~6 m)
+...waveIsland({ id: 'isla-olas', from: -187, length: 16, strength: 1.2 }),
+```
+
+| Opción | Por defecto | Qué es |
+|---|---|---|
+| `id`, `from`, `length` | **obligatorios** | igual que en la lluvia |
+| `breakwaters` | uno cada ~6 m | cuántos rompeolas (bloques de roca de 1 × 3 m, 0.8 m de alto), alternando borde |
+| `dir` | `'alternate'` | de dónde vienen las olas: `'alternate'`, `'random'`, `'left'`, `'right'` |
+| `firstSide` | `'left'` | borde del primer rompeolas |
+| `width`, `x`, `top` | `10`, `0`, `1` | igual que en la lluvia (mínimo 7 m de ancho) |
+| `strength` | `1` | multiplicador del oleaje solo en esta isla |
+
 ### Sin helper (a mano)
 
 Es lo mismo que devuelven los helpers: el campo `weather` en la plataforma.
@@ -76,6 +94,8 @@ Es lo mismo que devuelven los helpers: el campo `weather` en la plataforma.
 { id: 'isla', x: 0, z: 33, w: 10, d: 14, top: 1, weather: 'rain' }
 { id: 'isla', ..., weather: { type: 'rain', strength: 0.6, shelters: [{ x: -2.4, z: 36, w: 3.6, d: 3 }] } }
 { id: 'isla', ..., weather: { type: 'wind', dir: 'alternate', strength: 1.2 } }
+{ id: 'isla', ..., weather: { type: 'waves', dir: 'alternate', breakwaters: [{ x: -4.2, z: -217, w: 1, d: 3 }] } }
+// + la plataforma del rompeolas para que choque: { id: 'rompeolas', kind: 'breakwater', x: -4.2, z: -217, w: 1, d: 3, top: 1.8, h: 1 }
 ```
 
 ---
@@ -103,6 +123,16 @@ Cada isla con clima tiene un ritmo que se repite: **calma → aviso → fuerte �
 - **Se llevan contenido**: 4 %/s, y hasta ×1.8 si van desincronizados.
 - Caminar **contra** la ráfaga compensa el empuje.
 - La **manga de viento** y las flechas del piso muestran hacia dónde va a soplar.
+
+### Oleaje (`CONFIG.weather.waves`)
+- **Aviso** (1.6 s): crece una loma de agua con espuma en el borde de donde viene la ola. La UI dice de qué lado.
+- **Ola** (2.2 s): la cresta cruza la isla de lado a lado.
+  - Al jugador **parado en el piso** que toca lo **empuja** (4.5 m/s) hacia donde va la ola; puede tirarlo al agua.
+  - Mientras toca la caja la **moja** (60 %/s, ≈ 20 % por ola) y la **inclina** (14°).
+- **Cómo se esquiva:**
+  - **Rompeolas** (rocas en los bordes, alternados): la franja de la isla detrás de un rompeolas **del lado de donde viene la ola** queda cubierta. La UI dice **"🪨 A SALVO TRAS EL ROMPEOLAS"**. El del lado contrario no sirve.
+  - **Saltar**: a un jugador en el aire la ola le pasa por debajo; si saltan **los dos a la vez**, la caja tampoco se moja.
+- Los rompeolas **chocan**: se pueden saltar o usar de escalón.
 
 ---
 
@@ -133,7 +163,7 @@ Cada isla con clima tiene un ritmo que se repite: **calma → aviso → fuerte �
 |---|---|
 | `weather:enter` / `weather:exit` | `{ type, zone }` |
 | `weather:warn` / `weather:start` / `weather:end` | `{ type, zone, dir }` |
-| `weather:shelter` | `{ type, zone, inside }` (entra / sale de una carpa) |
+| `weather:shelter` | `{ type, zone, inside }` (entra / sale de una carpa o de detrás de un rompeolas) |
 
-- **Tests:** `apps/test/weather.test.js` (`npm test`) cubre lluvia, carpas, viento, ritmo y los helpers `rainIsland` / `windIsland`.
-- **Audio opcional (Luis):** `luis/audio/sfx-lluvia`, `sfx-viento` (loops) y `sfx-trueno`.
+- **Tests:** `apps/test/weather.test.js` (`npm test`) cubre lluvia, carpas, viento, ritmo y los helpers `rainIsland` / `windIsland`; `apps/test/waves.test.js`, el oleaje y `waveIsland`.
+- **Audio opcional (Luis):** `luis/audio/sfx-lluvia`, `sfx-viento`, `sfx-olas` (loops), `sfx-trueno` y `sfx-ola` (al romper).

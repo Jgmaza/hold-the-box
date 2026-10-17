@@ -1,4 +1,4 @@
-// Arena de prueba de NPCs: abrir con ?level=npcs (también ?level=npcs&debug).
+// Fixture de tests: arena de NPCs (easy → medium → hard). Ya no es un mapa del juego.
 // Avanza hacia -Z; el agua está en y = 0 (a los lados). Cada zona tiene NPCs de una dificultad:
 //   salida → zona easy (cangrejos) → CP → zona medium (pistolas de agua) → CP → zona hard (perro) → META.
 // Los NPCs se quedan en SU plataforma (campo `platform` = id) y pasean al azar dentro de ella.

@@ -220,6 +220,9 @@
 .weather[data-type='wind'] {
   background: rgba(70, 120, 90, 0.75);
 }
+.weather[data-type='waves'] {
+  background: rgba(20, 120, 150, 0.8);
+}
 .weather[data-phase='warn'] {
   animation: weather-warn 0.5s ease-in-out infinite alternate;
 }

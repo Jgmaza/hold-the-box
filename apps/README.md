@@ -21,8 +21,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 |---|---|
 | `npm run dev` | Servidor local con recarga automática (también al subir archivos a `deliveries/`) |
 | `npm run dev` → `/?level=muelle\|bahia\|tormenta` | Niveles 1–3 (salta el menú) |
-| `npm run dev` → `/?level=npcs` | **Arena de prueba de NPCs** (easy / medium / hard). `&seed=N` repite el mismo azar |
-| `npm run dev` → `/?level=rieles` | **Arena de prueba de rieles** asimétricos (piedras / huecos / topes por carril) |
+| `npm run dev` → `/?level=bahia` | Entra directo a un mapa (`muelle` / `bahia` / `tormenta`). `&seed=N` repite el mismo azar |
 | `npm test` | Tests de la simulación (sin navegador) |
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve `dist/` para probar el build |
@@ -41,7 +40,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 **Menú:** Inicio → **Mapa + caja** → **Personajes** → cuenta 3-2-1 → partida. En Personajes cada uno cambia con sus flechas (`A`/`D` · `←`/`→`) y marca LISTO con su salto. Los dos pueden escoger el mismo personaje: P2 sale con color alterno. `Esc` = atrás. También se maneja con mouse.
 En partida: `P` / `Esc` pausa · `R` reinicia · `M` menú (en pausa, victoria o derrota) · `F2` o `` ` `` panel de debug.
 Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reiniciar el nivel.
-`?level=muelle` / `?level=npcs` salta el menú y entra directo (desarrollo).
+`?level=muelle` / `bahia` / `tormenta` salta el menú y entra directo (desarrollo).
 
 > Algunos teclados no registran muchas teclas a la vez (ghosting). Si a uno "se le traba" una tecla, prueben otro teclado.
 
@@ -60,9 +59,10 @@ Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reini
 - **Clima** (islas con `weather`; en el Muelle, una isla de lluvia y otra de viento después de las NPC). Cada zona tiene ritmo: calma → aviso → aguacero / ráfaga:
   - **lluvia**: la llovizna moja **8 %/s** y el **aguacero 40 %/s** (uno entero al descubierto = caja deshecha). El piso resbala. **Bajo las carpas no se moja ni resbala**: con la caja mayormente debajo ya cuenta, la lona se vuelve transparente y la UI dice "A SALVO".
   - **viento**: las ráfagas empujan a la pareja (puede tirarla al agua), inclinan la caja y se llevan contenido; caminar contra la ráfaga compensa y sincronizados pierden menos.
-- **Rieles** (después del rodillo en el Muelle; arena `?level=rieles`): dos carriles largos con obstáculos **distintos y desfasados** (piedras, hueco dañado, tope). Cada uno salta lo suyo; si no se coordinan, la caja se inclina. Ver [`docs/rieles.md`](../docs/rieles.md).
+  - **oleaje** (Bahía y Tormenta): una ola cruza la isla de lado a lado; empuja a quien esté en el piso y moja / inclina la caja. Se esquiva detrás de un **rompeolas** del lado de donde viene, o **saltando juntos**.
+- **Rieles** (después del rodillo en el Muelle; también en la Bahía y la Tormenta): dos carriles largos con obstáculos **distintos y desfasados** (piedras, hueco dañado, tope). Cada uno salta lo suyo; si no se coordinan, la caja se inclina. Ver [`docs/rieles.md`](../docs/rieles.md).
 - **Meta:** al entrar la caja, victoria con tiempo, contenido %, mojado % y calificación (perfecta / aceptable / dañada).
-- **NPCs** (en niveles con `npcs`: al inicio del Muelle hay una isla por NPC, unidas por puentes seguros con checkpoint; también la arena `?level=npcs`): pasean al azar por su plataforma, ven la caja y la atacan. No hay vida de personaje: el daño va a la caja.
+- **NPCs** (en niveles con `npcs`: al inicio del Muelle hay una isla por NPC, unidas por puentes seguros con checkpoint): pasean al azar por su plataforma, ven la caja y la atacan. No hay vida de personaje: el daño va a la caja.
   - **easy** (cangrejo): lento, ve 3 m de frente. Si toca a alguien, pellizca → −contenido. Se salta juntos.
   - **medium** (pistola de agua): ve 6 m, avisa y dispara un chorro en arco → +mojado. Se esquiva moviéndose juntos y rápido.
   - **hard** (perro mojado): persigue **siempre** a la pareja (`alwaysChase`, sin necesidad de verla, dentro de su isla). Espera en el borde y, cuando la caja pisa su isla, avisa y embiste → empujón + −contenido + mojado. Si falla queda aturdido: ahí se pasa.
@@ -103,9 +103,9 @@ apps/
     levels/level1.js    Nivel 1 "El Muelle"
     levels/level2.js    Nivel 2 "La Bahía"
     levels/level3.js    Nivel 3 "La Tormenta"
-    levels/npcArena.js  arena de prueba de NPCs
-    levels/railsArena.js arena de prueba de rieles asimétricos
-    levels/sections.js  rainIsland / windIsland / railsPair / dressLevel
+    levels/sections.js  rainIsland / windIsland / waveIsland / railsPair / dressLevel
+    levels/kenneyBounds.js   tamaños medidos de los GLB Kenney (generado: scripts/measure-kenney.mjs)
+    levels/kenneyColliders.js qué props Kenney chocan y con qué forma
     view/               PlayCanvas: dibuja el estado de la sim
       gameView.js       escena, luz, une todo
       levelView.js      plataformas, agua, obstáculos, carteles, props Kenney, meta
@@ -143,11 +143,11 @@ apps/
 - `checkpoints`: zona + `spawn: { p1, p2 }`.
 - `goal`: zona de meta.
 - **Secciones de clima en una línea** (`levels/sections.js`, guía completa en [`docs/clima.md`](../docs/clima.md)):
-  `rainIsland({ id, from, length, shelters? })` → isla de lluvia de cualquier largo con carpas **alternadas izquierda / derecha** repartidas solas; `windIsland({ id, from, length, dir? })` → isla de viento.
+  `rainIsland({ id, from, length, shelters? })` → isla de lluvia de cualquier largo con carpas **alternadas izquierda / derecha** repartidas solas; `windIsland({ id, from, length, dir? })` → isla de viento; `...waveIsland({ id, from, length, breakwaters? })` → isla de oleaje + rompeolas (array: spread).
 - **Rieles asimétricos** (`...railsPair({ id, from, length?, hazards? })`, guía en [`docs/rieles.md`](../docs/rieles.md)): dos carriles con piedras / huecos / topes **repartidos solos** según el largo (como las carpas de `rainIsland`); devuelve un **array** (usar spread).
-- **Escenografía Kenney** (`dressLevel` / `dressIsland`, [`docs/escenografia.md`](../docs/escenografia.md)): props en las orillas con semilla fija; barcos en el agua.
+- **Escenografía Kenney** (`dressLevel` / `dressIsland`, [`docs/escenografia.md`](../docs/escenografia.md)): props en las orillas con semilla fija; barcos en el agua. Los props **chocan** (tamaños medidos de los GLB con `node scripts/measure-kenney.mjs`).
 - **Agua 3D** (`view/water.js`, [`docs/agua.md`](../docs/agua.md)): olas y espuma en código; la física sigue en `waterLevel`.
-- `weather` en una plataforma (opcional, a mano): `'rain'` | `'wind'` o `{ type, strength, dir, shelters }`. Esa isla pasa a tener clima, sin tocar nada más. Números en `CONFIG.weather`.
+- `weather` en una plataforma (opcional, a mano): `'rain'` | `'wind'` | `'waves'` o `{ type, strength, dir, shelters, breakwaters }`. Esa isla pasa a tener clima, sin tocar nada más. Números en `CONFIG.weather`.
   - lluvia: `shelters: [{ x, z, w, d }]` = carpas donde no se moja (que entre la pareja: `w` ≥ 3.2).
   - viento: `dir: 'alternate'` (izq./der. alternado) | `'random'` | grados (0 = hacia +X).
 - `npcs` (opcional): `{ difficulty: 'easy' | 'medium' | 'hard', platform: '<id>', x, z }`. Pasea solo dentro de esa plataforma. Números en `CONFIG.npcs`.
@@ -192,7 +192,7 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `npc:shoot` | `{ id, x, y, z }` (medium disparó) |
 | `npc:hit` | `{ id, difficulty, player, x, y, z }` (+ `box:impact` / `box:wet` con `cause: 'npc-easy' \| 'npc-medium' \| 'npc-hard'`) |
 | `npc:splash` | `{ x, y, z }` (un chorro cayó al piso) |
-| `weather:enter` / `weather:exit` | `{ type: 'rain' \| 'wind', zone }` (la caja entra / sale de una isla con clima) |
+| `weather:enter` / `weather:exit` | `{ type: 'rain' \| 'wind' \| 'waves', zone }` (la caja entra / sale de una isla con clima) |
 | `weather:warn` / `weather:start` / `weather:end` | `{ type, zone, dir }` (aviso / empieza / termina el aguacero o la ráfaga; `dir` = `{x, z}` del viento) |
 | `weather:shelter` | `{ type, zone, inside }` (la caja entra / sale de una carpa) |
 
@@ -234,9 +234,11 @@ Los PNG van con fondo transparente (ver [`docs/visual/pipeline-papel.md`](../doc
   - derrotas por contenido y por mojado;
   - reintento desde checkpoint;
   - checkpoints y meta.
-- NPCs: paseo dentro de su plataforma, semilla, visión, los 3 ataques, esquivar y la arena.
+- NPCs: paseo dentro de su plataforma, semilla, visión, los 3 ataques y esquivar (arena de prueba en `test/fixtures/`).
 - Clima: zonas desde `weather`, lluvia (aguacero empapa, carpas cubren, resbala), viento (empuje, inclinación, contenido, sincronía), ritmo con semilla.
-- Rieles: `railsPair` (carriles, huecos, piedras), bloqueo/salto, arena y tramo del Muelle.
+- Oleaje: la cresta empuja y moja, el rompeolas del lado correcto tapa, saltar juntos esquiva, el rompeolas choca.
+- Props Kenney: bounds medidos para cada modelo usado, forma por modelo, giro, choques, subir encima y que no tapen pasillo / spawns.
+- Rieles: `railsPair` (carriles, huecos, piedras), bloqueo/salto, arena de prueba (`test/fixtures/`) y tramo del Muelle.
 - Sanidad del nivel 1 y lectura de la paleta.
 
 ---

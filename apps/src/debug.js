@@ -130,6 +130,14 @@ export class DebugPanel {
     fw.add(WC.wind, 'syncRelief', 0, 3, 0.1).name('castigo desincronía');
     fw.add(WC.wind, 'period', 2, 15, 0.5).name('ciclo (s)');
     fw.add(WC.wind, 'activeTime', 0.5, 8, 0.1).name('ráfaga (s)');
+    const fo = f9.addFolder('oleaje').close();
+    fo.add(WC.waves, 'pushSpeed', 0, 10, 0.1).name('empuje m/s');
+    fo.add(WC.waves, 'wetRate', 0, 150, 1).name('mojado %/s (cresta)');
+    fo.add(WC.waves, 'leanDeg', 0, 40, 0.5).name('inclina caja °');
+    fo.add(WC.waves, 'crestWidth', 0.4, 4, 0.1).name('ancho cresta m');
+    fo.add(WC.waves, 'period', 3, 15, 0.5).name('ciclo (s)');
+    fo.add(WC.waves, 'warnTime', 0.5, 4, 0.1).name('aviso (s)');
+    fo.add(WC.waves, 'activeTime', 0.8, 6, 0.1).name('cruce (s)');
 
     this._frames = 0;
     this._t0 = performance.now();

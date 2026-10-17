@@ -1,6 +1,6 @@
 // Rieles asimétricos: geometría de railsPair, piedras, huecos, arena y Muelle (sin navegador).
 import { describe, expect, it } from 'vitest';
-import railsArena from '../src/levels/railsArena.js';
+import railsArena from './fixtures/railsArena.js';
 import {
   RAILS_BEATS,
   RAILS_DEFAULT_LENGTH,
@@ -148,7 +148,7 @@ describe('nivel 1 y arena', () => {
     expect(level1.goal.z).toBeLessThan(-110);
   });
 
-  it('la arena ?level=rieles carga y se puede ganar', () => {
+  it('la arena de rieles (fixture) carga y se puede ganar', () => {
     const g = start(railsArena);
     expect(g.weather.zones).toHaveLength(0);
     expect(railsArena.platforms.some((p) => p.kind === 'rock')).toBe(true);
