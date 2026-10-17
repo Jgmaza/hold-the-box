@@ -54,6 +54,7 @@ export class GameAudio {
     events.on('geyser:hit', () => this.play('sfx-mojado'));
     events.on('game:splash', () => this.play('sfx-splash'));
     events.on('hazard:hit', () => this.play('sfx-golpe'));
+    events.on('npc:hit', (e) => this.play(e.difficulty === 'medium' ? 'sfx-mojado' : 'sfx-golpe'));
     events.on('box:drop', () => this.play('sfx-golpe'));
     events.on('game:checkpoint', () => this.play('sfx-meta'));
     events.on('game:win', () => {

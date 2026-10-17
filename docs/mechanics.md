@@ -22,6 +22,7 @@ Burla al fallar · mods/skins · más perfiles de caja
 - Rodillos giratorios
 - Plataformas móviles
 - Agua debajo (castigo permanente)
+- NPCs easy / medium / hard que botan contenido o mojan la caja. Al inicio del Muelle hay **una isla por NPC** (easy → medium → hard) unidas por puentes seguros con checkpoint, y más en la arena de prueba (`?level=npcs`). Ver `apps/README.md`.
 
 ## Controles
 Ver `docs/controls.md`.

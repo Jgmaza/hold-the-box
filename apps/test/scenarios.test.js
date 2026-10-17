@@ -1,10 +1,19 @@
 // Escenarios de juego completos sobre el nivel 1 (sin navegador).
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Box } from '../src/sim/box.js';
 import { BACK, CONFIG, FWD, Game, IDLE, LEFT, jump, level1, maxOf, playingGame, run } from './helpers.js';
 
+// Estos escenarios prueban la caja y el nivel; los NPCs de la primera isla se prueban en npcs.test.js.
+beforeEach(() => {
+  CONFIG.npcs.enabled = false;
+});
+
+/** Índice de un checkpoint del nivel 1 por id (el orden cambia si se agregan checkpoints). */
+const cpIndex = (id) => level1.checkpoints.findIndex((c) => c.id === id);
+
 afterEach(() => {
   CONFIG.debug.godMode = false;
+  CONFIG.npcs.enabled = true;
 });
 
 describe('título', () => {
@@ -144,8 +153,8 @@ describe('checkpoints y meta', () => {
     // Colocar a los jugadores justo antes del CP1 y caminar hacia él.
     g._placeAtSpawn({ p1: { x: -0.8, y: 1, z: -26.5 }, p2: { x: 0.8, y: 1, z: -26.5 } });
     run(g, 0.6, FWD, FWD);
-    expect(got).toContain(0);
-    expect(g.checkpointIndex).toBe(0);
+    expect(got).toContain(cpIndex('cp1'));
+    expect(g.checkpointIndex).toBe(cpIndex('cp1'));
   });
 
   it('llegar a la meta con la caja → victoria con calificación', () => {
@@ -180,7 +189,7 @@ describe('obstáculos', () => {
     const g = playingGame();
     let hits = 0;
     g.events.on('hazard:hit', () => hits++);
-    g.teleport(0);
+    g.teleport(cpIndex('cp1'));
     run(g, 3, FWD, FWD);
     expect(hits).toBeGreaterThanOrEqual(1);
     expect(g.box.integrity).toBeLessThan(100);
