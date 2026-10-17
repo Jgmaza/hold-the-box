@@ -1,0 +1,1 @@
+Design a short 3-minute cooperative level with a shared box, moving platforms and a final goal. Prioritize fun and simplicity.

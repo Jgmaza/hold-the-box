@@ -1,0 +1,1 @@
+No Sueltes La Caja is a cooperative platformer where teamwork is the only way to reach the goal.

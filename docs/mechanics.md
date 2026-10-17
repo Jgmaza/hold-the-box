@@ -1,0 +1,1 @@
+Shared box mechanic: both players influence movement. Coordination increases speed and stability.

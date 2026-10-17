@@ -1,0 +1,1 @@
+Player 1: WASD + Space. Player 2: Arrows + Enter.

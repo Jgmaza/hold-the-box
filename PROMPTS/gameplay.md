@@ -1,0 +1,1 @@
+You are a senior PlayCanvas game developer. Create a clean and modular script for a cooperative platform game with two players, movement, jump, gravity, collisions and setup instructions.
