@@ -1,0 +1,14 @@
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+node_modules/
+.playcanvas/
+*.tmp
+*.psd
+*.blend
+*.blend1
+.idea/
+.vscode/
+*.wav.bak
