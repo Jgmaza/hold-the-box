@@ -160,6 +160,33 @@ describe('checkpoints y meta', () => {
   });
 });
 
+describe('obstáculos', () => {
+  it('el elevador sube a los dos pegados al piso (sin rebotar)', () => {
+    const g = playingGame();
+    const el = g.world.movers.find((m) => m.def.id === 'elevador');
+    g.teleport({ p1: { x: -0.8, y: el.pos.top, z: -88 }, p2: { x: 0.8, y: el.pos.top, z: -88 } });
+    let lands = 0;
+    g.events.on('player:land', () => lands++);
+    let maxTop = 0;
+    run(g, 4, IDLE, IDLE, (s, gg) => {
+      maxTop = Math.max(maxTop, el.pos.top);
+      expect(gg.p1.grounded && gg.p2.grounded).toBe(true);
+    });
+    expect(maxTop).toBeGreaterThan(4.9);
+    expect(lands).toBe(0);
+  });
+
+  it('el rodillo golpea a quien no salta y le quita contenido a la caja', () => {
+    const g = playingGame();
+    let hits = 0;
+    g.events.on('hazard:hit', () => hits++);
+    g.teleport(0);
+    run(g, 3, FWD, FWD);
+    expect(hits).toBeGreaterThanOrEqual(1);
+    expect(g.box.integrity).toBeLessThan(100);
+  });
+});
+
 describe('nivel 1', () => {
   const floorAt = (g, p) => g.world.floorBelow(p.x, p.z, p.y + 0.01);
 

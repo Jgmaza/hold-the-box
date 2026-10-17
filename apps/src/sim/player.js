@@ -56,8 +56,8 @@ export class Player {
     const g = this.ground;
     if (this.grounded && g && g.delta) {
       this.move(g.delta.x, 0, g.delta.z, colliders);
-      // El desplazamiento vertical se aplica directo: el jugador va pegado al piso.
-      if (g.delta.y !== 0) this.pos.y = Math.max(this.pos.y + g.delta.y, g.aabb.max.y);
+      // En vertical va pegado al piso de la plataforma (que ya se movió en este paso).
+      if (g.delta.y !== 0) this.pos.y = g.aabb.max.y;
     }
   }
 
@@ -101,7 +101,8 @@ export class Player {
     const fallSpeed = -this.vel.y;
     const hit = this.move(this.vel.x * dt, this.vel.y * dt, this.vel.z * dt, colliders);
     if (hit.hitGround) {
-      if (!wasGrounded) {
+      // Caídas mínimas (bordes, plataformas que bajan) no cuentan como aterrizaje.
+      if (!wasGrounded && fallSpeed > 1.5) {
         this.justLanded = true;
         this.landSpeed = fallSpeed;
       }

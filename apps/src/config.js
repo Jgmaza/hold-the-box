@@ -92,7 +92,7 @@ export const CONFIG = {
     sweeperKnockback: 8,
     sweeperLift: 4,
     sweeperHitCooldown: 0.6,
-    sweeperKickDeg: 160, // golpe angular a la caja (grados/s)
+    sweeperKickDeg: 320, // golpe angular a la caja (grados/s)
   },
 
   water: {
