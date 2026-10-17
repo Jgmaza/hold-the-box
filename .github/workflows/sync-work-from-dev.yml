@@ -1,0 +1,53 @@
+name: Sync work from dev
+
+# Cuando entra algo a dev, alimenta las ramas personales con un merge
+# (no borra trabajo propio de cada work/*; si hay conflicto, el job falla y se resuelve a mano).
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-work-from-dev
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: sync-work-branches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge origin/dev into each work/*
+        env:
+          BRANCHES: work/jose work/danel work/luis work/zharick work/juanes work/matias
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+
+          for b in $BRANCHES; do
+            echo "::group::Sync $b"
+            if git rev-parse --verify "origin/$b" >/dev/null 2>&1; then
+              git checkout -B "$b" "origin/$b"
+            else
+              git checkout -B "$b" origin/dev
+            fi
+
+            if git merge-base --is-ancestor origin/dev HEAD; then
+              echo "$b already contains origin/dev — skip"
+            else
+              git merge origin/dev -m "chore: sync $b from dev"
+              git push origin "HEAD:refs/heads/$b"
+              echo "Updated $b"
+            fi
+            echo "::endgroup::"
+          done

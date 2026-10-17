@@ -8,14 +8,13 @@ export class DebugPanel {
     this.game = game;
     const gui = (this.gui = new GUI({ title: 'No Sueltes La Caja · debug (F2)' }));
 
-    const live = (this.live = { estado: '', caja: '', inclinación: 0, sincronía: 0, contenido: 0, mojado: 0, fps: 0 });
+    const live = (this.live = { estado: '', caja: '', inclinación: 0, sincronía: 0, contenido: 0, mojado: 0, npcs: '', fps: 0 });
     const f0 = gui.addFolder('En vivo');
     for (const k of Object.keys(live)) f0.add(live, k).listen().disable();
 
-    const acts = {
-      'Salida': () => game.teleport(-1),
-      'Checkpoint 1': () => game.teleport(0),
-      'Checkpoint 2': () => game.teleport(1),
+    const acts = { 'Salida': () => game.teleport(-1) };
+    game.world.checkpoints.forEach((c, i) => (acts[`Checkpoint ${i + 1} (${c.def.id ?? i + 1})`] = () => game.teleport(i)));
+    Object.assign(acts, {
       'Frente a la meta': () => game.teleport('goal'),
       'Llenar caja': () => game.box.reset(),
       'Mojar +30%': () => game.box.addWet(30, 'debug'),
@@ -23,7 +22,7 @@ export class DebugPanel {
         navigator.clipboard?.writeText(JSON.stringify(CONFIG, null, 2));
         console.log(CONFIG);
       },
-    };
+    });
     const f1 = gui.addFolder('Acciones');
     f1.add(CONFIG.debug, 'godMode').name('modo dios (sin derrota)');
     for (const k of Object.keys(acts)) f1.add(acts, k);
@@ -63,6 +62,28 @@ export class DebugPanel {
     f5.add(L, 'ratePerSec', 0, 30, 0.5);
     f5.add(L, 'sweeperDamage', 0, 40, 1);
 
+    const Cat = CONFIG.box.cat;
+    const fCat = gui.addFolder('Gato');
+    fCat.add(Cat, 'enabled').name('gato activo');
+    fCat.add(Cat, 'ragePerSec', 0, 8, 0.1).name('rabia / s');
+    fCat.add(Cat, 'calmMul', 0.2, 1.5, 0.05).name('freno si van juntos');
+    fCat.add(Cat, 'desyncMul', 1, 4, 0.1).name('prisa si se separan');
+    fCat.add(Cat, 'warnRage', 1, 80, 1).name('pata (rabia)');
+    fCat.add(Cat, 'scratchRage', 1, 90, 1).name('arañazo (rabia)');
+    fCat.add(Cat, 'damageRage', 1, 100, 1).name('romper (rabia)');
+    fCat.add(Cat, 'chipPerSec', 0, 20, 0.5).name('daño lento %/s');
+    fCat.add(Cat, 'cooldown', 0.5, 12, 0.1).name('pausa arañazo (s)');
+    fCat.add(Cat, 'goalDrainPerSec', 0, 40, 1).name('meta quietos %/s');
+    fCat.add(Cat, 'hurrySpeed', 0, 4, 0.1).name('prisa para salvarse');
+    fCat.add(Cat, 'knock', 0, 8, 0.1).name('empujón');
+    fCat.add(Cat, 'kick', 0, 500, 10).name('sacudida');
+
+    const BombCfg = CONFIG.box.bomb;
+    const fBomb = gui.addFolder('Bomba');
+    fBomb.add(BombCfg, 'enabled').name('bomba activa');
+    fBomb.add(BombCfg, 'fuseTime', 10, 180, 1).name('mecha (s)');
+    fBomb.add(BombCfg, 'warnTime', 3, 40, 1).name('aviso (s)');
+
     const W = CONFIG.box.wet;
     const f6 = gui.addFolder('Mojado').close();
     f6.add(W, 'fallPenalty', 0, 100, 1);
@@ -75,6 +96,23 @@ export class DebugPanel {
     f7.add(CONFIG.camera.offset, 'y', 2, 20, 0.5).name('altura');
     f7.add(CONFIG.camera.offset, 'z', 2, 25, 0.5).name('distancia');
     f7.add(CONFIG.camera, 'fov', 25, 90, 1);
+
+    const NP = CONFIG.npcs;
+    const f8 = gui.addFolder('NPCs').close();
+    f8.add(NP, 'enabled').name('activos');
+    for (const k of ['easy', 'medium', 'hard']) {
+      const t = NP[k];
+      const f = f8.addFolder(k).close();
+      if ('alwaysChase' in t) f.add(t, 'alwaysChase').name('persigue siempre');
+      f.add(t, 'wanderSpeed', 0, 8, 0.1);
+      if ('chaseSpeed' in t) f.add(t, 'chaseSpeed', 0, 10, 0.1);
+      f.add(t, 'visionRange', 0, 15, 0.5);
+      f.add(t, 'visionFov', 10, 360, 5);
+      f.add(t, 'reaction', 0, 2, 0.05).name('reaction (s)');
+      f.add(t, 'cooldown', 0, 6, 0.1).name('cooldown (s)');
+      f.add(t, 'damage', 0, 30, 1).name('contenido −');
+      f.add(t, 'wet', 0, 40, 1).name('mojado +');
+    }
 
     this._frames = 0;
     this._t0 = performance.now();
@@ -95,6 +133,8 @@ export class DebugPanel {
     l['sincronía'] = +b.sync.toFixed(2);
     l.contenido = +b.integrity.toFixed(1);
     l.mojado = +b.wetness.toFixed(1);
+    const npcs = g.npcs.list;
+    l.npcs = npcs.length ? `${npcs.filter((n) => n.state === 'alert' || n.state === 'attack').length}/${npcs.length} atacando` : '—';
     this._frames++;
     const now = performance.now();
     if (now - this._t0 > 500) {

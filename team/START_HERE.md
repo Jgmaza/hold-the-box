@@ -1,6 +1,6 @@
 # Asignaciones — fase post-slice
 
-Vienes del [`INDEX.md`](../INDEX.md). Scope: [`MVP_SCOPE.md`](../MVP_SCOPE.md).
+Primero: [`docs/ONBOARDING.md`](../docs/ONBOARDING.md). Luego [`INDEX.md`](../INDEX.md). Scope: [`MVP_SCOPE.md`](../MVP_SCOPE.md).
 
 | Persona | Ahora | Carpeta | Rama |
 |---|---|---|---|

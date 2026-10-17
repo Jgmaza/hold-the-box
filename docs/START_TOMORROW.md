@@ -1,9 +1,11 @@
 # Empezar mañana — camino al primer demo
 
-> Índice del repo: [`../INDEX.md`](../INDEX.md) · Visual: [`visual/PLAN.md`](./visual/PLAN.md)
+> **Histórico:** el vertical slice ya está en `apps/`. Para el flujo actual usa [`ONBOARDING.md`](./ONBOARDING.md) + [`INDEX.md`](../INDEX.md).
 
-Fecha de referencia: plan congelado para el siguiente día de jam.  
-Objetivo: ver un **vertical slice** jugable, no el MVP completo.
+> Índice: [`../INDEX.md`](../INDEX.md) · Visual: [`visual/PLAN.md`](./visual/PLAN.md)
+
+Fecha de referencia: plan del primer demo.  
+Objetivo de entonces: **vertical slice** jugable (ya cumplido).
 
 ---
 

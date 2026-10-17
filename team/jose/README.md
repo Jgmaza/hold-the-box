@@ -4,13 +4,13 @@ Rama: `work/jose`
 
 ## Cómo empezar
 
-1. [`../../INDEX.md`](../../INDEX.md)  
-2. Scope real: [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md)  
-3. Deploy: ver checklist abajo + [`../../apps/README.md`](../../apps/README.md)
+1. [`../../docs/ONBOARDING.md`](../../docs/ONBOARDING.md) — Git + CI/CD del equipo  
+2. [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md) — scope congelado  
+3. [`../../docs/DEPLOY.md`](../../docs/DEPLOY.md) — Pages + itch  
 
 ## Tu rol
-Dirección y **sacar el juego a la calle**. No eres el bulk de código (`apps/` = Danel).  
-El core de caja ya está: tu foco es **no inflar sistemas**, coordinar entregas y **desplegar**.
+Dirección y **sacar el juego a la calle**. Código pesado = Danel (`apps/`).  
+Foco: no inflar sistemas, coordinar entregas, **promover a `main`** y subir itch.
 
 ## Tareas
 
@@ -20,19 +20,28 @@ El core de caja ya está: tu foco es **no inflar sistemas**, coordinar entregas 
 - [ ] Pitch
 
 ### Deploy (prioridad tuya)
-- [ ] En `main` o `dev` estable: `cd apps && npm ci && npm test && npm run build`
-- [ ] Publicar `apps/dist/` (itch.io HTML5 u otro host)
-- [ ] Documentar URL del build en este README o `docs/DEPLOY.md`
-- [ ] Promover `dev` → `main` cuando el build sea el de presentación ([`docs/BRANCHES.md`](../../docs/BRANCHES.md))
+
+**GitHub Pages (automático)**  
+1. Smoke en `dev`  
+2. PR **`dev` → `main`**  
+3. CI verde (tus PRs los mergeas como admin; los del equipo los apruebas tú como QA)  
+4. Merge → Actions **Deploy Pages**  
+5. Verificar https://jgmaza.github.io/no-sueltes-la-caja/
+
+**itch.io (manual, entrega jam)**  
+1. Con build bueno (idealmente el de `main`): `cd apps && npm ci && npm test && npm run build`  
+2. Zip del **contenido** de `apps/dist/` → ver [`docs/DEPLOY.md`](../../docs/DEPLOY.md)  
+3. Subir HTML5 en itch · pegar URL en `DEPLOY.md`  
+4. Material oficial del jam en [`docs/jam/`](../../docs/jam/)
 
 ### Equipo
-- [ ] Luis: perfiles de caja  
-- [ ] Juanes/Matias: visuales del muelle actual  
+- [ ] Luis: perfiles de caja + material jam si falta  
+- [ ] Juanes/Matias: visuales  
 - [ ] Zharick: UI  
-- [ ] GitHubs faltantes si aplica  
+- [ ] Tras merges a `dev`: el sync alimenta `work/*` (ellos hacen `git pull`)
 
 ## Mensaje al equipo
-> El juego ya tiene caja compleja. Luis la mejora por perfiles. Diseño viste este proyecto. Yo despliego.
+> Trabajamos en `work/<nombre>` → PR a `dev`. Al entrar a `dev`, las ramas se sincronizan solas. Producción = PR a `main` (2 ✅) → Pages. itch lo sube Jose.
 
 ## Prompts
 [`prompts.md`](./prompts.md)

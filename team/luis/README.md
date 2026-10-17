@@ -4,9 +4,11 @@ GitHub: [@turriago](https://github.com/turriago) · Rama: `work/luis`
 
 ## Cómo empezar
 
-1. [`../../INDEX.md`](../../INDEX.md) + juega el build (`dev` → `cd apps && npm run dev`)  
-2. Abre `apps/src/config.js` y `?debug` en el browser  
-3. Documenta tuneos en `deliveries/luis/BOX_FEEL.md` y perfiles en `BOX_VARIANTS.md`
+1. [`../../docs/ONBOARDING.md`](../../docs/ONBOARDING.md) — flujo Git / sync  
+2. [`../../INDEX.md`](../../INDEX.md) + juega (`dev` → `cd apps && npm run dev`)  
+3. Abre `apps/src/config.js` y `?debug` en el browser  
+4. Documenta tuneos en `deliveries/luis/BOX_FEEL.md` y perfiles en `BOX_VARIANTS.md`  
+5. Material oficial del jam → [`../../docs/jam/`](../../docs/jam/) (PR a `dev`)
 
 ## Tu rol (actualizado)
 
