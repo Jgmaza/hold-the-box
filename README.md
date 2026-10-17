@@ -22,5 +22,9 @@ Ahí está el índice general. Luego entras a `team/<tu-nombre>/` para tus tarea
 ```bash
 git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
 cd no-sueltes-la-caja
+git checkout dev          # integración / playtest
 # abre INDEX.md
+cd apps && npm install && npm run dev   # → http://localhost:5173
 ```
+
+Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md) — `main` prod · `dev` integración · `work/<persona>` trabajo.
