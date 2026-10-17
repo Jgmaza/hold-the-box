@@ -4,25 +4,27 @@
 // Agregar clima a una isla = poner el campo en su plataforma (nada más):
 //   { id: 'isla-lluvia', x, z, w, d, top, weather: 'rain' }
 //   { id: 'isla-viento', x, z, w, d, top, weather: { type: 'wind', dir: 'alternate', strength: 1 } }
+//   ...waveIsland({ id: 'isla-olas', from, length })   oleaje + rompeolas (sections.js)
 //
 // update() devuelve los efectos del paso (game.js los aplica):
-//   wetRate      %/s de mojado para la caja          (lluvia)
+//   wetRate      %/s de mojado para la caja          (lluvia, ola)
 //   drain        %/s de contenido que se lleva        (viento)
-//   tilt         { roll, pitch } grados extra caja    (viento)
-//   push         { 1: {x, z}, 2: {x, z} } m/s         (viento)
+//   tilt         { roll, pitch } grados extra caja    (viento, ola)
+//   push         { 1: {x, z}, 2: {x, z} } m/s         (viento, ola)
 //   gripMul      { 1, 2 } multiplicador de agarre     (lluvia: piso resbaloso)
 //
 // Eventos (en game.events), siempre de la zona donde está la caja:
 //   weather:enter / weather:exit  { type, zone }
 //   weather:warn                  { type, zone, dir }   aviso (se viene el aguacero / la ráfaga)
 //   weather:start / weather:end   { type, zone, dir }   empieza / termina lo fuerte
-//   weather:shelter               { type, zone, inside }  la caja entra / sale de una carpa (lluvia)
+//   weather:shelter               { type, zone, inside }  la caja entra / sale de una carpa (lluvia) o de detrás de un rompeolas (ola)
 import { CONFIG } from '../../config.js';
 import { makeRng } from '../math.js';
 import { RainZone } from './rain.js';
+import { WavesZone } from './waves.js';
 import { WindZone } from './wind.js';
 
-export const WEATHER_TYPES = { rain: RainZone, wind: WindZone };
+export const WEATHER_TYPES = { rain: RainZone, wind: WindZone, waves: WavesZone };
 
 const PHASE_EVENT = { warn: 'weather:warn', active: 'weather:start', calm: 'weather:end' };
 

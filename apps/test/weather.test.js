@@ -51,7 +51,7 @@ describe('zonas de clima', () => {
 
   it('un clima desconocido avisa con un error claro', () => {
     expect(() => island('nieve')).toThrow(/clima "nieve"/);
-    expect(Object.keys(WEATHER_TYPES)).toEqual(['rain', 'wind']);
+    expect(Object.keys(WEATHER_TYPES)).toEqual(['rain', 'wind', 'waves']);
   });
 
   it('el nivel 1 tiene isla de lluvia y luego isla de viento, después de la isla hard y antes del muelle', () => {

@@ -1,8 +1,8 @@
-// Arena de prueba de rieles asimétricos: abrir con ?level=rieles (también ?level=rieles&debug).
+// Fixture de tests: arena de rieles asimétricos. Ya no es un mapa del juego.
 // Pad de entrada → rieles 28 m (P1 piedras/hueco, P2 hueco/tope/piedra) → pad de salida + META.
 // Ver docs/rieles.md.
 
-import { railsPair } from './sections.js';
+import { railsPair } from '../../src/levels/sections.js';
 
 export default {
   id: 'rails-arena',

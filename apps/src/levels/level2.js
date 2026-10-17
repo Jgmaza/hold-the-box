@@ -3,9 +3,9 @@
 // Sube un escalón respecto al Muelle: tramos más largos, menos checkpoints y mecánicas repetidas
 // con otro largo (sin rodillo ni elevador):
 //   inicio → isla NPC medium → aguacero de 5 carpas → rieles de 36 m → ferry → viento alternado
-//   → isla cangrejos (medium + easy) → rieles cortos de 24 m → segundo ferry → chorros (4) → META.
+//   → isla cangrejos (medium + easy) → rieles cortos de 24 m → segundo ferry → chorros (4) → oleaje con rompeolas → META.
 
-import { dressLevel, rainIsland, railsPair, windIsland } from './sections.js';
+import { dressLevel, rainIsland, railsPair, waveIsland, windIsland } from './sections.js';
 
 const cp = (id, z, { d = 3, w = 4 } = {}) => ({ id, x: 0, z, w, d, top: 1, spawn: { p1: { x: -0.8, y: 1, z }, p2: { x: 0.8, y: 1, z } } });
 
@@ -37,7 +37,9 @@ const level = {
     { id: 'tras-rieles-2', x: 0, z: -180, w: 8, d: 6, top: 1 }, //               z -177 .. -183  (segundo ferry)
     { id: 'muelle-chorros', x: 0, z: -195, w: 8, d: 4, top: 1 }, //              z -193 .. -197
     { id: 'chorros', x: 0, z: -204, w: 6, d: 14, top: 1 }, //                    z -197 .. -211
-    { id: 'isla-meta', x: 0, z: -218, w: 10, d: 14, top: 1 }, //                 z -211 .. -225
+    { id: 'puente-olas', x: 0, z: -212.5, w: 4, d: 3, top: 1 }, //               z -211 .. -214
+    ...waveIsland({ id: 'isla-olas', from: -214, length: 18 }), //               z -214 .. -232  (oleaje + 3 rompeolas)
+    { id: 'isla-meta', x: 0, z: -239, w: 10, d: 14, top: 1 }, //                 z -232 .. -246
   ],
 
   moving: [
@@ -58,9 +60,9 @@ const level = {
     { x: 1.0, z: -208.5, baseY: 1, radius: 1.1, offset: 2.4 },
   ],
 
-  checkpoints: [cp('cp-lluvia', -24.5), cp('cp-rieles', -51.5), cp('cp-ferry', -108, { d: 5, w: 8 }), cp('cp-cangrejos', -134.5), cp('cp-chorros', -195, { w: 8 })],
+  checkpoints: [cp('cp-lluvia', -24.5), cp('cp-rieles', -51.5), cp('cp-ferry', -108, { d: 5, w: 8 }), cp('cp-cangrejos', -134.5), cp('cp-chorros', -195, { w: 8 }), cp('cp-olas', -212.5)],
 
-  goal: { x: 0, z: -221.5, w: 8, d: 5, top: 1 },
+  goal: { x: 0, z: -242.5, w: 8, d: 5, top: 1 },
 
   signs: [
     { x: 3.6, z: -2, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
@@ -71,6 +73,7 @@ const level = {
     { x: 4, z: -110, top: 1, w: 3.4, h: 1.4, text: '¡VIENTO!\nCAMINEN CONTRA LA RÁFAGA', style: 'warn' },
     { x: -3.8, z: -137, top: 1, w: 3, h: 1.4, text: 'ISLA DE LOS\nCANGREJOS', style: 'warn' },
     { x: 3, z: -194, top: 1, w: 2.8, h: 1.3, text: '¡NO MOJEN\nLA CAJA!', style: 'warn' },
+    { x: -3.8, z: -212.5, top: 1, w: 3.4, h: 1.4, text: '¡OLEAJE!\nDETRÁS DEL ROMPEOLAS', style: 'warn' },
     { x: -13, z: -70, top: 0, w: 7, h: 3, post: 3.5, text: 'BAHÍA DE LOS\nCARGADORES\nNO SE ACEPTAN CAJAS MOJADAS', style: 'billboard' },
   ],
 
@@ -81,9 +84,10 @@ const level = {
     { type: 'flag', x: 3.3, z: -106, top: 1, checkpoint: 2 },
     { type: 'flag', x: 3.4, z: -136.8, top: 1, checkpoint: 3 },
     { type: 'flag', x: -3.3, z: -195.5, top: 1, checkpoint: 4 },
+    { type: 'flag', x: 3.3, z: -213.2, top: 1, checkpoint: 5 },
     { type: 'palm', x: 4.3, z: -90, top: 1 },
-    { type: 'palm', x: -4.3, z: -223, top: 1 },
-    { type: 'bar', x: 3.8, z: -223.5, top: 1 },
+    { type: 'palm', x: -4.3, z: -244, top: 1 },
+    { type: 'bar', x: 3.8, z: -244.5, top: 1 },
   ],
 };
 
@@ -91,7 +95,7 @@ const level = {
 level.scenery = dressLevel(
   level,
   {
-    beach: ['inicio', 'isla-npc', 'isla-cangrejos'],
+    beach: ['inicio', 'isla-npc', 'isla-cangrejos', 'isla-olas'],
     pirate: ['isla-lluvia', 'tras-rieles', 'muelle-medio', 'isla-viento', 'tras-rieles-2', 'chorros', 'isla-meta'],
   },
   { seed: 2, density: 1.15 },

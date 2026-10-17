@@ -36,7 +36,7 @@ platforms: [
 | `width` | `0.7` | ancho de cada riel |
 | `top` | `1` | altura del piso |
 
-Arena de prueba: `/?level=rieles`.
+Arena de prueba (solo tests): `apps/test/fixtures/railsArena.js`.
 
 En el Muelle: `...railsPair({ id: 'rieles', from: -44, length: 28 })`.
 

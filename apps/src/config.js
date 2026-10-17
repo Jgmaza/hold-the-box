@@ -241,6 +241,21 @@ export const CONFIG = {
       warnTime: 0.9,
       activeTime: 2.2,
     },
+
+    // Oleaje: una ola cruza la isla de lado a lado; avisa de qué lado viene. Empuja a quien esté en el piso
+    // y moja / inclina la caja. Detrás de un rompeolas del lado correcto no pasa nada; saltando juntos, tampoco.
+    waves: {
+      swell: 0.15, // intensidad en calma (marejada que se ve)
+      warnLevel: 0.45, // intensidad del aviso (la loma de agua crece en el borde)
+      pushSpeed: 4.5, // m/s que empuja la cresta a quien toca
+      wetRate: 60, // % de mojado por segundo mientras la cresta toca la caja (una ola ≈ 20 %)
+      leanDeg: 14, // inclinación extra de la caja mientras la toca
+      crestWidth: 1.6, // ancho de la cresta (m)
+      shelterMargin: 0.3, // la caja cuenta como cubierta aunque su centro quede hasta esto fuera del tramo del rompeolas
+      period: 6.5,
+      warnTime: 1.6,
+      activeTime: 2.2, // lo que tarda la ola en cruzar la isla
+    },
   },
 
   water: {

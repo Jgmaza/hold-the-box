@@ -24,10 +24,15 @@ const arrow = (dir) => (dir && dir.x < 0 ? '←' : '→');
 const WEATHER_CHIP = {
   rain: { calm: () => '🌧 LLUVIA', warn: () => '⛈ ¡SE VIENE EL AGUACERO!', active: () => '⛈ AGUACERO · ¡al techo!' },
   wind: { calm: () => '🍃 VIENTO', warn: (d) => `💨 RÁFAGA ${arrow(d)}`, active: (d) => `💨 ¡RÁFAGA! ${arrow(d)}` },
+  waves: { calm: () => '🌊 OLEAJE', warn: (d) => `🌊 ¡SE VIENE LA OLA! ${arrow(d)}`, active: (d) => `🌊 ¡OLA! ${arrow(d)} · rompeolas o salten` },
 };
+// Texto del chip cuando la caja está cubierta (carpa / rompeolas).
+const WEATHER_SAFE = { rain: '☂ A SALVO BAJO LA CARPA', waves: '🪨 A SALVO TRAS EL ROMPEOLAS' };
+const WEATHER_SAFE_TOAST = { rain: '¡A salvo bajo la carpa! Esperen que pare', waves: '¡Detrás del rompeolas! Aguanten la ola' };
 const WEATHER_WARN = {
   rain: () => ['¡Se viene el aguacero! ¡A la carpa!', 'wet'],
   wind: (d) => [`¡Ráfaga desde la ${d && d.x < 0 ? 'derecha' : 'izquierda'}! Caminen en contra`, 'bad'],
+  waves: (d) => [`¡Ola desde la ${d && d.x < 0 ? 'derecha' : 'izquierda'}! Detrás del rompeolas`, 'wet'],
 };
 
 const NPC_HIT = {
@@ -134,7 +139,7 @@ export class UI {
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
-      if (e.inside && phase !== 'calm') this.toast('¡A salvo bajo la carpa! Esperen que pare', 'good');
+      if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
     });
     ev.on('box:impact', (e) => {
       if (e.cause === 'cat') return;
@@ -178,7 +183,7 @@ export class UI {
     const zone = g.weather.current;
     const chip = this.$('.weather');
     const safe = !!zone?.boxShelter;
-    const label = !zone ? '' : safe ? '☂ A SALVO BAJO LA CARPA' : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
+    const label = !zone ? '' : safe ? WEATHER_SAFE[zone.type] : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
     if (chip.textContent !== label) chip.textContent = label;
     chip.dataset.type = zone?.type ?? '';
     chip.dataset.phase = safe ? 'safe' : (zone?.phase ?? '');
