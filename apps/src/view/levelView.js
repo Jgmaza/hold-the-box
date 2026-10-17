@@ -1,4 +1,5 @@
 // Dibujo del nivel con primitivas (Capa A) + carteles/props con PNG de Matias si existen (Capa B).
+import * as pc from 'playcanvas';
 import { imageUrl } from './deliveries.js';
 import { checkerCanvas, signCanvas } from './signs.js';
 
@@ -18,6 +19,7 @@ export class LevelView {
     this.geysers = world.geysers.map((g) => ({ sim: g, ...this._geyser(g) }));
     for (const s of L.signs ?? []) this._sign(s);
     for (const p of L.props ?? []) this._prop(p);
+    this._scenery(L.scenery);
     if (L.goal) this._goal(L.goal);
   }
 
@@ -95,6 +97,27 @@ export class LevelView {
       bubbles.push(b);
     }
     return { column, bubbles };
+  }
+
+  /** Modelos del kit pirata. El GLB busca Textures/colormap.png a su lado. */
+  _scenery(items) {
+    if (!items?.length) return;
+    const base = import.meta.env.BASE_URL;
+    for (const s of items) {
+      const asset = new pc.Asset(s.art, 'container', { url: `${base}kenney/${s.art}.glb` });
+      this.gfx.app.assets.add(asset);
+      asset.on('error', () => console.warn('[nivel] no se pudo cargar', s.art));
+      asset.ready((loaded) => {
+        const ent = loaded.resource.instantiateRenderEntity();
+        const scale = s.s ?? 0.36;
+        ent.name = s.art;
+        ent.setLocalScale(scale, scale, scale);
+        ent.setLocalEulerAngles(0, s.yaw ?? 0, 0);
+        ent.setPosition(s.x, s.top, s.z);
+        this.root.addChild(ent);
+      });
+      this.gfx.app.assets.load(asset);
+    }
   }
 
   _sign(s) {
