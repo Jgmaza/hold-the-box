@@ -20,6 +20,6 @@ Leer: `docs/visual/DECISIONS.md` + `docs/visual/refs/`.
 | `art.md` | OK |
 | `level_design.md` | OK |
 | `gameplay.md` | OK — core caja; Luis tunear / Danel code |
-| `ui.md` / `polish.md` | Pendiente Ronda 4 |
+| `ui.md` / `polish.md` | OK (R4) |
 
 Índice: [`../INDEX.md`](../INDEX.md)
