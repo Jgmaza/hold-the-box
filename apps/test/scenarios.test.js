@@ -1,0 +1,180 @@
+// Escenarios de juego completos sobre el nivel 1 (sin navegador).
+import { afterEach, describe, expect, it } from 'vitest';
+import { Box } from '../src/sim/box.js';
+import { BACK, CONFIG, FWD, Game, IDLE, LEFT, jump, level1, maxOf, playingGame, run } from './helpers.js';
+
+afterEach(() => {
+  CONFIG.debug.godMode = false;
+});
+
+describe('título', () => {
+  it('empieza solo cuando los dos pulsan salto', () => {
+    const g = new Game(level1);
+    g.setInputs(jump(), IDLE);
+    expect(g.state).toBe('title');
+    expect(g.ready).toEqual({ p1: true, p2: false });
+    g.setInputs(IDLE, jump());
+    expect(g.state).toBe('playing');
+  });
+});
+
+describe('sincronía', () => {
+  it('quietos = 1, uno solo = soloValue, opuestos = 0', () => {
+    expect(Box.syncFromInputs(IDLE, IDLE)).toBe(1);
+    expect(Box.syncFromInputs(FWD, IDLE)).toBe(CONFIG.box.sync.soloValue);
+    expect(Box.syncFromInputs(FWD, FWD)).toBe(1);
+    expect(Box.syncFromInputs(FWD, BACK)).toBe(0);
+  });
+});
+
+describe('caja compartida', () => {
+  it('caminar sincronizados: la caja va derecha y van rápido', () => {
+    const g = playingGame();
+    const z0 = g.box.center.z;
+    const s = run(g, 1.2, FWD, FWD);
+    expect(maxOf(s, 'mag')).toBeLessThan(CONFIG.box.tilt.tiltingDeg);
+    expect(s.every((x) => x.boxState === 'upright')).toBe(true);
+    expect(z0 - g.box.center.z).toBeGreaterThan(5); // > 5 m en 1.2 s
+  });
+
+  it('si solo uno camina, van más lento y la caja se inclina', () => {
+    const solo = playingGame();
+    const z0 = solo.box.center.z;
+    const s = run(solo, 1.2, FWD, IDLE);
+    expect(z0 - solo.box.center.z).toBeLessThan(4);
+    expect(maxOf(s, 'mag')).toBeGreaterThan(CONFIG.box.tilt.tiltingDeg);
+    expect(solo.state).toBe('playing');
+  });
+
+  it('saltar solo: se inclina pero no la sueltan', () => {
+    const g = playingGame();
+    const s = run(g, 2, jump(), IDLE);
+    expect(maxOf(s, 'mag')).toBeGreaterThan(CONFIG.box.tilt.tiltingDeg);
+    expect(g.state).toBe('playing');
+    expect(g.box.dropped).toBe(false);
+  });
+
+  it('saltar juntos: la caja casi no se mueve', () => {
+    const g = playingGame();
+    const s = run(g, 1.5, jump(), jump());
+    expect(maxOf(s, 'mag')).toBeLessThan(CONFIG.box.tilt.tiltingDeg);
+  });
+
+  it('saltar con 0.1 s de diferencia todavía es manejable', () => {
+    const g = playingGame();
+    const s = run(g, 1.5, (t, i) => (i === 0 ? jump() : IDLE), (t, i) => (i === 6 ? jump() : IDLE));
+    expect(maxOf(s, 'mag')).toBeLessThan(CONFIG.box.tilt.criticalDeg);
+  });
+
+  it('tirar en direcciones opuestas: ¡Soltaron la caja!', () => {
+    const g = playingGame();
+    let fail = null;
+    g.events.on('game:fail', (e) => (fail = e));
+    run(g, 4, FWD, BACK);
+    expect(g.box.dropped).toBe(true);
+    expect(g.state).toBe('failed');
+    expect(fail.reason).toBe('dropped');
+  });
+
+  it('el huequito vacía la caja con la inclinación', () => {
+    const g = playingGame();
+    const before = g.box.integrity;
+    run(g, 1.5, FWD, IDLE);
+    expect(g.box.integrity).toBeLessThan(before);
+  });
+});
+
+describe('agua, respawn y derrotas', () => {
+  it('caer al agua: respawn en la salida y +30% mojada', () => {
+    const g = playingGame();
+    let splash = 0;
+    let respawn = 0;
+    g.events.on('game:splash', () => splash++);
+    g.events.on('game:respawn', () => respawn++);
+    run(g, 3, LEFT, LEFT);
+    expect(splash).toBeGreaterThanOrEqual(1);
+    expect(respawn).toBeGreaterThanOrEqual(1);
+    expect(g.box.wetness).toBeGreaterThan(20);
+    expect(g.state).toBe('playing');
+  });
+
+  it('contenido en 0 → derrota "empty"', () => {
+    const g = playingGame();
+    g.box.integrity = 0;
+    run(g, 2, IDLE, IDLE);
+    expect(g.state).toBe('failed');
+    expect(g.failReason).toBe('empty');
+  });
+
+  it('mojado al 100% → derrota "soaked"', () => {
+    const g = playingGame();
+    g.box.wetness = 100;
+    run(g, 2, IDLE, IDLE);
+    expect(g.state).toBe('failed');
+    expect(g.failReason).toBe('soaked');
+  });
+
+  it('reintentar tras la derrota vuelve al checkpoint con la caja guardada', () => {
+    const g = playingGame();
+    g.teleport(0);
+    g.checkpointSnapshot = { integrity: 80, wetness: 10 };
+    g.box.integrity = 0;
+    run(g, 2, IDLE, IDLE);
+    expect(g.state).toBe('failed');
+    g.setInputs(jump(), IDLE);
+    expect(g.state).toBe('playing');
+    expect(g.box.integrity).toBe(80);
+    expect(g.p1.pos.z).toBeCloseTo(level1.checkpoints[0].spawn.p1.z);
+  });
+
+  it('el modo dios evita la derrota', () => {
+    CONFIG.debug.godMode = true;
+    const g = playingGame();
+    run(g, 4, FWD, BACK);
+    expect(g.state).toBe('playing');
+  });
+});
+
+describe('checkpoints y meta', () => {
+  it('pasar la caja por un checkpoint lo activa', () => {
+    const g = playingGame();
+    const got = [];
+    g.events.on('game:checkpoint', (e) => got.push(e.index));
+    g.teleport(-1);
+    // Colocar a los jugadores justo antes del CP1 y caminar hacia él.
+    g._placeAtSpawn({ p1: { x: -0.8, y: 1, z: -26.5 }, p2: { x: 0.8, y: 1, z: -26.5 } });
+    run(g, 0.6, FWD, FWD);
+    expect(got).toContain(0);
+    expect(g.checkpointIndex).toBe(0);
+  });
+
+  it('llegar a la meta con la caja → victoria con calificación', () => {
+    const g = playingGame();
+    let win = null;
+    g.events.on('game:win', (e) => (win = e));
+    g.teleport('goal');
+    run(g, 2, FWD, FWD);
+    expect(g.state).toBe('won');
+    expect(win.rating).toBe('perfect');
+    expect(win.time).toBeGreaterThan(0);
+  });
+});
+
+describe('nivel 1', () => {
+  const floorAt = (g, p) => g.world.floorBelow(p.x, p.z, p.y + 0.01);
+
+  it('los puntos de aparición están sobre suelo', () => {
+    const g = new Game(level1);
+    const spawns = [level1.spawn, ...level1.checkpoints.map((c) => c.spawn)];
+    for (const s of spawns) {
+      expect(floorAt(g, s.p1)).toBeCloseTo(s.p1.y);
+      expect(floorAt(g, s.p2)).toBeCloseTo(s.p2.y);
+    }
+  });
+
+  it('la meta está sobre la terraza', () => {
+    const g = new Game(level1);
+    const goal = level1.goal;
+    expect(floorAt(g, { x: goal.x, y: goal.top, z: goal.z })).toBeCloseTo(goal.top);
+  });
+});
