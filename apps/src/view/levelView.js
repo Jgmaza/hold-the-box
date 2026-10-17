@@ -39,7 +39,19 @@ export class LevelView {
     const h = a.max.y - a.min.y;
     const d = a.max.z - a.min.z;
     const cx = (a.max.x + a.min.x) / 2;
+    const cy = (a.max.y + a.min.y) / 2;
     const cz = (a.max.z + a.min.z) / 2;
+    // Piedras / topes de los rieles: bloque compacto encima del tablón (sin postes).
+    if (def.kind === 'rock' || def.kind === 'bump') {
+      const mat = def.kind === 'rock' ? 'dark' : 'ui';
+      g.prim('box', g.solid(mat, { mul: def.kind === 'rock' ? 0.95 : 1.1 }), {
+        parent: this.root,
+        pos: [cx, cy, cz],
+        scale: [w, h, d],
+        name: def.id,
+      });
+      return;
+    }
     const plank = def.kind === 'plank';
     const top = 0.14;
     g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 0.75 }), { parent: this.root, pos: [cx, a.min.y + (h - top) / 2, cz], scale: [w, h - top, d], name: def.id });
@@ -55,7 +67,7 @@ export class LevelView {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [px, a.max.y - 0.3, pz], scale: [0.3, 0.9, 0.3] });
       }
     } else {
-      // Postes que sostienen el tablón.
+      // Postes que sostienen el tablón / riel.
       for (let z = a.min.z + 0.6; z < a.max.z; z += 3) {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [cx, (a.min.y + this.waterY) / 2 - 0.2, z], scale: [0.18, a.min.y - this.waterY + 0.6, 0.18] });
       }

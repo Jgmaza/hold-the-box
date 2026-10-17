@@ -1,14 +1,14 @@
-// Secciones de nivel listas para instanciar en una línea (devuelven una plataforma para `level.platforms`).
-// Ver docs/clima.md.
+// Secciones de nivel listas para instanciar en una línea.
+// Clima → una plataforma (docs/clima.md). Rieles → array de plataformas (docs/rieles.md).
 //
 //   platforms: [
 //     ...,
-//     rainIsland({ id: 'isla-lluvia', from: 40, length: 14 }),            // carpas automáticas (≈ 1 cada 4.5 m)
-//     rainIsland({ id: 'lluvia-larga', from: 0, length: 30, shelters: 6 }), // 6 carpas alternadas
+//     rainIsland({ id: 'isla-lluvia', from: 40, length: 14 }),
 //     windIsland({ id: 'isla-viento', from: 23, length: 14 }),
+//     ...railsPair({ id: 'rieles', from: -44, length: 28 }),
 //   ]
 //
-// El nivel avanza hacia -Z: `from` es el borde de ENTRADA (z más alto) y la isla llega hasta `from - length`.
+// El nivel avanza hacia -Z: `from` es el borde de ENTRADA (z más alto) y la sección llega hasta `from - length`.
 
 const SHELTER = { w: 3.6, d: 3 }; // tamaño de carpa en el que entra la pareja con la caja
 const EDGE = 0.8; // distancia mínima de la carpa al borde de la isla
@@ -72,10 +72,145 @@ export function windIsland({ id, from, length, dir = 'alternate', width = 10, x 
   return { id, x, z: round(from - length / 2), w: width, d: length, top, weather };
 }
 
+const round = (v) => Math.round(v * 100) / 100;
+
+// Rieles: obstáculos se REPARTEN solos según `length` (como las carpas de rainIsland).
+// Ver docs/rieles.md.
+export const RAILS_GAP = 1.6;
+export const RAILS_ROCK_H = 0.55;
+export const RAILS_BUMP_H = 0.35;
+export const RAILS_DEFAULT_LENGTH = 28;
+export const RAILS_APPROACH = 3; // metros sólidos al entrar / salir
+export const RAILS_SPACING = 4; // ≈ un obstáculo cada tantos metros del tramo jugable
+// Ciclo de tipos: en cada slot un solo carril tiene el obstáculo (P1, P2, P1, P2…).
+export const RAILS_TYPES = ['rock', 'gap', 'rock', 'bump', 'gap', 'rock'];
+
+/**
+ * Sheet de beats para un largo dado (offsets en metros desde la entrada hacia −Z).
+ * Misma idea que repartir carpas en rainIsland: más largo → más obstáculos.
+ *
+ * @param {number} length
+ * @param {number} [hazards]  cantidad (por defecto ≈ una cada 4 m del tramo jugable, mínimo 2)
+ * @returns {{ p1: {rocks:number[], gaps:number[], bumps:number[]}, p2: typeof p1 }}
+ */
+export function railsBeats(length, hazards) {
+  if (!(length > 0)) throw new Error(`[railsBeats] length debe ser > 0`);
+  const playable = length - 2 * RAILS_APPROACH;
+  if (playable < RAILS_GAP + 0.5) {
+    throw new Error(`[railsBeats] length ${length} m es corto (mínimo ${Math.ceil(2 * RAILS_APPROACH + RAILS_GAP + 0.5)} m)`);
+  }
+  const count = hazards ?? Math.max(2, Math.round(playable / RAILS_SPACING));
+  if (count < 1 || !Number.isInteger(count)) throw new Error(`[railsBeats] hazards debe ser un entero ≥ 1 (llegó ${count})`);
+  const step = playable / count;
+  if (RAILS_GAP > step) {
+    throw new Error(`[railsBeats] ${count} obstáculos no entran en ${length} m (máximo ${Math.floor(playable / RAILS_GAP)})`);
+  }
+
+  const empty = () => ({ rocks: [], gaps: [], bumps: [] });
+  const beats = { p1: empty(), p2: empty() };
+  for (let i = 0; i < count; i++) {
+    const t = round(RAILS_APPROACH + step * (i + 0.5));
+    const type = RAILS_TYPES[i % RAILS_TYPES.length];
+    const lane = i % 2 === 0 ? 'p1' : 'p2';
+    const key = type === 'rock' ? 'rocks' : type === 'gap' ? 'gaps' : 'bumps';
+    beats[lane][key].push(t);
+  }
+  return beats;
+}
+
+/** Sheet del largo por defecto (28 m → 6 obstáculos desfasados). Útil en tests. */
+export const RAILS_BEATS = railsBeats(RAILS_DEFAULT_LENGTH);
+
+/**
+ * Par de rieles con obstáculos distintos por jugador (spread en `platforms`).
+ * La sección puede ser tan larga (o corta) como se quiera: los obstáculos se reparten solas.
+ * Ver docs/rieles.md.
+ *
+ * @param {object} o
+ * @param {string} o.id
+ * @param {number} o.from                 z del borde de entrada
+ * @param {number} [o.length=28]          largo total (m, hacia −Z)
+ * @param {number} [o.hazards]            cantidad de obstáculos (por defecto ≈ 1 cada 4 m)
+ * @param {{p1:object, p2:object}} [o.beats]  sheet a mano (offsets desde la entrada); si se da, ignora `hazards`
+ * @param {number} [o.laneX=0.8]          |x| de cada carril (P1 = −laneX, P2 = +laneX)
+ * @param {number} [o.width=0.7]          ancho de cada riel
+ * @param {number} [o.top=1]              altura del piso del riel
+ * @returns {object[]} plataformas (plank + rock + bump)
+ */
+export function railsPair({ id, from, length = RAILS_DEFAULT_LENGTH, hazards, beats, laneX = 0.8, width = 0.7, top = 1 } = {}) {
+  check(id, from, length, 'railsPair');
+  const sheet = beats ?? railsBeats(length, hazards);
+  for (const lane of ['p1', 'p2']) {
+    for (const t of [...(sheet[lane].rocks ?? []), ...(sheet[lane].gaps ?? []), ...(sheet[lane].bumps ?? [])]) {
+      if (t < 0 || t > length) throw new Error(`[railsPair] "${id}": beat ${t} fuera de [0, ${length}]`);
+    }
+  }
+
+  const out = [];
+  out.push(...laneRails(`${id}-izq`, -laneX, from, length, sheet.p1, width, top));
+  out.push(...laneRails(`${id}-der`, laneX, from, length, sheet.p2, width, top));
+  return out;
+}
+
+/** Segmentos de un carril + piedras/topes encima. */
+function laneRails(id, x, from, length, beats, width, top) {
+  const gaps = (beats.gaps ?? []).map((t) => ({ start: t - RAILS_GAP / 2, end: t + RAILS_GAP / 2 }));
+  gaps.sort((a, b) => a.start - b.start);
+
+  const plats = [];
+  let cursor = 0;
+  let seg = 0;
+  for (const g of gaps) {
+    if (g.start > length) break;
+    const a = Math.max(0, g.start);
+    const b = Math.min(length, g.end);
+    if (a > cursor + 0.05) {
+      plats.push(railSeg(`${id}-s${seg++}`, x, from, cursor, a, width, top));
+    }
+    cursor = Math.max(cursor, b);
+  }
+  if (cursor < length - 0.05) {
+    plats.push(railSeg(`${id}-s${seg++}`, x, from, cursor, length, width, top));
+  }
+
+  let i = 0;
+  for (const t of beats.rocks ?? []) {
+    if (t < 0 || t > length) continue;
+    plats.push({
+      id: `${id}-rock${i++}`,
+      x,
+      z: round(from - t),
+      w: width + 0.1,
+      d: 0.7,
+      top: top + RAILS_ROCK_H,
+      h: RAILS_ROCK_H,
+      kind: 'rock',
+    });
+  }
+  i = 0;
+  for (const t of beats.bumps ?? []) {
+    if (t < 0 || t > length) continue;
+    plats.push({
+      id: `${id}-bump${i++}`,
+      x,
+      z: round(from - t),
+      w: width + 0.05,
+      d: 0.55,
+      top: top + RAILS_BUMP_H,
+      h: RAILS_BUMP_H,
+      kind: 'bump',
+    });
+  }
+  return plats;
+}
+
+function railSeg(id, x, from, t0, t1, width, top) {
+  const d = t1 - t0;
+  return { id, x, z: round(from - (t0 + t1) / 2), w: width, d: round(d), top, h: 0.35, kind: 'plank' };
+}
+
 function check(id, from, length, fn) {
   if (!id) throw new Error(`[${fn}] falta \`id\``);
   if (typeof from !== 'number') throw new Error(`[${fn}] "${id}": falta \`from\` (z del borde de entrada)`);
   if (!(length > 0)) throw new Error(`[${fn}] "${id}": \`length\` debe ser > 0`);
 }
-
-const round = (v) => Math.round(v * 100) / 100;

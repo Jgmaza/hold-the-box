@@ -1,10 +1,12 @@
 // Niveles disponibles. Se escogen en el menú; ?level=<clave> salta el menú y entra directo (desarrollo).
 import level1 from './level1.js';
 import npcArena from './npcArena.js';
+import railsArena from './railsArena.js';
 
 export const LEVELS = {
   muelle: level1,
   npcs: npcArena, // arena de prueba de NPCs
+  rieles: railsArena, // arena de prueba de rieles asimétricos
 };
 
 export const DEFAULT_LEVEL = 'muelle';
@@ -13,4 +15,5 @@ export const DEFAULT_LEVEL = 'muelle';
 export const MAPS = [
   { key: 'muelle', icon: '⚓', tag: 'Nivel 1', difficulty: 2, blurb: 'Islas con NPCs, lluvia y viento, rodillo, chorros y elevador hasta la META.' },
   { key: 'npcs', icon: '🦀', tag: 'Arena', difficulty: 3, blurb: 'Recta corta llena de cangrejos, pistolas de agua y un perro mojado.' },
+  { key: 'rieles', icon: '🛤️', tag: 'Arena', difficulty: 2, blurb: 'Dos rieles con obstáculos distintos: piedras, huecos y topes para cada uno.' },
 ].map((m) => ({ ...m, name: LEVELS[m.key].name }));

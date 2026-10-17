@@ -21,6 +21,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 |---|---|
 | `npm run dev` | Servidor local con recarga automática (también al subir archivos a `deliveries/`) |
 | `npm run dev` → `/?level=npcs` | **Arena de prueba de NPCs** (easy / medium / hard). `&seed=N` repite el mismo azar |
+| `npm run dev` → `/?level=rieles` | **Arena de prueba de rieles** asimétricos (piedras / huecos / topes por carril) |
 | `npm test` | Tests de la simulación (sin navegador) |
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve `dist/` para probar el build |
@@ -58,6 +59,7 @@ Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reini
 - **Clima** (islas con `weather`; en el Muelle, una isla de lluvia y otra de viento después de las NPC). Cada zona tiene ritmo: calma → aviso → aguacero / ráfaga:
   - **lluvia**: la llovizna moja **8 %/s** y el **aguacero 40 %/s** (uno entero al descubierto = caja deshecha). El piso resbala. **Bajo las carpas no se moja ni resbala**: con la caja mayormente debajo ya cuenta, la lona se vuelve transparente y la UI dice "A SALVO".
   - **viento**: las ráfagas empujan a la pareja (puede tirarla al agua), inclinan la caja y se llevan contenido; caminar contra la ráfaga compensa y sincronizados pierden menos.
+- **Rieles** (después del rodillo en el Muelle; arena `?level=rieles`): dos carriles largos con obstáculos **distintos y desfasados** (piedras, hueco dañado, tope). Cada uno salta lo suyo; si no se coordinan, la caja se inclina. Ver [`docs/rieles.md`](../docs/rieles.md).
 - **Meta:** al entrar la caja, victoria con tiempo, contenido %, mojado % y calificación (perfecta / aceptable / dañada).
 - **NPCs** (en niveles con `npcs`: al inicio del Muelle hay una isla por NPC, unidas por puentes seguros con checkpoint; también la arena `?level=npcs`): pasean al azar por su plataforma, ven la caja y la atacan. No hay vida de personaje: el daño va a la caja.
   - **easy** (cangrejo): lento, ve 3 m de frente. Si toca a alguien, pellizca → −contenido. Se salta juntos.
@@ -96,10 +98,11 @@ apps/
         rain.js  wind.js   lluvia (mojado, carpas, piso resbaloso) y viento (empuje, inclinación, contenido)
       world.js          colliders del nivel y triggers
       collision.js      AABB
-    levels/index.js     niveles disponibles + MAPS (tarjetas del selector de mapas)
+    levels/index.js     niveles disponibles + MAPS (tarjetas del selector de mapas; ?level=<clave> entra directo)
     levels/level1.js    "El Muelle" descrito como datos
     levels/npcArena.js  arena de prueba de NPCs
-    levels/sections.js  secciones listas: rainIsland() / windIsland()
+    levels/railsArena.js arena de prueba de rieles asimétricos
+    levels/sections.js  secciones listas: rainIsland() / windIsland() / railsPair()
     view/               PlayCanvas: dibuja el estado de la sim
       gameView.js       escena, luz, une todo
       levelView.js      plataformas, agua, obstáculos, carteles, props, meta
@@ -136,6 +139,7 @@ apps/
 - `goal`: zona de meta.
 - **Secciones de clima en una línea** (`levels/sections.js`, guía completa en [`docs/clima.md`](../docs/clima.md)):
   `rainIsland({ id, from, length, shelters? })` → isla de lluvia de cualquier largo con carpas **alternadas izquierda / derecha** repartidas solas; `windIsland({ id, from, length, dir? })` → isla de viento.
+- **Rieles asimétricos** (`...railsPair({ id, from, length?, hazards? })`, guía en [`docs/rieles.md`](../docs/rieles.md)): dos carriles con piedras / huecos / topes **repartidos solos** según el largo (como las carpas de `rainIsland`); devuelve un **array** (usar spread).
 - `weather` en una plataforma (opcional, a mano): `'rain'` | `'wind'` o `{ type, strength, dir, shelters }`. Esa isla pasa a tener clima, sin tocar nada más. Números en `CONFIG.weather`.
   - lluvia: `shelters: [{ x, z, w, d }]` = carpas donde no se moja (que entre la pareja: `w` ≥ 3.2).
   - viento: `dir: 'alternate'` (izq./der. alternado) | `'random'` | grados (0 = hacia +X).
@@ -225,6 +229,7 @@ Los PNG van con fondo transparente (ver [`docs/visual/pipeline-papel.md`](../doc
   - checkpoints y meta.
 - NPCs: paseo dentro de su plataforma, semilla, visión, los 3 ataques, esquivar y la arena.
 - Clima: zonas desde `weather`, lluvia (aguacero empapa, carpas cubren, resbala), viento (empuje, inclinación, contenido, sincronía), ritmo con semilla.
+- Rieles: `railsPair` (carriles, huecos, piedras), bloqueo/salto, arena y tramo del Muelle.
 - Sanidad del nivel 1 y lectura de la paleta.
 
 ---

@@ -88,6 +88,7 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 | [`GAME_DESIGN_DOCUMENT.md`](./GAME_DESIGN_DOCUMENT.md) | Fantasía |
 | [`docs/mechanics.md`](./docs/mechanics.md) | Mecánicas |
 | [`docs/clima.md`](./docs/clima.md) | Clima: lluvia / viento y cómo instanciar secciones |
+| [`docs/rieles.md`](./docs/rieles.md) | Rieles asimétricos (P1/P2) y `railsPair()` |
 | [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Decisiones diseño |
 | [`prompts/shared/`](./prompts/shared/) | Prompts identidad |
 | [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs |

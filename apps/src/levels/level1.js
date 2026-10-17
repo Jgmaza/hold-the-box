@@ -5,9 +5,9 @@
 // Carteles: `art` = PNG opcional en deliveries/ (si no existe se dibuja `text`).
 // Recorrido: inicio → isla easy → isla medium → isla hard (un NPC por isla, unidas por puentes seguros)
 //   → isla lluvia → isla viento (clima: campo `weather` de la plataforma, ver src/sim/weather/)
-//   → muelle → hueco → ferry → CP1 → rodillo → dos tablones → chorros → CP2 → escalones → elevador → bar + META.
+//   → muelle → hueco → ferry → CP1 → rodillo → rieles asimétricos → chorros → CP2 → escalones → elevador → bar + META.
 
-import { rainIsland, windIsland } from './sections.js';
+import { rainIsland, railsPair, windIsland } from './sections.js';
 
 export default {
   id: 'muelle',
@@ -38,22 +38,21 @@ export default {
     { id: 'tras-hueco', x: 0, z: -12.25, w: 8, d: 7.5, top: 1 }, // z -8.5 .. -16  (hueco de 2.5 m)
     { id: 'cp1', x: 0, z: -29, w: 8, d: 6, top: 1 }, //               z -26 .. -32
     { id: 'rodillo', x: 0, z: -38, w: 12, d: 12, top: 1 }, //         z -32 .. -44
-    // Puente de dos tablones: uno para cada uno. Si se separan o se juntan de más, al agua.
-    { id: 'tablon-izq', x: -0.8, z: -49, w: 0.7, d: 10, top: 1, h: 0.35, kind: 'plank' },
-    { id: 'tablon-der', x: 0.8, z: -49, w: 0.7, d: 10, top: 1, h: 0.35, kind: 'plank' },
-    { id: 'chorros', x: 0, z: -61, w: 6, d: 14, top: 1 }, //          z -54 .. -68
-    { id: 'cp2', x: 0, z: -71, w: 8, d: 6, top: 1 }, //               z -68 .. -74
-    { id: 'escalon-1', x: 0, z: -75.5, w: 8, d: 3, top: 1.6 },
-    { id: 'escalon-2', x: 0, z: -78.5, w: 8, d: 3, top: 2.2 },
-    { id: 'escalon-3', x: 0, z: -82.5, w: 8, d: 5, top: 2.8 }, //     z -80 .. -85
-    { id: 'terraza', x: 0, z: -96.5, w: 12, d: 12, top: 5 }, //       z -90.5 .. -102.5
+    // Rieles asimétricos (ver docs/rieles.md): P1 piedras/hueco, P2 hueco/tope/piedra, desfasados.
+    ...railsPair({ id: 'rieles', from: -44, length: 28 }), //         z -44 .. -72
+    { id: 'chorros', x: 0, z: -79, w: 6, d: 14, top: 1 }, //          z -72 .. -86
+    { id: 'cp2', x: 0, z: -89, w: 8, d: 6, top: 1 }, //               z -86 .. -92
+    { id: 'escalon-1', x: 0, z: -93.5, w: 8, d: 3, top: 1.6 },
+    { id: 'escalon-2', x: 0, z: -96.5, w: 8, d: 3, top: 2.2 },
+    { id: 'escalon-3', x: 0, z: -100.5, w: 8, d: 5, top: 2.8 }, //    z -98 .. -103
+    { id: 'terraza', x: 0, z: -114.5, w: 12, d: 12, top: 5 }, //      z -108.5 .. -120.5
   ],
 
   moving: [
     // Ferry sobre el agua entre "tras-hueco" y CP1.
     { id: 'ferry', x: 0, z: -18.5, w: 4.5, d: 4, top: 1, to: { z: -23.5 }, period: 7 },
     // Elevador de los escalones a la terraza.
-    { id: 'elevador', x: 0, z: -88, w: 5, d: 5, top: 2.8, to: { top: 5 }, period: 7, phase: 0 },
+    { id: 'elevador', x: 0, z: -106, w: 5, d: 5, top: 2.8, to: { top: 5 }, period: 7, phase: 0 },
   ],
 
   // Un NPC por isla. Ver src/sim/npcs/ y CONFIG.npcs.
@@ -66,9 +65,9 @@ export default {
   sweepers: [{ id: 'rodillo', x: 0, z: -38, top: 1, length: 5.2, speed: 70, startAngle: 90 }],
 
   geysers: [
-    { x: -1.0, z: -57.5, baseY: 1, radius: 1.1, offset: 0 },
-    { x: 1.2, z: -61, baseY: 1, radius: 1.1, offset: 1.07 },
-    { x: -0.6, z: -64.5, baseY: 1, radius: 1.1, offset: 2.13 },
+    { x: -1.0, z: -75.5, baseY: 1, radius: 1.1, offset: 0 },
+    { x: 1.2, z: -79, baseY: 1, radius: 1.1, offset: 1.07 },
+    { x: -0.6, z: -82.5, baseY: 1, radius: 1.1, offset: 2.13 },
   ],
 
   // Se activan cuando la caja entra. Guardan dónde reaparecer y el estado de la caja.
@@ -80,10 +79,11 @@ export default {
     { id: 'cp-viento', x: 0, z: 24.5, w: 4, d: 3, top: 1, spawn: { p1: { x: -0.8, y: 1, z: 24.5 }, p2: { x: 0.8, y: 1, z: 24.5 } } },
     { id: 'cp-salida', x: 0, z: 7.5, w: 4, d: 3, top: 1, spawn: { p1: { x: -0.8, y: 1, z: 2 }, p2: { x: 0.8, y: 1, z: 2 } } },
     { id: 'cp1', x: 0, z: -29, w: 8, d: 5, top: 1, spawn: { p1: { x: -0.8, y: 1, z: -29 }, p2: { x: 0.8, y: 1, z: -29 } } },
-    { id: 'cp2', x: 0, z: -71, w: 8, d: 5, top: 1, spawn: { p1: { x: -0.8, y: 1, z: -71 }, p2: { x: 0.8, y: 1, z: -71 } } },
+    { id: 'cp-rieles', x: 0, z: -42, w: 8, d: 4, top: 1, spawn: { p1: { x: -0.8, y: 1, z: -42 }, p2: { x: 0.8, y: 1, z: -42 } } },
+    { id: 'cp2', x: 0, z: -89, w: 8, d: 5, top: 1, spawn: { p1: { x: -0.8, y: 1, z: -89 }, p2: { x: 0.8, y: 1, z: -89 } } },
   ],
 
-  goal: { x: 0, z: -99.5, w: 8, d: 5, top: 5 },
+  goal: { x: 0, z: -117.5, w: 8, d: 5, top: 5 },
 
   signs: [
     { x: -3.6, z: -3, top: 1, w: 3.4, h: 1.5, text: 'TRABAJO EN EQUIPO\n= RESULTADOS', art: 'matias/senal-trabajo-equipo.png' },
@@ -95,10 +95,10 @@ export default {
     { x: 4, z: 22.3, top: 1, w: 3.4, h: 1.4, text: '¡VIENTO!\nCAMINEN CONTRA LA RÁFAGA', style: 'warn' },
     { x: 3.2, z: -10, top: 1, w: 3.2, h: 1.5, text: '¡CUIDADO QUE\nNO SE CAIGA!', art: 'matias/senal-cuidado-caja.png', style: 'warn' },
     { x: -4.6, z: -34, top: 1, w: 2.8, h: 1.3, text: '¡SALTEN\nJUNTOS!', style: 'warn' },
-    { x: 2.9, z: -43, top: 1, w: 2.8, h: 1.2, text: 'UNO POR TABLÓN', style: 'info' },
-    { x: -2.4, z: -55, top: 1, w: 2.8, h: 1.3, text: '¡NO MOJEN\nLA CAJA!', style: 'warn' },
-    { x: -3.2, z: -83.5, top: 2.8, w: 3.2, h: 1.3, text: 'ESPEREN EL\nELEVADOR', style: 'info' },
-    { x: -4.6, z: -100.5, top: 5, w: 3.2, h: 1.4, text: 'AQUÍ SE TOMA\nEL RON', art: 'matias/cartel-ron.png', style: 'bar' },
+    { x: 2.9, z: -43, top: 1, w: 3.4, h: 1.3, text: 'CADA UNO SU RIEL\nOBSTÁCULOS DISTINTOS', style: 'info' },
+    { x: -2.4, z: -73, top: 1, w: 2.8, h: 1.3, text: '¡NO MOJEN\nLA CAJA!', style: 'warn' },
+    { x: -3.2, z: -101.5, top: 2.8, w: 3.2, h: 1.3, text: 'ESPEREN EL\nELEVADOR', style: 'info' },
+    { x: -4.6, z: -118.5, top: 5, w: 3.2, h: 1.4, text: 'AQUÍ SE TOMA\nEL RON', art: 'matias/cartel-ron.png', style: 'bar' },
     // Valla publicitaria en el agua (humor local, family friendly).
     { x: -12, z: -40, top: 0, w: 7, h: 3, post: 3.5, text: 'SE BUSCAN AYUDANTES\nPARA CARGAR CAJAS\nPAGO: GRATITUD', art: 'matias/billboard-humor.png', style: 'billboard' },
   ],
@@ -214,12 +214,13 @@ export default {
     { type: 'palm', x: 3.3, z: -15, top: 1 },
     { type: 'palm', x: -5.3, z: -43, top: 1 },
     { type: 'palm', x: 5.3, z: -33, top: 1 },
-    { type: 'palm', x: 2.4, z: -67, top: 1 },
-    { type: 'palm', x: -3.5, z: -73, top: 1 },
-    { type: 'palm', x: 5.2, z: -91.5, top: 5 },
-    { type: 'palm', x: -5.2, z: -91.5, top: 5 },
-    { type: 'bar', x: -4.3, z: -101, top: 5 },
+    { type: 'palm', x: 2.4, z: -85, top: 1 },
+    { type: 'palm', x: -3.5, z: -91, top: 1 },
+    { type: 'palm', x: 5.2, z: -109.5, top: 5 },
+    { type: 'palm', x: -5.2, z: -109.5, top: 5 },
+    { type: 'bar', x: -4.3, z: -119, top: 5 },
     { type: 'flag', x: 3.5, z: -27, top: 1, checkpoint: 5 },
-    { type: 'flag', x: 3.5, z: -69, top: 1, checkpoint: 6 },
+    { type: 'flag', x: 3.5, z: -41, top: 1, checkpoint: 6 },
+    { type: 'flag', x: 3.5, z: -87, top: 1, checkpoint: 7 },
   ],
 };
