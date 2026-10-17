@@ -90,6 +90,46 @@ export function boxCanvas(baseHex) {
   return c;
 }
 
+/** Globo de rabia (estilo cómic) para desync de salto. */
+export function angerMarkCanvas() {
+  const c = canvas(128, 128);
+  const g = c.getContext('2d');
+  g.clearRect(0, 0, 128, 128);
+  // Globo
+  g.fillStyle = '#ff3b3b';
+  g.beginPath();
+  g.arc(64, 58, 42, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = '#1a1a1a';
+  g.lineWidth = 6;
+  g.stroke();
+  // Colita
+  g.beginPath();
+  g.moveTo(48, 92);
+  g.lineTo(40, 118);
+  g.lineTo(68, 96);
+  g.closePath();
+  g.fill();
+  g.stroke();
+  // Ceño / venas ">_<" simplificado
+  g.strokeStyle = '#1a1a1a';
+  g.lineWidth = 7;
+  g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(40, 48);
+  g.lineTo(52, 58);
+  g.lineTo(40, 68);
+  g.moveTo(88, 48);
+  g.lineTo(76, 58);
+  g.lineTo(88, 68);
+  g.stroke();
+  g.beginPath();
+  g.moveTo(50, 78);
+  g.quadraticCurveTo(64, 70, 78, 78);
+  g.stroke();
+  return c;
+}
+
 export function checkerCanvas(cells = 8) {
   const c = canvas(256, 256);
   const g = c.getContext('2d');

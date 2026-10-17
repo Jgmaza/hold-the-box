@@ -1,9 +1,9 @@
 // Dibujo de un jugador. Capa A: cápsula + cabeza + accesorios.
 // Brazos: pivote en el hombro del torso → se estiran a la caja; el puño va siempre en la punta.
-// Si Juanes entrega p1-cargar.png / p1-frente.png (o p2-...), se usa como billboard.
+// Desync de salto: el que falló tiembla poco + signo de rabia; el que saltó bien sigue agarrando.
 import { CONFIG } from '../config.js';
 import { imageUrl } from './deliveries.js';
-import { signCanvas } from './signs.js';
+import { angerMarkCanvas, signCanvas } from './signs.js';
 
 export class PlayerView {
   constructor(gfx, player, colorKey) {
@@ -23,14 +23,11 @@ export class PlayerView {
     gfx.prim('capsule', suit, { parent: P, pos: [0, 0.6, 0], scale: [0.6, 0.6, 0.6], name: 'torso' });
     gfx.prim('sphere', skin, { parent: P, pos: [0, 1.36, 0], scale: [0.5, 0.5, 0.5], name: 'head' });
 
-    // Rig: hombro FIJO al torso → brazo y puño hijos (crecen en -Z local del hombro).
     this.armRigs = [];
     for (const side of [-1, 1]) {
       const shoulder = gfx.group(side < 0 ? 'shoulder-L' : 'shoulder-R', P);
-      // Pegado al costado del torso (cápsula ~radio 0.3).
       shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
 
-      // Hombro = manga/ropa (mismo material que torso), no piel.
       const joint = gfx.prim('sphere', suit, {
         parent: shoulder,
         pos: [0, 0, 0],
@@ -43,7 +40,6 @@ export class PlayerView {
         scale: [0.12, 0.12, 0.5],
         name: 'arm',
       });
-      // Puño = piel (sale de la manga).
       const fist = gfx.prim('sphere', skin, {
         parent: shoulder,
         pos: [0, 0, -0.52],
@@ -73,6 +69,16 @@ export class PlayerView {
       name: 'label',
     });
 
+    const angerTex = gfx.textureFromCanvas(angerMarkCanvas());
+    this.anger = gfx.prim('box', gfx.textured(angerTex, { unlit: true, cutout: true }), {
+      parent: this.root,
+      pos: [0.35, 2.15, 0],
+      scale: [0.38, 0.38, 0.02],
+      shadows: false,
+      name: 'anger',
+    });
+    this.anger.enabled = false;
+
     this._tryBillboard(player.id);
   }
 
@@ -100,85 +106,83 @@ export class PlayerView {
     this.squashVel -= Math.min(10, 2 + speed * 0.5);
   }
 
-  /**
-   * ¿Este jugador “falló” el salto sincronizado? (el otro sí saltó / va más alto)
-   * Solo afecta la mimica de brazos; la física no cambia.
-   */
+  /** Falló el salto sync: compañero saltó / va más alto. Solo mimica. */
   _isJumpDesyncLoser(partner) {
     const p = this.player;
     const heightGap = partner.pos.y - p.pos.y;
-    // Compañero en el aire y yo en piso, o me quedé claramente más abajo.
     if (!partner.grounded && p.grounded) return true;
     if (!partner.grounded && heightGap > 0.35) return true;
     return false;
   }
 
-  /** Brazos locos de pánico: siguen anclados al hombro, no bajan a “soltar” la caja. */
-  _updateFlailArms(dt) {
-    this.flailT += dt * 20;
-    const t = this.flailT;
-
-    for (const { side, shoulder, arm, fist } of this.armRigs) {
-      shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
-
-      const pitch = -25 + Math.sin(t * 2.3 + side) * 50;
-      const yaw = side * 35 + Math.cos(t * 2.9 + side * 0.7) * 45;
-      const roll = Math.sin(t * 3.4 + side * 1.3) * 40;
-      shoulder.setLocalEulerAngles(pitch, yaw, roll);
-
-      // Largo corto-medio (agitando), no estirarse hacia abajo.
-      const len = 0.5 + Math.abs(Math.sin(t * 1.8 + side)) * 0.28;
-      arm.setLocalPosition(0, 0, -len * 0.5);
-      arm.setLocalEulerAngles(0, 0, 0);
-      arm.setLocalScale(0.12, 0.12, len);
-
-      fist.setLocalPosition(0, 0, -len);
-      fist.setLocalScale(0.15, 0.15, 0.15);
-    }
+  /** El que sí saltó (aire) mientras el otro quedó en piso. */
+  _isJumpDesyncWinner(partner) {
+    const p = this.player;
+    return !p.grounded && partner.grounded;
   }
 
   /**
-   * Hombro queda en el torso; brazo crece en -Z del hombro; puño = punta del brazo.
+   * Frustración suave: sigue apuntando a la caja con un temblor mínimo + globo de rabia.
+   * No es “brazos locos”.
    */
-  _updateCarryArms(box) {
-    if (this.sprite || !this.armRigs?.length || box?.dropped) return;
+  _updateFrustratedArms(dt, box) {
+    this.flailT += dt * 8;
+    const wobble = Math.sin(this.flailT) * 6; // grados, suave
+    this._poseArmsToBox(box, {
+      gripYOffset: CONFIG.box.size.h * 0.08,
+      pitchAdd: wobble,
+      flareAdd: Math.cos(this.flailT * 1.1) * 4,
+    });
+  }
+
+  /**
+   * Agarre estable a la caja.
+   * @param {{ gripYOffset?: number, pitchAdd?: number, flareAdd?: number }} opts
+   *  - winner (saltó bien): manos bajo la caja (soportándola)
+   *  - normal: costado
+   */
+  _poseArmsToBox(box, opts = {}) {
+    if (!this.armRigs?.length || box?.dropped) return;
 
     const p = this.player;
     const S = CONFIG.box.size;
     const halfW = S.w * 0.5;
     const sideSign = p.id === 1 ? -1 : 1;
+    const gripYOffset = opts.gripYOffset ?? S.h * 0.1;
 
-    // Cara cercana de la caja, altura de costado (no debajo).
-    const gripY = box.center.y + S.h * 0.1;
+    const gripY = box.center.y + gripYOffset;
     const gripX = box.center.x + sideSign * box.axis.x * halfW;
     const gripZ = box.center.z + sideSign * box.axis.z * halfW;
 
-    // Hombro en mundo ≈ pies + offset local (body yaw ya orienta al compañero).
     const shWorldY = p.pos.y + 1.02;
     const dx = gripX - p.pos.x;
     const dy = gripY - shWorldY;
     const dz = gripZ - p.pos.z;
     const horiz = Math.hypot(dx, dz);
     const len = Math.max(0.4, Math.min(2.35, Math.hypot(horiz, dy)));
-    // +rotX en PlayCanvas baja el extremo -Z → invertimos para subir hacia la caja.
-    const pitchDeg = -(Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI;
+    const pitchDeg = -(Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI + (opts.pitchAdd ?? 0);
 
     for (const { side, shoulder, arm, fist } of this.armRigs) {
-      // Hombro siempre anclado al muñeco (no se mueve con el reach).
       shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
-      // Ligera apertura L/R para no cruzar brazos; el largo va en -Z.
-      const flare = side * 10;
-      shoulder.setLocalEulerAngles(pitchDeg, flare, 0);
+      shoulder.setLocalEulerAngles(pitchDeg, side * 10 + (opts.flareAdd ?? 0) * side, 0);
 
-      // Brazo: pivote en hombro → centro a mitad de camino en -Z.
       arm.setLocalPosition(0, 0, -len * 0.5);
       arm.setLocalEulerAngles(0, 0, 0);
       arm.setLocalScale(0.12, 0.12, len);
 
-      // Puño (bolita): exactamente en la punta del brazo (-Z = len).
       fist.setLocalPosition(0, 0, -len);
       fist.setLocalScale(0.15, 0.15, 0.15);
     }
+  }
+
+  _setAngerVisible(show, camPos, time) {
+    if (!this.anger) return;
+    this.anger.enabled = !!show;
+    if (!show) return;
+    const bob = 0.04 * Math.sin(time * 6);
+    this.anger.setLocalPosition(0.38, 2.2 + bob, 0);
+    const yawCam = (Math.atan2(camPos.x - this.player.pos.x, camPos.z - this.player.pos.z) * 180) / Math.PI;
+    this.anger.setLocalEulerAngles(0, yawCam, 0);
   }
 
   update(dt, partner, camPos, box) {
@@ -203,10 +207,23 @@ export class PlayerView {
     this.body.setLocalEulerAngles(0, yaw, lean);
     this.body.setLocalScale(side, sq, side);
 
+    const loser = this._isJumpDesyncLoser(partner);
+    const winner = this._isJumpDesyncWinner(partner);
+
     if (box && !this.sprite && this.armRigs?.length) {
-      if (this._isJumpDesyncLoser(partner)) this._updateFlailArms(dt);
-      else this._updateCarryArms(box);
+      if (loser) {
+        // Rabia suave: sigue hacia la caja, temblor mínimo.
+        this._updateFrustratedArms(dt, box);
+      } else if (winner) {
+        // Saltó bien: manos debajo / soportando la caja.
+        this._poseArmsToBox(box, { gripYOffset: -CONFIG.box.size.h * 0.42 });
+      } else {
+        // Sync normal: costados.
+        this._poseArmsToBox(box, { gripYOffset: CONFIG.box.size.h * 0.1 });
+      }
     }
+
+    this._setAngerVisible(loser && !this.sprite, camPos, this.flailT);
 
     if (this.sprite || this.label) {
       const yawCam = (Math.atan2(camPos.x - p.pos.x, camPos.z - p.pos.z) * 180) / Math.PI;
