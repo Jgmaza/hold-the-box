@@ -4,9 +4,10 @@ import { selectBox } from '../src/config.js';
 import { Box } from '../src/sim/box.js';
 import { BACK, CONFIG, FWD, Game, IDLE, LEFT, jump, level1, maxOf, playingGame, run } from './helpers.js';
 
-// Estos escenarios prueban la caja y el nivel; los NPCs de la primera isla se prueban en npcs.test.js.
+// Estos escenarios prueban la caja y el nivel; NPCs y clima se prueban en npcs.test.js y weather.test.js.
 beforeEach(() => {
   CONFIG.npcs.enabled = false;
+  CONFIG.weather.enabled = false;
 });
 
 /** Índice de un checkpoint del nivel 1 por id (el orden cambia si se agregan checkpoints). */
@@ -16,6 +17,7 @@ afterEach(() => {
   CONFIG.debug.godMode = false;
   CONFIG.npcs.enabled = true;
   selectBox('vip');
+  CONFIG.weather.enabled = true;
 });
 
 describe('título', () => {

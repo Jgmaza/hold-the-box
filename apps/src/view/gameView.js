@@ -7,6 +7,7 @@ import { LevelView } from './levelView.js';
 import { NpcViews } from './npcView.js';
 import { Particles } from './particles.js';
 import { PlayerView } from './playerView.js';
+import { WeatherViews } from './weatherView.js';
 
 // Qué salpica cuando un NPC le pega a la caja: contenido (se bota) y/o agua (se moja).
 const NPC_HIT_COLORS = { easy: ['content'], medium: ['water'], hard: ['content', 'water'] };
@@ -26,6 +27,7 @@ export class GameView {
     this.players = [new PlayerView(this.gfx, game.p1, 'p1'), new PlayerView(this.gfx, game.p2, 'p2')];
     this.box = new BoxView(this.gfx, game.box, this.particles, game.cat, game.bomb);
     this.npcs = new NpcViews(this.gfx, game.npcs, this.particles);
+    this.weather = new WeatherViews(this.gfx, game.weather, { particles: this.particles, scene: app.scene, sun: this.sun });
     this._bind(game.events);
     this.camera.snap(game);
   }
@@ -53,6 +55,7 @@ export class GameView {
     });
     sun.setLocalEulerAngles(50, 25, 0);
     app.root.addChild(sun);
+    this.sun = sun;
   }
 
   _bind(events) {
@@ -108,6 +111,7 @@ export class GameView {
     this.players[1].update(dt, game.p1, camPos, game.box);
     this.box.update(dt, this.time);
     this.npcs.update(dt, this.time, camPos);
+    this.weather.update(dt, this.time, game, camPos);
     this.particles.update(dt);
   }
 }

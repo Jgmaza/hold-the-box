@@ -18,6 +18,17 @@ const fmtTime = (t) => {
 
 const STATE_LABEL = { upright: 'ESTABLE', tilting: 'INCLINADA', critical: '¡SE CAE!' };
 
+// Indicador de clima (mientras la caja está en una isla con clima) y avisos.
+const arrow = (dir) => (dir && dir.x < 0 ? '←' : '→');
+const WEATHER_CHIP = {
+  rain: { calm: () => '🌧 LLUVIA', warn: () => '⛈ ¡SE VIENE EL AGUACERO!', active: () => '⛈ AGUACERO · ¡al techo!' },
+  wind: { calm: () => '🍃 VIENTO', warn: (d) => `💨 RÁFAGA ${arrow(d)}`, active: (d) => `💨 ¡RÁFAGA! ${arrow(d)}` },
+};
+const WEATHER_WARN = {
+  rain: () => ['¡Se viene el aguacero! ¡A la carpa!', 'wet'],
+  wind: (d) => [`¡Ráfaga desde la ${d && d.x < 0 ? 'derecha' : 'izquierda'}! Caminen en contra`, 'bad'],
+};
+
 const NPC_HIT = {
   easy: ['¡Pellizco! Se botó contenido', 'bad'],
   medium: ['¡Chorro! Se moja la caja', 'wet'],
@@ -119,6 +130,11 @@ export class UI {
     ev.on('bomb:warn', () => this.toast('¡La mecha está corta!', 'bad'));
     ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
     ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
+    ev.on('weather:shelter', (e) => {
+      const phase = this.game.weather.current?.phase;
+      if (e.inside && phase !== 'calm') this.toast('¡A salvo bajo la carpa! Esperen que pare', 'good');
+    });
     ev.on('box:impact', (e) => {
       if (e.cause === 'cat') return;
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
@@ -161,6 +177,14 @@ export class UI {
     this._meter('sync', b.sync * 100, b.sync < 0.4);
     this.$('.timer').textContent = fmtTime(g.runTime);
 
+    const zone = g.weather.current;
+    const chip = this.$('.weather');
+    const safe = !!zone?.boxShelter;
+    const label = !zone ? '' : safe ? '☂ A SALVO BAJO LA CARPA' : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
+    if (chip.textContent !== label) chip.textContent = label;
+    chip.dataset.type = zone?.type ?? '';
+    chip.dataset.phase = safe ? 'safe' : (zone?.phase ?? '');
+
     // Nivel de burbuja: la bolita va hacia el lado que baja.
     const R = 43;
     const max = 40;
@@ -201,6 +225,7 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="wetness"><span>Mojado</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
     </div>
+    <div class="weather" data-type=""></div>
     <div class="timer">00:00.0</div>
     <div class="box-name" data-box="vip">VIP</div>
     <div class="level" data-state="upright"><div class="dial"><div class="dot"></div></div><span class="state">ESTABLE</span></div>
