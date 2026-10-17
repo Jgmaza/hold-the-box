@@ -1,15 +1,4 @@
-/* UI provisional — Zharick puede reemplazarla o darle estilo. Colores: variables que vienen de la paleta. */
-:root {
-  --ui: #ffcc33;
-  --danger: #e8453c;
-  --goal: #3ccf6e;
-  --water: #1fa2c9;
-  --box: #c8955a;
-  --ink: #1d1d1d;
-  --paper: #fff8e8;
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Arial Black', sans-serif;
-}
-
+/* UI de la partida (HUD + pausa / victoria / derrota). Zharick puede rehacerla. Base compartida: theme.css. */
 #ui {
   position: fixed;
   inset: 0;
@@ -208,6 +197,48 @@
   }
 }
 
+/* Clima: chip bajo las barras mientras la caja está en una isla con clima. */
+.weather {
+  position: absolute;
+  top: 132px;
+  left: 16px;
+  padding: 7px 14px;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  background: rgba(20, 20, 30, 0.55);
+  backdrop-filter: blur(4px);
+  transition: background 0.3s, transform 0.2s;
+}
+.weather:empty {
+  display: none;
+}
+.weather[data-type='rain'] {
+  background: rgba(31, 110, 160, 0.75);
+}
+.weather[data-type='wind'] {
+  background: rgba(70, 120, 90, 0.75);
+}
+.weather[data-type='waves'] {
+  background: rgba(20, 120, 150, 0.8);
+}
+.weather[data-phase='warn'] {
+  animation: weather-warn 0.5s ease-in-out infinite alternate;
+}
+.weather[data-phase='active'] {
+  background: var(--danger);
+}
+.weather[data-phase='safe'] {
+  background: var(--goal);
+  color: var(--ink);
+}
+@keyframes weather-warn {
+  to {
+    transform: scale(1.07);
+  }
+}
+
 .toasts {
   position: absolute;
   bottom: 28px;
@@ -286,118 +317,31 @@
   border-radius: 22px;
   box-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
 }
-.card h1 {
-  margin: 0;
-  font-size: clamp(34px, 6vw, 64px);
-  font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-}
-.card h1 .accent {
-  color: var(--danger);
-}
 .card h2 {
   margin: 0;
-  font-size: clamp(26px, 4vw, 40px);
-  font-weight: 900;
+  font-family: var(--display);
+  font-size: clamp(30px, 4.5vw, 48px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 .card p {
   margin: 0;
   font-size: 17px;
   line-height: 1.4;
 }
-.card .tag {
-  font-weight: 800;
-  opacity: 0.7;
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
 }
-.controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-}
-.controls > div {
-  padding: 12px;
-  border-radius: 14px;
-  border: 3px solid var(--ink);
-  background: #fff;
-  font-weight: 800;
-  transition: background 0.2s, transform 0.2s;
-}
-.controls > div.ready {
-  background: var(--goal);
-  transform: scale(1.04);
-}
-.controls .who {
-  font-size: 22px;
-  font-weight: 900;
-}
-kbd {
-  display: inline-block;
-  min-width: 1.6em;
-  padding: 2px 7px;
-  font-family: var(--font);
-  font-weight: 900;
-  font-size: 0.9em;
-  border: 2px solid var(--ink);
-  border-bottom-width: 4px;
-  border-radius: 7px;
-  background: #fff;
-}
-.pick-label {
-  font-weight: 800;
-  font-size: 15px;
-}
-.box-pick {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  width: 100%;
-}
-.box-pick button {
-  pointer-events: auto;
-  cursor: pointer;
-  display: grid;
-  gap: 6px;
-  padding: 12px;
-  text-align: left;
-  color: var(--ink);
-  background: #fff;
-  border: 3px solid var(--ink);
-  border-radius: 14px;
-  font-family: var(--font);
-}
-.box-pick button b {
-  font-size: 20px;
-  font-weight: 900;
-}
-.box-pick button span {
+.card .keys {
+  font-weight: 700;
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
-}
-.box-pick button.on {
-  background: var(--ui);
-  transform: scale(1.03);
-}
-.box-pick button[data-box='gato'].on {
-  background: #ffb067;
-}
-.rules {
-  display: grid;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 15px;
-}
-.cta {
-  font-size: 19px;
-  font-weight: 900;
-  animation: pulse 1.2s infinite;
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.55;
-  }
+  opacity: 0.75;
 }
 .stats {
   display: grid;
@@ -444,9 +388,7 @@ kbd {
     width: 72px;
     height: 72px;
   }
-  .controls,
-  .stats,
-  .box-pick {
+  .stats {
     grid-template-columns: 1fr;
   }
 }

@@ -33,6 +33,7 @@ export class Player {
     this.justLanded = false;
     this.landSpeed = 0;
     this.knockTimer = 0; // tras un golpe del rodillo, menos control
+    this.push = { x: 0, z: 0 }; // velocidad extra que impone el mundo (viento), m/s; la fija el juego cada paso
   }
 
   /** Input de este frame: x/z en [-1, 1] (W = -z), jumpPressed solo el frame en que se pulsa. */
@@ -71,8 +72,9 @@ export class Player {
     this.knockTimer = Math.max(0, this.knockTimer - dt);
 
     const speed = P.walkSpeed * mods.speedMul;
-    const tx = this.input.x * speed;
-    const tz = this.input.z * speed;
+    // El viento suma a la velocidad objetivo: se compensa caminando en contra.
+    const tx = this.input.x * speed + this.push.x;
+    const tz = this.input.z * speed + this.push.z;
     const hasInput = this.inputMagnitude > 0.05;
     let accel;
     if (this.grounded) accel = (hasInput ? P.groundAccel : P.groundDecel) * mods.grip;

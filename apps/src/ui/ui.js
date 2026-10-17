@@ -1,6 +1,7 @@
-// UI provisional en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
-// Zharick: puedes reemplazar este archivo/estilos; el contrato está en apps/README.md (sección UI).
-import { BOX_CHOICES, CONFIG, selectBox } from '../config.js';
+// UI de la partida en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
+// El título / selección vive en ui/menu.js. Zharick: el contrato está en apps/README.md (sección UI).
+import { CONFIG } from '../config.js';
+import './theme.css';
 import './ui.css';
 
 const TIPS = {
@@ -18,6 +19,22 @@ const fmtTime = (t) => {
 
 const STATE_LABEL = { upright: 'ESTABLE', tilting: 'INCLINADA', critical: '¡SE CAE!' };
 
+// Indicador de clima (mientras la caja está en una isla con clima) y avisos.
+const arrow = (dir) => (dir && dir.x < 0 ? '←' : '→');
+const WEATHER_CHIP = {
+  rain: { calm: () => '🌧 LLUVIA', warn: () => '⛈ ¡SE VIENE EL AGUACERO!', active: () => '⛈ AGUACERO · ¡al techo!' },
+  wind: { calm: () => '🍃 VIENTO', warn: (d) => `💨 RÁFAGA ${arrow(d)}`, active: (d) => `💨 ¡RÁFAGA! ${arrow(d)}` },
+  waves: { calm: () => '🌊 OLEAJE', warn: (d) => `🌊 ¡SE VIENE LA OLA! ${arrow(d)}`, active: (d) => `🌊 ¡OLA! ${arrow(d)} · rompeolas o salten` },
+};
+// Texto del chip cuando la caja está cubierta (carpa / rompeolas).
+const WEATHER_SAFE = { rain: '☂ A SALVO BAJO LA CARPA', waves: '🪨 A SALVO TRAS EL ROMPEOLAS' };
+const WEATHER_SAFE_TOAST = { rain: '¡A salvo bajo la carpa! Esperen que pare', waves: '¡Detrás del rompeolas! Aguanten la ola' };
+const WEATHER_WARN = {
+  rain: () => ['¡Se viene el aguacero! ¡A la carpa!', 'wet'],
+  wind: (d) => [`¡Ráfaga desde la ${d && d.x < 0 ? 'derecha' : 'izquierda'}! Caminen en contra`, 'bad'],
+  waves: (d) => [`¡Ola desde la ${d && d.x < 0 ? 'derecha' : 'izquierda'}! Detrás del rompeolas`, 'wet'],
+};
+
 const NPC_HIT = {
   easy: ['¡Pellizco! Se botó contenido', 'bad'],
   medium: ['¡Chorro! Se moja la caja', 'wet'],
@@ -25,9 +42,11 @@ const NPC_HIT = {
 };
 
 export class UI {
-  constructor(root, game, palette) {
+  /** @param {{ onMenu?: () => void }} opts  `onMenu`: botón "Menú" de pausa / victoria / derrota */
+  constructor(root, game, palette, { onMenu = () => {} } = {}) {
     this.root = root;
     this.game = game;
+    this.onMenu = onMenu;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box']) root.style.setProperty(`--${k}`, palette[k]);
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
@@ -36,36 +55,34 @@ export class UI {
       this.meters[el.dataset.k] = { el, bar: el.querySelector('i'), val: el.querySelector('b') };
     }
     this._lastJump = { 1: -10, 2: -10 };
+    this._timers = new Set();
     this._bind(game.events);
-    this._buildBoxPick();
+    this._bindButtons();
     this.show(game.state);
   }
 
-  _buildBoxPick() {
-    const pick = this.$('.box-pick');
-    for (const box of BOX_CHOICES) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.dataset.box = box.id;
-      btn.innerHTML = `<b>${box.name}</b><span>${box.blurb}</span>`;
-      btn.addEventListener('click', () => {
-        if (this.game.state !== 'title') return;
-        selectBox(box.id);
-        this._paintBoxPick();
-      });
-      pick.appendChild(btn);
-    }
-    selectBox(CONFIG.box.profile);
-    this._paintBoxPick();
+  _bindButtons() {
+    const acts = {
+      resume: () => this.game.togglePause(),
+      restart: () => this.game.restart(),
+      retry: () => this.game.retry(),
+      menu: () => this.onMenu(),
+    };
+    // Sin foco en el botón tras el clic: si no, Espacio/Enter lo volverían a pulsar.
+    this.root.addEventListener('mousedown', this._noFocus = (e) => e.target.closest('button') && e.preventDefault());
+    this.root.addEventListener('click', this._onClick = (e) => acts[e.target.closest('[data-act]')?.dataset.act]?.());
   }
 
-  _paintBoxPick() {
+  destroy() {
+    this.root.removeEventListener('mousedown', this._noFocus);
+    this.root.removeEventListener('click', this._onClick);
+    for (const t of this._timers) clearTimeout(t);
+    this.root.innerHTML = '';
+  }
+
+  _paintBoxName() {
     const id = CONFIG.box.profile;
-    for (const btn of this.root.querySelectorAll('.box-pick button')) {
-      btn.classList.toggle('on', btn.dataset.box === id);
-    }
     const name = this.$('.box-name');
-    if (!name) return;
     let label = 'VIP';
     if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
     if (CONFIG.box.bomb.enabled) {
@@ -91,7 +108,11 @@ export class UI {
     const box = this.$('.toasts');
     box.appendChild(t);
     while (box.children.length > 3) box.firstChild.remove();
-    setTimeout(() => t.remove(), 2000);
+    const timer = setTimeout(() => {
+      this._timers.delete(timer);
+      t.remove();
+    }, 2000);
+    this._timers.add(timer);
   }
 
   flash(k) {
@@ -102,10 +123,6 @@ export class UI {
   }
 
   _bind(ev) {
-    ev.on('game:ready', (r) => {
-      this.$('.p1').classList.toggle('ready', r.p1);
-      this.$('.p2').classList.toggle('ready', r.p2);
-    });
     ev.on('game:start', () => this.show('playing'));
     ev.on('game:pause', (e) => this.show(e.paused ? 'paused' : 'playing'));
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
@@ -119,6 +136,11 @@ export class UI {
     ev.on('bomb:warn', () => this.toast('¡La mecha está corta!', 'bad'));
     ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
     ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
+    ev.on('weather:shelter', (e) => {
+      const phase = this.game.weather.current?.phase;
+      if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
+    });
     ev.on('box:impact', (e) => {
       if (e.cause === 'cat') return;
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
@@ -150,16 +172,21 @@ export class UI {
   update() {
     const g = this.game;
     const b = g.box;
-    if (g.state === 'title') {
-      this._paintBoxPick();
-      return;
-    }
-    this._paintBoxPick();
+    if (g.state === 'title') return;
+    this._paintBoxName();
 
     this._meter('integrity', b.integrity, b.integrity < 35);
     this._meter('wetness', b.wetness, b.wetness > 65);
     this._meter('sync', b.sync * 100, b.sync < 0.4);
     this.$('.timer').textContent = fmtTime(g.runTime);
+
+    const zone = g.weather.current;
+    const chip = this.$('.weather');
+    const safe = !!zone?.boxShelter;
+    const label = !zone ? '' : safe ? WEATHER_SAFE[zone.type] : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
+    if (chip.textContent !== label) chip.textContent = label;
+    chip.dataset.type = zone?.type ?? '';
+    chip.dataset.phase = safe ? 'safe' : (zone?.phase ?? '');
 
     // Nivel de burbuja: la bolita va hacia el lado que baja.
     const R = 43;
@@ -201,6 +228,7 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="wetness"><span>Mojado</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
     </div>
+    <div class="weather" data-type=""></div>
     <div class="timer">00:00.0</div>
     <div class="box-name" data-box="vip">VIP</div>
     <div class="level" data-state="upright"><div class="dial"><div class="dot"></div></div><span class="state">ESTABLE</span></div>
@@ -209,29 +237,15 @@ const TEMPLATE = /* html */ `
   </div>
   <div class="fade"></div>
 
-  <section class="screen" data-screen="title">
-    <div class="card">
-      <h1>NO SUELTES<br /><span class="accent">LA CAJA</span></h1>
-      <p class="tag">Cooperativo local para 2 · la caja es el problema</p>
-      <div class="controls">
-        <div class="p1"><div class="who">P1 · traje</div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> mover · <kbd>Espacio</kbd> saltar</div>
-        <div class="p2"><div class="who">P2 · gorra</div><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd> mover · <kbd>Enter</kbd> saltar</div>
-      </div>
-      <p class="pick-label">Elige la caja · clic, o teclas <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></p>
-      <div class="box-pick"></div>
-      <div class="rules">
-        <span>Muévanse al mismo ritmo: la caja va derecha y más rápido.</span>
-        <span>Salten juntos. Si se inclina, gotea por el huequito.</span>
-        <span>No la mojen, no la dejen caer... y lleguen a la META.</span>
-      </div>
-      <p class="cta">Los dos pulsen SALTAR para empezar</p>
-    </div>
-  </section>
-
   <section class="screen" data-screen="paused">
     <div class="card">
       <h2>PAUSA</h2>
-      <p><kbd>P</kbd> / <kbd>Esc</kbd> continuar · <kbd>R</kbd> reiniciar nivel</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="resume">Continuar</button>
+        <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>P</kbd> / <kbd>Esc</kbd> continuar · <kbd>R</kbd> reiniciar · <kbd>M</kbd> menú</p>
     </div>
   </section>
 
@@ -244,7 +258,11 @@ const TEMPLATE = /* html */ `
         <div>Contenido<b class="integrity">100%</b></div>
         <div>Mojado<b class="wetness">0%</b></div>
       </div>
-      <p class="cta"><kbd>Espacio</kbd> / <kbd>Enter</kbd> jugar otra vez</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="restart">Otra vez</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> otra vez · <kbd>M</kbd> menú</p>
     </div>
   </section>
 
@@ -252,8 +270,12 @@ const TEMPLATE = /* html */ `
     <div class="card">
       <h2>¡Soltaron la caja!</h2>
       <p class="tip"></p>
-      <p class="cta"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span></p>
-      <p><kbd>Esc</kbd> reiniciar el nivel</p>
+      <div class="actions">
+        <button type="button" class="btn big go" data-act="retry">Reintentar</button>
+        <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
+        <button type="button" class="btn light" data-act="menu">Menú</button>
+      </div>
+      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span> · <kbd>Esc</kbd> reiniciar · <kbd>M</kbd> menú</p>
     </div>
   </section>
 `;

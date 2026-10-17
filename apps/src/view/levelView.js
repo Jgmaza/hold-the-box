@@ -1,6 +1,11 @@
 // Dibujo del nivel con primitivas (Capa A) + carteles/props con PNG de Matias si existen (Capa B).
+import * as pc from 'playcanvas';
+import { buildBackdrop } from './backdrop.js';
 import { imageUrl } from './deliveries.js';
-import { checkerCanvas, signCanvas } from './signs.js';
+import { bush, palm, rock, seeded } from './nature.js';
+import { Parts } from './parts.js';
+import { checkerCanvas, plankCanvas, signCanvas } from './signs.js';
+import { Water } from './water.js';
 
 export class LevelView {
   constructor(gfx, world) {
@@ -9,24 +14,35 @@ export class LevelView {
     this.root = gfx.group('level');
     this.billboards = []; // entidades que miran a la cámara
     this.flags = []; // banderas de checkpoint
+    this.floating = []; // barcos / botes Kenney (suben y bajan con el mar)
+    this._assets = new Map();
     const L = world.level;
 
-    this._water(world.waterLevel);
+    this.waterY = world.waterLevel;
     for (const s of world.statics) this._platform(s.def, s.aabb);
+    this._sea(world);
     this.movers = world.movers.map((m) => ({ sim: m, e: this._mover(m) }));
     this.sweepers = world.sweepers.map((s) => ({ sim: s, ...this._sweeper(s) }));
     this.geysers = world.geysers.map((g) => ({ sim: g, ...this._geyser(g) }));
     for (const s of L.signs ?? []) this._sign(s);
     for (const p of L.props ?? []) this._prop(p);
+    this._scenery(L.scenery);
     if (L.goal) this._goal(L.goal);
   }
 
   // ------------------------------------------------------------------ piezas
 
-  _water(y) {
-    const g = this.gfx;
-    this.water = g.prim('plane', g.solid('water', { gloss: 0.7 }), { parent: this.root, pos: [0, y, -50], scale: [500, 1, 500], shadows: false, name: 'agua' });
-    this.waterY = y;
+  /** Cielo + islas lejanas + agua con olas y espuma alrededor de cada plataforma e isla. */
+  _sea(world) {
+    const plats = world.statics.map((s) => s.aabb);
+    const zs = plats.flatMap((a) => [a.min.z, a.max.z]);
+    const clear = Math.max(...plats.map((a) => Math.max(Math.abs(a.min.x), Math.abs(a.max.x)))) + 10;
+    const P = (this.parts ??= new Parts(this.gfx));
+    const seed = [...(world.level.id ?? 'nivel')].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
+    const { sky, shores } = buildBackdrop(P, this.root, { minZ: Math.min(...zs), maxZ: Math.max(...zs), seaY: this.waterY, seed, clear });
+    this.sky = sky;
+    const docks = plats.map((a) => ({ x: (a.min.x + a.max.x) / 2, z: (a.min.z + a.max.z) / 2, w: a.max.x - a.min.x, d: a.max.z - a.min.z }));
+    this.water = new Water(this.gfx, { y: this.waterY, parent: this.root, shores: [...docks, ...shores] });
   }
 
   _platform(def, a) {
@@ -35,18 +51,48 @@ export class LevelView {
     const h = a.max.y - a.min.y;
     const d = a.max.z - a.min.z;
     const cx = (a.max.x + a.min.x) / 2;
+    const cy = (a.max.y + a.min.y) / 2;
     const cz = (a.max.z + a.min.z) / 2;
+    // Rompeolas (oleaje): rocas grandes apiladas que llenan su caja de colisión, con espuma al pie.
+    if (def.kind === 'breakwater') {
+      const P = (this.parts ??= new Parts(g));
+      const rand = seeded(Math.abs(Math.round(cx * 13 + cz * 7)) + 3);
+      const n = Math.max(2, Math.round(d / 1.1));
+      const size = Math.min(w, h) * 1.15;
+      for (let i = 0; i < n; i++) {
+        const z = a.min.z + (d * (i + 0.5)) / n;
+        rock(P, this.root, [cx + (rand() - 0.5) * 0.15, a.max.y - h * 0.95, z], size, rand);
+      }
+      P.ball(this.root, g.solid('foam', { opacity: 0.7, gloss: 0 }), [cx, a.max.y - h + 0.03, cz], [w * 1.6, 0.05, d * 1.15], { shadows: false, name: 'espuma-rompeolas' });
+      return;
+    }
+    // Piedras / topes de los rieles: bloque compacto encima del tablón (sin postes).
+    if (def.kind === 'rock' || def.kind === 'bump') {
+      const mat = def.kind === 'rock' ? 'dark' : 'ui';
+      g.prim('box', g.solid(mat, { mul: def.kind === 'rock' ? 0.95 : 1.1 }), {
+        parent: this.root,
+        pos: [cx, cy, cz],
+        scale: [w, h, d],
+        name: def.id,
+      });
+      return;
+    }
     const plank = def.kind === 'plank';
     const top = 0.14;
     g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 0.75 }), { parent: this.root, pos: [cx, a.min.y + (h - top) / 2, cz], scale: [w, h - top, d], name: def.id });
-    g.prim('box', g.solid(plank ? 'plank' : 'wood', { mul: 1.08 }), { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
+    // Piso de tablones: textura clara teñida con el color de la madera, 2 m por repetición.
+    this._plankTex ??= g.textureFromCanvas(plankCanvas(), { repeat: true });
+    const floor = g.textured(this._plankTex, { tint: g.color(plank ? 'plank' : 'wood', 1.12) });
+    floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
+    floor.update();
+    g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
     if (!plank) {
       // Pilotes en las esquinas (se ven en el agua).
       for (const [px, pz] of [[a.min.x, a.min.z], [a.max.x, a.min.z], [a.min.x, a.max.z], [a.max.x, a.max.z]]) {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [px, a.max.y - 0.3, pz], scale: [0.3, 0.9, 0.3] });
       }
     } else {
-      // Postes que sostienen el tablón.
+      // Postes que sostienen el tablón / riel.
       for (let z = a.min.z + 0.6; z < a.max.z; z += 3) {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [cx, (a.min.y + this.waterY) / 2 - 0.2, z], scale: [0.18, a.min.y - this.waterY + 0.6, 0.18] });
       }
@@ -97,6 +143,47 @@ export class LevelView {
     return { column, bubbles };
   }
 
+  /** Modelos del kit pirata (un asset por modelo, compartido). El GLB busca Textures/colormap.png a su lado. */
+  _scenery(items) {
+    this._assets = new Map();
+    this.floating = [];
+    if (!items?.length) return;
+    const base = import.meta.env.BASE_URL;
+    const assets = this.gfx.app.assets;
+    for (const s of items) {
+      let asset = this._assets.get(s.art);
+      if (!asset) {
+        asset = new pc.Asset(`kenney-${s.art}`, 'container', { url: `${base}kenney/${s.art}.glb` });
+        asset.on('error', () => console.warn('[nivel] no se pudo cargar', s.art));
+        assets.add(asset);
+        assets.load(asset);
+        this._assets.set(s.art, asset);
+      }
+      asset.ready((loaded) => {
+        if (this._dead) return;
+        const ent = loaded.resource.instantiateRenderEntity();
+        const scale = s.s ?? 0.36;
+        ent.name = s.art;
+        ent.setLocalScale(scale, scale, scale);
+        ent.setLocalEulerAngles(0, s.yaw ?? 0, 0);
+        ent.setPosition(s.x, s.top, s.z);
+        this.root.addChild(ent);
+        if (s.float) this.floating.push({ e: ent, s, phase: s.x * 0.37 + s.z * 0.11 });
+      });
+    }
+  }
+
+  /** Libera los GLB (las entidades ya se borraron con la raíz de la partida). */
+  destroy() {
+    this._dead = true;
+    for (const asset of this._assets.values()) {
+      this.gfx.app.assets.remove(asset);
+      asset.unload();
+    }
+    this._assets.clear();
+    this.water?.destroy();
+  }
+
   _sign(s) {
     const g = this.gfx;
     const post = s.post ?? 1.6;
@@ -116,18 +203,11 @@ export class LevelView {
     if (p.type === 'palm') {
       const art = imageUrl('matias/prop-palmera.png');
       if (art) return this._billboard(art, [p.x, p.top, p.z], 3.6);
-      const palm = g.group('palmera', this.root, [p.x, p.top, p.z]);
-      const lean = (p.x > 0 ? -1 : 1) * 8;
-      palm.setLocalEulerAngles(0, 0, lean);
-      for (let i = 0; i < 5; i++) {
-        g.prim('cylinder', g.solid('trunk', { mul: i % 2 ? 0.9 : 1 }), { parent: palm, pos: [0, 0.35 + i * 0.62, 0], scale: [0.3 - i * 0.025, 0.62, 0.3 - i * 0.025] });
-      }
-      for (let i = 0; i < 6; i++) {
-        const leaf = g.group('hoja', palm, [0, 3.2, 0]);
-        leaf.setLocalEulerAngles(0, i * 60, 0);
-        g.prim('box', g.solid('leaf', { mul: i % 2 ? 0.85 : 1 }), { parent: leaf, pos: [0.8, -0.15, 0], rot: [0, 0, -22], scale: [1.7, 0.08, 0.5] });
-      }
-      g.prim('sphere', g.solid('trunk', { mul: 0.7 }), { parent: palm, pos: [0.15, 3.0, 0.1], scale: [0.22, 0.22, 0.22] });
+      // Se curva hacia afuera del camino; la semilla sale de la posición (siempre la misma palmera ahí).
+      const rand = seeded(Math.abs(Math.round(p.x * 31 + p.z * 17)) + 1);
+      const P = (this.parts ??= new Parts(g));
+      palm(P, this.root, [p.x, p.top, p.z], { height: 3.4, lean: 0.22, yaw: p.x > 0 ? 0 : 180, rand });
+      bush(P, this.root, [p.x + (p.x > 0 ? -0.5 : 0.5), p.top, p.z + 0.4], 0.6, rand);
     } else if (p.type === 'bar') {
       const bar = g.group('bar', this.root, [p.x, p.top, p.z]);
       g.prim('box', g.solid('wood', { mul: 0.6 }), { parent: bar, pos: [0, 0.55, 0], scale: [2.6, 1.1, 0.8] });
@@ -197,7 +277,12 @@ export class LevelView {
   // ------------------------------------------------------------------ frame
 
   update(dt, time, game, camPos) {
-    this.water.setLocalPosition(0, this.waterY + Math.sin(time * 0.8) * 0.04, -50);
+    this.water.update(time, camPos);
+    this.sky.setPosition(camPos.x, this.waterY, camPos.z);
+    for (const f of this.floating) {
+      f.e.setPosition(f.s.x, f.s.top + Math.sin(time * 1.1 + f.phase) * 0.06, f.s.z);
+      f.e.setLocalEulerAngles(Math.sin(time * 0.9 + f.phase) * 2.5, f.s.yaw ?? 0, Math.sin(time * 0.7 + f.phase * 1.3) * 3.5);
+    }
 
     for (const m of this.movers) m.e.setPosition(m.sim.pos.x, m.sim.pos.top, m.sim.pos.z);
     for (const s of this.sweepers) s.pivot.setLocalEulerAngles(0, -s.sim.angle, 0);

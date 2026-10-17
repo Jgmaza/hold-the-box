@@ -14,7 +14,14 @@ const SLOTS = {
   'sfx-meta': { volume: 0.8 },
   'musica-victoria': { volume: 0.7 },
   'musica-derrota': { volume: 0.7 },
+  'sfx-lluvia': { volume: 0.5, loop: true },
+  'sfx-viento': { volume: 0.5, loop: true },
+  'sfx-trueno': { volume: 0.8 },
+  'sfx-olas': { volume: 0.5, loop: true },
+  'sfx-ola': { volume: 0.85 },
 };
+
+const WEATHER_LOOP = { rain: 'sfx-lluvia', wind: 'sfx-viento', waves: 'sfx-olas' };
 
 export class GameAudio {
   constructor(app) {
@@ -116,6 +123,21 @@ export class GameAudio {
     if (this.available.has(name)) this.entity.sound.stop(name);
   }
 
+  /** Al salir al menú: corta música y loops de la partida. */
+  stopAll() {
+    for (const name of this.available) this.entity.sound.stop(name);
+  }
+
+  /** Cada frame: el loop del clima sube y baja con la intensidad (llovizna ↔ aguacero, brisa ↔ ráfaga). */
+  update(game) {
+    const zone = game.weather.current;
+    if (!zone) return;
+    const name = WEATHER_LOOP[zone.type];
+    if (!this.available.has(name)) return;
+    const slot = this.entity.sound.slot(name);
+    if (slot) slot.volume = SLOTS[name].volume * (0.35 + 0.65 * zone.intensity);
+  }
+
   /** Conecta los eventos del juego con los sonidos. */
   bind(events) {
     events.on('game:start', () => {
@@ -134,6 +156,12 @@ export class GameAudio {
     events.on('game:splash', () => this.play('sfx-splash'));
     events.on('hazard:hit', () => this.play('sfx-golpe'));
     events.on('npc:hit', (e) => this.play(e.difficulty === 'medium' ? 'sfx-mojado' : 'sfx-golpe'));
+    // Clima: loop de la isla donde está la caja; trueno al avisar el aguacero.
+    events.on('weather:enter', (e) => this.play(WEATHER_LOOP[e.type]));
+    events.on('weather:exit', (e) => this.stop(WEATHER_LOOP[e.type]));
+    events.on('weather:warn', (e) => e.type === 'rain' && this.play('sfx-trueno'));
+    events.on('weather:start', (e) => e.type === 'waves' && this.play('sfx-ola'));
+    events.on('game:respawn', () => Object.values(WEATHER_LOOP).forEach((n) => this.stop(n)));
     events.on('box:drop', () => this.play('sfx-golpe'));
     events.on('game:checkpoint', () => this.play('sfx-meta'));
     events.on('game:win', () => {
