@@ -1,57 +1,26 @@
 # No Sueltes La Caja
 
-Game Jam 2026 — Tema: **Better Together**  
-PlayCanvas · coop local 2 jugadores · la caja se inclina, puede tener huequito y mojarse.
+Game Jam 2026 · Better Together · PlayCanvas · coop local 2P
 
----
+## Empieza aquí
 
-## Mañana / primer demo
+# → **[`INDEX.md`](./INDEX.md)**
 
-👉 **[`docs/START_TOMORROW.md`](./docs/START_TOMORROW.md)** — orden del vertical slice (Danel Opus 5.5 + roles)
+Ahí está el índice general. Luego entras a `team/<tu-nombre>/` para tus tareas y prompts.
 
-## Empieza aquí según quién eres
-
-👉 **[`team/START_HERE.md`](./team/START_HERE.md)**
-
-| Persona | Rol | Carpeta |
+| Rol | Persona | Carpeta |
 |---|---|---|
-| Jose | Lead | [`team/jose/`](./team/jose/) |
-| Danel | Dev Estrella (`apps/`) | [`team/danel/`](./team/danel/) |
-| Luis | Soundtrack + Color | [`team/luis/`](./team/luis/) |
-| Zharick | Dev Apoyo | [`team/zharick/`](./team/zharick/) |
-| Juanes | Diseño 1 | [`team/juanes/`](./team/juanes/) |
-| Matias | Diseño 2 | [`team/matias/`](./team/matias/) |
+| Lead | Jose | `team/jose/` |
+| Gameplay (`apps/`) | Danel · [@danelmott](https://github.com/danelmott) | `team/danel/` |
+| Audio + color | Luis · [@turriago](https://github.com/turriago) | `team/luis/` |
+| Dev apoyo | Zharick | `team/zharick/` |
+| Dibujo personajes/caja | Juanes | `team/juanes/` |
+| Dibujo señales/props | Matias | `team/matias/` |
 
-Cada carpeta tiene:
-- `README.md` → tus tareas
-- `prompts.md` → prompts listos para IA
-
-Skills por persona → [`team/SKILLS.md`](./team/SKILLS.md)  
-**Danel → Claude Opus 5.5** + [`.cursor/skills/no-sueltes-playcanvas/`](./.cursor/skills/no-sueltes-playcanvas/)
-
-Entregables → [`deliveries/`](./deliveries/)  
-Juego → [`apps/`](./apps/)
-
----
-
-## Estructura
-
-```
-├── team/           # tareas + prompts por persona
-├── deliveries/     # arte, audio, bugs
-├── apps/           # PlayCanvas (Danel)
-├── docs/           # GDD de apoyo, pipeline diseño
-├── PROMPTS/        # prompts genéricos legacy
-├── GAME_DESIGN_DOCUMENT.md
-├── MVP_SCOPE.md
-└── TASK_BOARD.md
-```
-
-## Clone
+**Visual:** diseño solo dibuja en papel → PNG. No Blender. Ver [`docs/visual/PLAN.md`](./docs/visual/PLAN.md).
 
 ```bash
 git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
 cd no-sueltes-la-caja
+# abre INDEX.md
 ```
-
-Luego abre `team/START_HERE.md` y métete a tu carpeta.

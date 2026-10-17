@@ -1,5 +1,7 @@
 # Prompts — Matias (señales + props)
 
+No Blender. Carteles legibles → PNG en `deliveries/matias/`. Ver `docs/visual/PLAN.md`.
+
 ## Layout de carteles
 ```
 Propón layouts simples (ASCII o bullets) para carteles de madera cartoon:

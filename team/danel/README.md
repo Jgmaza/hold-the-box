@@ -1,33 +1,39 @@
 # Danel — Dev Estrella (PlayCanvas)
 
-GitHub: [@danelmott](https://github.com/danelmott)  
-Eres el **owner de `apps/`**. Aquí va el vibe coding pesado. Jose revisa; tú ejecutas.
+GitHub: [@danelmott](https://github.com/danelmott)
 
-## Tus tareas
+## Cómo empezar (3 pasos)
 
-- [ ] Scaffold PlayCanvas / estructura en `apps/`
-- [ ] P1 + P2: movimiento, salto, controles (`docs/controls.md`)
-- [ ] Cámara cooperativa
-- [ ] Caja compartida (ambos influyen)
-- [ ] Inclinación de caja
-- [ ] Mecánica **huequito** y/o **se moja** (mínimo una completa; ideal ambas simples)
-- [ ] Plataformas, rodillos, agua/fail, respawn
-- [ ] Meta + win/fail states
-- [ ] Integrar assets de `deliveries/juanes`, `deliveries/matias`, `deliveries/luis`
-- [ ] Dejar build jugable para testing de Jose/Zharick
+1. [`../../INDEX.md`](../../INDEX.md) + [`../../docs/START_TOMORROW.md`](../../docs/START_TOMORROW.md)  
+2. Cursor → modelo **Claude Opus 5.5** + skill `no-sueltes-playcanvas`  
+3. Ejecuta prompts en orden: [`prompts.md`](./prompts.md) · trabaja solo en `apps/`
+
+## Tu rol
+**Owner de `apps/`.** Aquí va el vibe coding. Jose revisa; tú ejecutas.
+
+## Visual (léelo)
+[`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md)
+
+1. **Capa A primero:** primitivas (cápsulas, cubos, planos) + colores de Luis.  
+2. **No esperes** dibujos de Juanes/Matias para el demo.  
+3. Cuando lleguen PNG en `deliveries/`, pégalos como texturas/carteles (Capa B).  
+4. Modelado 3D “bonito” = opcional y al final (Capa C). **No se lo pidas a diseño.**
+
+## Tareas código
+
+- [ ] Scaffold PlayCanvas en `apps/`
+- [ ] P1 + P2 movimiento/salto
+- [ ] Cámara
+- [ ] Caja compartida + inclinación ← **corazón del demo**
+- [ ] Fail (agua) + meta + win
+- [ ] Huequito y/o se moja
+- [ ] Plataforma móvil, rodillo, respawn
+- [ ] Integrar `deliveries/` cuando existan
 
 ## Reglas
+- Ramas `apps/danel-*`
+- Sin online / inventario / powerups / ranking
+- Placeholders OK
 
-1. Trabaja en ramas `apps/danel-*`.
-2. No metas online, inventario, powerups, ranking.
-3. Lee `docs/mechanics.md` antes de improvisar sistemas nuevos.
-4. Si un asset no llega, usa placeholder y sigue.
-
-## Modelo + skills
-- **Modelo:** Claude **Opus 5.5** (obligatorio en Agent para `apps/`)
-- **Skill repo:** `.cursor/skills/no-sueltes-playcanvas/`
-- **Otros:** ver `team/SKILLS.md` (review-bugbot, split-to-prs, loop, create-rule)
-- **Prompts:** `team/danel/prompts.md` (llevan prefijo Opus 5.5)
-
-## Done cuando
-Dos jugadores pueden cargar la caja, sentir el riesgo (inclinación/agua/hueco) y llegar a la meta o fallar de forma clara.
+## Done (primer demo)
+Dos jugadores cargan la caja, se desbalancea si no coordinan, pueden ganar o perder.

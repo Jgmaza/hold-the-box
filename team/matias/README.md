@@ -1,41 +1,30 @@
 # Matias — Diseño 2 (señales + meta + props)
 
-**Solo dibujas.** No 3D, no código, no PlayCanvas.
+GitHub: _(pendiente)_
 
-## Tus tareas
+## Cómo empezar (3 pasos)
 
-- [ ] Señal: “TRABAJO EN EQUIPO = RESULTADOS”
-- [ ] Señal: “¡CUIDADO QUE NO SE CAIGA!”
-- [ ] Banner **META** + bandera a cuadros
-- [ ] Cartel bar: “AQUÍ SE TOMA EL RON”
-- [ ] Billboard humor local (versión jugable / family-friendly)
-- [ ] Props silueta clara: palmera, rodillo, plataforma madera
-- [ ] Foto → digitalizar → `deliveries/matias/`
+1. [`../../INDEX.md`](../../INDEX.md)  
+2. [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — **no modelas en 3D**  
+3. Dibuja → Photopea → `deliveries/matias/` ([pipeline](../../docs/visual/pipeline-papel.md))
 
-## Cómo entregar
+## Tu rol
+**Solo dibujas en papel.** Carteles y props legibles de lejos.  
+Danel los pega como texturas en planos del nivel.
 
-1. Dibuja carteles legibles (texto grande, poco adorno).
-2. Pipeline: `docs/design-pipeline.md`.
-3. Sube PNG:
-   ```
-   deliveries/matias/
-     senal-trabajo-equipo.png
-     senal-cuidado-caja.png
-     banner-meta.png
-     bandera-cuadros.png
-     cartel-ron.png
-     billboard.png
-     prop-palmera.png
-     prop-rodillo.png
-     prop-plataforma.png
-   ```
+## Tareas (prioridad)
 
-## Tip
-En el juego se leen de lejos: prioriza silueta y texto gordo sobre sombreado fino.
+- [ ] `banner-meta.png` (+ bandera a cuadros si cabe)
+- [ ] `senal-cuidado-caja.png` — “¡CUIDADO QUE NO SE CAIGA!”
+- [ ] `senal-trabajo-equipo.png` — “TRABAJO EN EQUIPO = RESULTADOS”
+- [ ] `cartel-ron.png` — “AQUÍ SE TOMA EL RON”
+- [ ] `prop-rodillo.png` / `prop-plataforma.png` / `prop-palmera.png` (siluetas simples)
 
-## Skills / herramientas
-Briefs: `team/matias/prompts.md`. Digitalizar: `docs/design-pipeline.md`.  
-Mapa: `team/SKILLS.md` (diseño no codea).
+## Dónde entregar
+`deliveries/matias/`
+
+## Prompts
+[`prompts.md`](./prompts.md)
 
 ## Done cuando
-Hay set de señales/meta/props en `deliveries/matias/` listos para que Danel los ponga en el nivel.
+Hay META + al menos 2 señales listas para que Danel las ponga en el nivel.

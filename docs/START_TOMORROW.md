@@ -1,5 +1,7 @@
 # Empezar mañana — camino al primer demo
 
+> Índice del repo: [`../INDEX.md`](../INDEX.md) · Visual: [`visual/PLAN.md`](./visual/PLAN.md)
+
 Fecha de referencia: plan congelado para el siguiente día de jam.  
 Objetivo: ver un **vertical slice** jugable, no el MVP completo.
 

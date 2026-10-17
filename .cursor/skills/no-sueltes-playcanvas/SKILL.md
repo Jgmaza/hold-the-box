@@ -41,5 +41,9 @@ Prohibido: multiplayer online, inventario, powerups, tienda, ranking, enemigos c
 5. Win/fail + enganche UI
 6. Integrar `deliveries/`
 
+## Visual
+Seguir `docs/visual/PLAN.md`: Capa A primitivas primero; PNG de `deliveries/` como texturas/carteles.
+No exigir modelado 3D a Juanes/Matias.
+
 ## Modelo
 Para implementación en `apps/`, preferir **Claude Opus 5.5** en Cursor Agent.

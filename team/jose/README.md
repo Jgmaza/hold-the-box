@@ -1,30 +1,25 @@
 # Jose — Lead
 
-No eres el executor principal de código. Diriges alcance, calidad y pitch.
+## Cómo empezar (3 pasos)
 
-## Tus tareas
+1. [`../../INDEX.md`](../../INDEX.md) — apunta al equipo aquí  
+2. Criterio demo: [`../../docs/START_TOMORROW.md`](../../docs/START_TOMORROW.md)  
+3. Visual congelado: [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — diseño **no** modela 3D
 
-- [ ] Congelar MVP (`MVP_SCOPE.md`)
-- [ ] Priorizar mecánicas de caja: inclinación → huequito / se moja
-- [ ] Criterios de aceptación por rol (revisar cada `team/*/README.md`)
-- [ ] Testing de builds que suba Danel
-- [ ] Coordinar Juanes/Matias → `deliveries/` → Danel integra
-- [ ] Pitch final (`docs/pitch.md` + demo)
-- [ ] Invitar al equipo al repo GitHub y aclarar dueños de carpeta
+## Tu rol
+Dirección, alcance, calidad, pitch. **No** eres el executor principal de código (`apps/` = Danel).
 
-## Mañana
-Arranque del día: **`docs/START_TOMORROW.md`** (criterio demo + mensaje para Danel).
+## Tareas
 
-## Skills (Cursor)
-`create-rule`, `create-skill`, `create-subagent`, `goal`, `split-to-prs`, `review` / `review-bugbot`, `share`, `automate`, `autopilot`, `loop` — detalle en `team/SKILLS.md`.
+- [ ] Congelar MVP / demo slice
+- [ ] Priorizar caja (inclinación → hueco/mojada)
+- [ ] Playtest builds de Danel
+- [ ] Coordinar `deliveries/` → integración
+- [ ] Invitar GitHubs faltantes (Zharick, Juanes, Matias)
+- [ ] Pitch final
 
-## Dónde mirar
+## Mensaje clave al equipo
+> Juanes/Matias solo dibujan papel→PNG. Danel usa primitivas primero. Nadie bloquea código esperando Blender.
 
-| Necesitas | Archivo |
-|---|---|
-| Vista global | `TASK_BOARD.md` |
-| Prompts de dirección | `team/jose/prompts.md` |
-| App | `apps/` (revisión, no bulk coding) |
-
-## Done cuando
-El equipo sabe qué hacer sin preguntarte cada hora, el MVP está claro y hay build jugable para pitch.
+## Skills / prompts
+`team/SKILLS.md` · [`prompts.md`](./prompts.md)

@@ -1,5 +1,7 @@
 # Skills por persona (Cursor + jam)
 
+Índice del repo: [`../INDEX.md`](../INDEX.md)
+
 Skills instaladas en la máquina del Lead viven en `~/.cursor/skills-cursor/`.  
 En el repo también hay un skill de proyecto para gameplay: `.cursor/skills/no-sueltes-playcanvas/`.
 

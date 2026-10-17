@@ -1,42 +1,33 @@
 # Juanes — Diseño 1 (personajes + caja)
 
-**Solo dibujas.** No 3D, no código, no PlayCanvas.
+GitHub: _(pendiente)_
 
-## Tus tareas
+## Cómo empezar (3 pasos)
 
-- [ ] P1 (traje + gafas): frente, 3/4, espalda + pose cargando caja
-- [ ] P2 (gorra + camiseta): mismas vistas + pose cargando
-- [ ] Caja Old Parr: normal, inclinada, con **huequito**, **mojada/goteando**
-- [ ] (Opcional) expresiones de estrés al desbalancearse
-- [ ] Foto limpia de cada hoja → digitalizar → subir a `deliveries/juanes/`
+1. Lee el índice: [`../../INDEX.md`](../../INDEX.md)  
+2. Lee el plan visual: [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — **no modelas en 3D**  
+3. Dibuja → Photopea → sube PNG a `deliveries/juanes/` ([pipeline](../../docs/visual/pipeline-papel.md))
 
-## Cómo entregar
+## Tu rol
+**Solo dibujas en papel.** No Blender. No PlayCanvas. No código.  
+Danel usa tus PNG como texturas/refs sobre cajas 3D simples.
 
-1. Dibuja en papel blanco, líneas claras.
-2. Sigue `docs/design-pipeline.md` (Photopea / Vectorizer / remove.bg).
-3. Exporta PNG y súbelos aquí:
-   ```
-   deliveries/juanes/
-     p1-frente.png
-     p1-trescuartos.png
-     p1-espalda.png
-     p1-cargar.png
-     p2-frente.png
-     p2-trescuartos.png
-     p2-espalda.png
-     p2-cargar.png
-     caja-normal.png
-     caja-inclinada.png
-     caja-huequito.png
-     caja-mojada.png
-   ```
+## Tareas (prioridad)
 
-## Referencia visual
-Concepto base del juego: dos tipos cargando la caja Old Parr en plataformas sobre el agua, vibe caribeña cartoon.
+- [ ] `caja-normal.png`
+- [ ] `caja-inclinada.png`
+- [ ] `caja-huequito.png`
+- [ ] `caja-mojada.png`
+- [ ] `p1-frente.png` + `p1-cargar.png` (traje + gafas)
+- [ ] `p2-frente.png` + `p2-cargar.png` (gorra + camiseta)
 
-## Skills / herramientas
-Casi no usas skills de código. Briefs: `team/juanes/prompts.md` (+ `canvas` si abres Cursor).  
-Digitalizar: `docs/design-pipeline.md` (Photopea). Mapa: `team/SKILLS.md`.
+Opcional después: más vistas / expresiones.
+
+## Dónde entregar
+`deliveries/juanes/` — nombres exactos arriba.
+
+## Prompts (briefs de dibujo)
+[`prompts.md`](./prompts.md)
 
 ## Done cuando
-Danel tiene referencias claras de P1, P2 y estados de la caja en `deliveries/juanes/`.
+Danel tiene al menos caja (4 estados) + siluetas P1/P2 para pegar o usar de referencia.

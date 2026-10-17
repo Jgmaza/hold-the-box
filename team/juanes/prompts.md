@@ -1,6 +1,7 @@
 # Prompts — Juanes (dibujo personajes + caja)
 
-Úsalos para brief / refs. El entregable final sigue siendo **tu dibujo a mano** + PNG.
+No pidas Blender ni 3D. El entregable es **dibujo a mano** + PNG en `deliveries/juanes/`.  
+Contexto: `docs/visual/PLAN.md` (Capa B = texturas/refs).
 
 ## Brief P1 / P2
 ```

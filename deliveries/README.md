@@ -1,12 +1,17 @@
-# Deliveries
+# Deliveries — aquí se sube el trabajo
 
-Aquí sube cada quien sus entregables. Danel (y Zharick) los toman para `apps/`.
+Cada quien escribe **solo en su carpeta**. Danel lee desde aquí para `apps/`.
 
 | Carpeta | Quién | Qué va |
 |---|---|---|
-| `juanes/` | Juanes | PNG personajes + caja |
-| `matias/` | Matias | PNG señales + props |
-| `luis/` | Luis | audio + `PALETTE.md` |
-| `zharick/` | Zharick | bugs, capturas UI, notas |
+| `juanes/` | Juanes | PNG caja + personajes (ver `docs/visual/pipeline-papel.md`) |
+| `matias/` | Matias | PNG señales + META + props |
+| `luis/` | Luis | `PALETTE.md` + `audio/` |
+| `zharick/` | Zharick | `BUGS.md`, capturas UI |
 
-No subas archivos enormes sin comprimir. Evita `.psd` enormes si puedes exportar PNG.
+## Reglas
+- Nombres de archivo como en el pipeline (sin espacios raros).  
+- PNG para arte. Audio en formatos web (ogg/mp3/wav cortos).  
+- No subas `.psd` / `.blend` enormes si puedes exportar.
+
+Índice: [`../INDEX.md`](../INDEX.md)

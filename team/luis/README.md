@@ -1,37 +1,32 @@
 # Luis — Soundtrack + Colorimetría
 
-GitHub: [@turriago](https://github.com/turriago)  
-Defines cómo **suena** y cómo **se siente el color** del juego. Danel integra en PlayCanvas.
+GitHub: [@turriago](https://github.com/turriago)
 
-## Tus tareas
+## Cómo empezar (3 pasos)
+
+1. [`../../INDEX.md`](../../INDEX.md)  
+2. Completa `deliveries/luis/PALETTE.md` (hex) — Danel lo usa en primitivas ya  
+3. Audio en `deliveries/luis/audio/` cuando puedas
+
+## Tu rol
+Identidad de **color y sonido**. No modelas 3D. Danel integra en PlayCanvas.
+
+## Visual
+Tus hex pintan la **Capa A** (mundo de primitivas) hasta que lleguen texturas.  
+Ver [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md).
+
+## Tareas
+
+### Color
+- [ ] Paleta en `deliveries/luis/PALETTE.md` (cielo, agua, madera, caja, UI, peligro, meta)
 
 ### Audio
-- [ ] Loop gameplay (caribe / party, agradable en repetición, ~60–90s loopable)
-- [ ] SFX: pasos, salto, caja inclinada, caja mojada, caída agua, meta, victoria, derrota
-- [ ] Exportar formatos web-friendly (wav/ogg/mp3 según acuerden con Danel)
-- [ ] Subir a `deliveries/luis/audio/` con nombres claros
+- [ ] Loop gameplay
+- [ ] SFX: salto, inclinación, mojado, splash, meta, victoria/derrota
+- [ ] Archivos en `deliveries/luis/audio/` con nombres claros
 
-### Colorimetría
-- [ ] Paleta oficial (hex): cielo, agua, madera, caja, UI, peligro
-- [ ] Moodboard corto (imagen o lista de refs)
-- [ ] Guía de contraste: señales legibles vs fondo
-- [ ] Documento `deliveries/luis/PALETTE.md`
-
-## Naming sugerido
-```
-bgm-gameplay-loop.ogg
-sfx-jump.ogg
-sfx-box-tilt.ogg
-sfx-box-wet.ogg
-sfx-splash.ogg
-sfx-goal.ogg
-bgm-victory.ogg
-bgm-fail.ogg
-```
-
-## Skills
-`canvas` (paleta/moodboard), prompts en `team/luis/prompts.md`.  
-No necesitas Opus; ver `team/SKILLS.md`.
+## Prompts
+[`prompts.md`](./prompts.md)
 
 ## Done cuando
-Danel puede dropear audio + hex en `apps/` sin adivinar intenciones.
+Danel puede pintar el nivel y dropear audio sin adivinar.

@@ -1,15 +1,20 @@
-# PROMPTS (legacy / globales)
+# Prompts
 
-Los prompts **por persona** viven en:
+## Los que debes usar (por persona)
 
-`team/<nombre>/prompts.md`
+Ve a **`team/<tu-nombre>/prompts.md`**. Esos son los oficiales.
 
-Usa esos primero. Esta carpeta queda como ideas genéricas de jam:
-
-| Archivo | Tema |
+| Persona | Archivo |
 |---|---|
-| `art.md` | refs de arte |
-| `gameplay.md` | scripts PlayCanvas |
-| `level_design.md` | nivel corto |
-| `polish.md` | mejoras < 30 min |
-| `ui.md` | pantallas UI |
+| Jose | `team/jose/prompts.md` |
+| Danel | `team/danel/prompts.md` ← Opus 5.5 |
+| Luis | `team/luis/prompts.md` |
+| Zharick | `team/zharick/prompts.md` |
+| Juanes | `team/juanes/prompts.md` |
+| Matias | `team/matias/prompts.md` |
+
+## Respaldo genérico
+
+`prompts/shared/` — ideas viejas de jam. Úsalas solo si tu prompt de persona no cubre el caso.
+
+Índice del repo: [`../INDEX.md`](../INDEX.md)

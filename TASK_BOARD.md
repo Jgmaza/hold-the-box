@@ -1,8 +1,9 @@
 # TASK BOARD — Roles y entregables
 
-> Empieza por persona: **[`team/START_HERE.md`](./team/START_HERE.md)**  
-> Cada quien tiene `team/<nombre>/README.md` (tareas) + `prompts.md`.  
-> Raíz = gestión. `apps/` = juego (Danel). Entregas = `deliveries/`.
+> **Índice general:** [`INDEX.md`](./INDEX.md)  
+> Asignaciones: [`team/START_HERE.md`](./team/START_HERE.md)  
+> Visual (papel ≠ Blender): [`docs/visual/PLAN.md`](./docs/visual/PLAN.md)  
+> `apps/` = juego (Danel). Entregas = `deliveries/`.
 
 ---
 
