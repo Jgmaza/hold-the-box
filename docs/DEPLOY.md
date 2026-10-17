@@ -4,16 +4,31 @@ El slice jugable vive en `apps/` (PlayCanvas + Vite).
 
 ## ¿Dónde se despliega?
 
-| Destino | Para qué | Estado |
+| Destino | Para qué | Cómo |
 |---|---|---|
-| **itch.io** (HTML5) | **Destino del jam / presentación oficial** | Tú subes el zip (cuenta itch) |
-| **GitHub Pages** | Link rápido para el equipo / playtest online | Auto desde rama `gh-pages` |
+| **itch.io** (HTML5) | Destino del jam / presentación oficial | Zip manual (cuenta itch) |
+| **GitHub Pages** | Link de producción del repo | **CI/CD** al mergear a `main` |
 
 **URL GitHub Pages:** https://jgmaza.github.io/no-sueltes-la-caja/  
 **URL itch.io:** `_crear página y pegar aquí_`
 
-itch.io es el estándar de game jams (embed, página del juego, downloads).  
-GitHub Pages sirve para compartir ya sin esperar a configurar itch.
+---
+
+## Flujo de producción (Pages)
+
+```
+work/<persona> → PR a dev → playtest
+dev → PR a main (mín. 2 aprobaciones + CI verde) → merge → Deploy Pages automático
+```
+
+Reglas de `main`:
+- Solo entra por **pull request** (no push directo)
+- Mínimo **2 reviews** aprobando
+- Check **CI / test** debe pasar
+
+El workflow [`.github/workflows/deploy-pages.yml`](../.github/workflows/deploy-pages.yml) corre en cada push a `main` (es decir, tras el merge del PR).
+
+CI en PRs: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (`npm test` + `npm run build` en `apps/`).
 
 ---
 
@@ -52,26 +67,24 @@ Smoke del build: `npm run preview` → http://127.0.0.1:4173/
 
 ---
 
-## GitHub Pages (link rápido)
+## GitHub Pages (automático)
 
-Ya hay rama `gh-pages` con el `dist/`.  
-Tras un build nuevo:
+No hace falta push manual a `gh-pages`. Tras merge a `main`:
 
-```bash
-# desde apps/ tras npm run build
-rm -rf /tmp/nslc-pages && mkdir /tmp/nslc-pages && cp -R dist/* /tmp/nslc-pages/
-cd /tmp/nslc-pages && git init && git checkout -b gh-pages
-git add -A && git commit -m "Deploy playable build"
-git remote add origin https://github.com/Jgmaza/no-sueltes-la-caja.git
-git push -f origin gh-pages
-```
+1. Actions → workflow **Deploy Pages**  
+2. Si sale verde → https://jgmaza.github.io/no-sueltes-la-caja/
+
+Redeploy manual (mismo commit de `main`): Actions → Deploy Pages → **Run workflow**.
+
+La rama legacy `gh-pages` deja de ser la fuente; Pages usa **GitHub Actions**.
 
 ---
 
-## Checklist pre-deploy
+## Checklist pre-promote (`dev` → `main`)
 
-- [x] `npm test` (29) + `npm run build`
-- [ ] Smoke 2P en preview / Pages
+- [ ] Smoke 2P en `dev` local o preview
+- [ ] CI verde en el PR a `main`
+- [ ] 2 aprobaciones del equipo
 - [ ] Sin depender de `?debug` para jugar
 - [ ] Fail/win entendibles
-- [ ] Página itch creada + URL anotada
+- [ ] (Jam) Página itch creada + URL anotada

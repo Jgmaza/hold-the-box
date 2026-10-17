@@ -22,7 +22,7 @@ La rama histórica de Danel `apps/danel-vertical-slice` ya se integró en `dev`.
 ## Flujo
 
 ```
-work/<persona>  →  PR a dev  →  playtest  →  cuando esté sólido, PR dev → main
+work/<persona>  →  PR a dev  →  playtest  →  PR dev → main (2 approvals + CI)  →  Pages
 ```
 
 1. `git fetch && git checkout work/<tu-nombre>`
@@ -30,7 +30,9 @@ work/<persona>  →  PR a dev  →  playtest  →  cuando esté sólido, PR dev 
 3. Trabaja / commit / push
 4. Abre PR hacia **`dev`** (no directo a `main`)
 5. Jose/Danel mergean a `dev` tras smoke test
-6. Lead promueve `dev` → `main` cuando haya demo presentable
+6. Cuando haya demo presentable: PR **`dev` → `main`**
+7. `main` exige **mín. 2 aprobaciones** + check **CI / test** verde
+8. Al mergear a `main`, Actions despliega GitHub Pages (ver [`DEPLOY.md`](./DEPLOY.md))
 
 ## Probar local (desde dev)
 
