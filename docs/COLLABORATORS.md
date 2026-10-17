@@ -2,16 +2,17 @@
 
 Repo: https://github.com/Jgmaza/no-sueltes-la-caja
 
-## GitHub usernames (completar e invitar)
+## GitHub usernames
 
-| Persona | GitHub | Invitar como |
-|---|---|---|
-| Danel | `@______` | Write |
-| Luis | `@______` | Write |
-| Zharick | `@______` | Write |
-| Juanes | `@______` | Write |
-| Matias | `@______` | Write |
+| Persona | GitHub | Permiso | Estado |
+|---|---|---|---|
+| Danel | [@danelmott](https://github.com/danelmott) | Write | Invitado |
+| Luis | [@turriago](https://github.com/turriago) | Write | Invitado |
+| Zharick | `@______` | Write | Pendiente |
+| Juanes | `@______` | Write | Pendiente |
+| Matias | `@______` | Write | Pendiente |
 
-En GitHub: **Settings → Collaborators → Add people**.
+Deben aceptar la invitación por email o en:  
+https://github.com/Jgmaza/no-sueltes-la-caja/invitations
 
-Cuando tengas los `@`, pégalos aquí y/o pídele al asistente que los invite por API.
+Cuando lleguen más `@`, se agregan igual (Write).

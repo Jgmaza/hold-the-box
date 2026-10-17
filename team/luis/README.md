@@ -1,5 +1,6 @@
 # Luis — Soundtrack + Colorimetría
 
+GitHub: [@turriago](https://github.com/turriago)  
 Defines cómo **suena** y cómo **se siente el color** del juego. Danel integra en PlayCanvas.
 
 ## Tus tareas

@@ -1,5 +1,6 @@
 # Danel — Dev Estrella (PlayCanvas)
 
+GitHub: [@danelmott](https://github.com/danelmott)  
 Eres el **owner de `apps/`**. Aquí va el vibe coding pesado. Jose revisa; tú ejecutas.
 
 ## Tus tareas
