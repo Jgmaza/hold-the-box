@@ -172,7 +172,8 @@ export class PlayerView {
     const dz = gripZ - p.pos.z;
     const horiz = Math.hypot(dx, dz);
     const len = Math.max(0.4, Math.min(2.35, Math.hypot(horiz, dy)));
-    const pitchDeg = -(Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI + (opts.pitchAdd ?? 0);
+    // +rotX sube la punta -Z del brazo: dy > 0 (agarre arriba) => pitch positivo.
+    const pitchDeg = (Math.atan2(dy, Math.max(0.05, horiz)) * 180) / Math.PI + (opts.pitchAdd ?? 0);
 
     for (const { side, shoulder, arm, fist } of this.armRigs) {
       shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
