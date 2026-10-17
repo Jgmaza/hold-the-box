@@ -33,11 +33,13 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 
 | | Mover | Saltar |
 |---|---|---|
-| **P1** (traje + gafas) | `W A S D` | `Espacio` |
-| **P2** (gorra + camiseta) | `↑ ← ↓ →` | `Enter` |
+| **P1** | `W A S D` | `Espacio` |
+| **P2** | `↑ ← ↓ →` | `Enter` |
 
-Para empezar, **los dos** pulsan saltar. `P` / `Esc` pausa · `R` reinicia · `F2` o `` ` `` panel de debug.
+**Menú:** Inicio → **Mapa + caja** → **Personajes** → cuenta 3-2-1 → partida. En Personajes cada uno cambia con sus flechas (`A`/`D` · `←`/`→`) y marca LISTO con su salto. Los dos pueden escoger el mismo personaje: P2 sale con color alterno. `Esc` = atrás. También se maneja con mouse.
+En partida: `P` / `Esc` pausa · `R` reinicia · `M` menú (en pausa, victoria o derrota) · `F2` o `` ` `` panel de debug.
 Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reiniciar el nivel.
+`?level=muelle` / `?level=npcs` salta el menú y entra directo (desarrollo).
 
 > Algunos teclados no registran muchas teclas a la vez (ghosting). Si a uno "se le traba" una tecla, prueben otro teclado.
 
@@ -73,7 +75,7 @@ apps/
   index.html            canvas + capa de UI
   vite.config.js        base relativa, acceso a ../deliveries, recarga al subir entregas
   src/
-    main.js             arranque y loop: teclas globales → input → sim → vista → UI
+    main.js             arranque, menú ↔ partida (startRun / backToMenu) y loop: teclas → input → sim → vista → UI
     config.js           TODOS los parámetros ajustables
     input.js            teclado → input de P1/P2 (event.code, sirve en teclado español)
     palette.js          paleta por defecto + lectura de deliveries/luis/PALETTE.md
@@ -94,7 +96,7 @@ apps/
         rain.js  wind.js   lluvia (mojado, carpas, piso resbaloso) y viento (empuje, inclinación, contenido)
       world.js          colliders del nivel y triggers
       collision.js      AABB
-    levels/index.js     niveles disponibles (?level=muelle | npcs)
+    levels/index.js     niveles disponibles + MAPS (tarjetas del selector de mapas)
     levels/level1.js    "El Muelle" descrito como datos
     levels/npcArena.js  arena de prueba de NPCs
     levels/sections.js  secciones listas: rainIsland() / windIsland()
@@ -102,13 +104,21 @@ apps/
       gameView.js       escena, luz, une todo
       levelView.js      plataformas, agua, obstáculos, carteles, props, meta
       playerView.js     jugadores (o sprite de Juanes)
+      characters.js     personajes escogibles (Ejecutivo / Repartidor): CHARACTERS + buildCharacter()
+      menuStage.js      escena 3D del menú: pedestales que giran, latigazo al cambiar, LISTO con salto
+      menuScenery.js    escenario del menú: cielo, sol, nubes, mar con espuma, islas, faro, velero, gaviotas, muelle
+      nature.js         palmeras, arbustos, rocas e islas por capas (menú y palmeras del nivel)
       boxView.js        caja (orientación, huequito, mojado, texturas de Juanes)
       npcView.js        NPCs (formas por dificultad, cono de visión, "!") y chorros
       weatherView.js    lluvia (nube, gotas, charcos, carpas, relámpagos) y viento (rachas, hojas, manga de viento)
       parts.js          piezas suaves (elipsoides, cápsulas, anillos, ojos) para modelos hechos en código
       camera.js  particles.js  signs.js (texturas con canvas)  gfx.js  audio.js
       deliveries.js     qué hay en deliveries/ (import.meta.glob)
-    ui/                 UI provisional en HTML/CSS (de Zharick)
+    ui/                 HTML/CSS encima del canvas
+      menu.js  menu.css  Inicio, Mapas + caja, Personajes (lee menuState.js, mueve menuStage)
+      menuState.js      estado del menú sin DOM (se prueba con vitest)
+      ui.js  ui.css     HUD + pausa / victoria / derrota de la partida
+      theme.css         colores, fuente (Lilita One), botones .btn y kbd compartidos
   test/                 tests de colisiones, escenarios de juego, NPCs y paleta
 ```
 
@@ -138,7 +148,7 @@ El nivel avanza hacia **−Z** y el agua está en `y = 0`. Los tests verifican q
 
 ## Para Zharick (UI)
 
-La UI vive en `src/ui/` y **solo escucha**; no hace falta tocar `sim/`. Se puede rehacer entera mientras use este contrato:
+La UI vive en `src/ui/` y **solo escucha**; no hace falta tocar `sim/`. El menú (`menu.js`) arma la selección y `main.js` crea una partida nueva por cada "Jugar" (al volver al menú se borra entera: `UI.destroy()`, `GameView.destroy()`). La partida arranca ya en `'playing'`; el estado `'title'` solo existe en la sim (tests). Botones: clase `.btn` de `theme.css` (`.big`, `.go`, `.light`, `.bad`, `.icon`). Se puede rehacer entera mientras use este contrato:
 
 ```js
 game.state      // 'title' | 'playing' | 'paused' | 'failing' | 'failed' | 'won'
@@ -175,7 +185,7 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `weather:warn` / `weather:start` / `weather:end` | `{ type, zone, dir }` (aviso / empieza / termina el aguacero o la ráfaga; `dir` = `{x, z}` del viento) |
 | `weather:shelter` | `{ type, zone, inside }` (la caja entra / sale de una carpa) |
 
-Acciones: `game.togglePause()`, `game.retry()`, `game.restart()`. Los colores llegan como variables CSS (`--ui`, `--danger`, `--goal`, `--water`, `--box`) desde la paleta de Luis.
+Acciones: `game.togglePause()`, `game.retry()`, `game.restart()`, y `onMenu()` (opción del constructor de `UI`) para volver al menú. Los colores llegan como variables CSS (`--ui`, `--danger`, `--goal`, `--water`, `--box`) desde la paleta de Luis.
 
 ---
 

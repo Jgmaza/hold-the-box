@@ -130,6 +130,59 @@ export function angerMarkCanvas() {
   return c;
 }
 
+/**
+ * Tablones del piso en tonos claros (se tiñen con el color de la madera): 4 tablas atravesadas con juntas,
+ * vetas y clavos. Pensada para repetirse (2 m por repetición).
+ */
+export function plankCanvas() {
+  const c = canvas(256, 256);
+  const g = c.getContext('2d');
+  let seed = 5;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const H = 64;
+  for (let b = 0; b < 4; b++) {
+    const y = b * H;
+    const tone = 205 + Math.floor(rand() * 40);
+    g.fillStyle = `rgb(${tone}, ${tone - 8}, ${tone - 18})`;
+    g.fillRect(0, y, 256, H);
+    // Vetas onduladas.
+    g.strokeStyle = 'rgba(90, 55, 25, 0.16)';
+    g.lineWidth = 2;
+    for (let k = 0; k < 5; k++) {
+      const gy = y + 8 + rand() * (H - 16);
+      g.beginPath();
+      g.moveTo(0, gy);
+      for (let x = 0; x <= 256; x += 32) g.lineTo(x, gy + Math.sin(x * 0.05 + k) * 2.5);
+      g.stroke();
+    }
+    // Nudo de la madera.
+    if (rand() < 0.6) {
+      g.fillStyle = 'rgba(90, 55, 25, 0.22)';
+      g.beginPath();
+      g.ellipse(30 + rand() * 196, y + H / 2, 7, 4, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+    // Junta entre tablas + borde claro arriba (da relieve).
+    g.fillStyle = 'rgba(40, 22, 8, 0.65)';
+    g.fillRect(0, y + H - 4, 256, 4);
+    g.fillStyle = 'rgba(255, 255, 255, 0.18)';
+    g.fillRect(0, y, 256, 3);
+    // Unión a lo largo (cada tabla en un lugar distinto) con clavos.
+    const jx = 40 + Math.floor(rand() * 176);
+    g.fillStyle = 'rgba(40, 22, 8, 0.6)';
+    g.fillRect(jx, y, 3, H - 4);
+    g.fillStyle = 'rgba(30, 30, 30, 0.75)';
+    for (const nx of [jx - 8, jx + 10]) {
+      for (const ny of [y + 14, y + H - 18]) {
+        g.beginPath();
+        g.arc(nx, ny, 2.5, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+  }
+  return c;
+}
+
 export function checkerCanvas(cells = 8) {
   const c = canvas(256, 256);
   const g = c.getContext('2d');
