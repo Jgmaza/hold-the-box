@@ -24,7 +24,7 @@ export class GameView {
     this.particles = new Particles(this.gfx);
     this.particles.waterLevel = game.world.waterLevel;
     this.players = [new PlayerView(this.gfx, game.p1, 'p1'), new PlayerView(this.gfx, game.p2, 'p2')];
-    this.box = new BoxView(this.gfx, game.box, this.particles);
+    this.box = new BoxView(this.gfx, game.box, this.particles, game.cat, game.bomb);
     this.npcs = new NpcViews(this.gfx, game.npcs, this.particles);
     this._bind(game.events);
     this.camera.snap(game);
@@ -65,6 +65,17 @@ export class GameView {
     events.on('game:respawn', () => this.camera.snap(this.game));
     events.on('game:start', () => this.camera.snap(this.game));
     events.on('game:teleport', () => this.camera.snap(this.game));
+    events.on('bomb:explode', () => {
+      const c = this.game.box.center;
+      this.particles.burst(c.x, c.y, c.z, 36, { color: 'danger', speed: 6, up: 8, life: 0.8, size: 0.16 });
+      this.particles.burst(c.x, c.y, c.z, 18, { color: 'ui', speed: 4, up: 5, life: 0.6, size: 0.1 });
+      this.camera.shake = 1.4;
+    });
+    events.on('cat:scratch', (e) => {
+      const p = this.game.players[e.player - 1].pos;
+      this.particles.burst(p.x, p.y + 1, p.z, 8, { color: 'danger', speed: 2.5, up: 2, life: 0.35, size: 0.06 });
+      this.camera.shake = Math.max(this.camera.shake, 0.45);
+    });
     events.on('hazard:hit', (e) => {
       const p = this.game.players[e.player - 1].pos;
       this.particles.burst(p.x, p.y + 0.6, p.z, 10, { color: 'ui', speed: 3, up: 3, life: 0.5, size: 0.1 });

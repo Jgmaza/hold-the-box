@@ -1,5 +1,6 @@
 // Escenarios de juego completos sobre el nivel 1 (sin navegador).
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { selectBox } from '../src/config.js';
 import { Box } from '../src/sim/box.js';
 import { BACK, CONFIG, FWD, Game, IDLE, LEFT, jump, level1, maxOf, playingGame, run } from './helpers.js';
 
@@ -14,6 +15,7 @@ const cpIndex = (id) => level1.checkpoints.findIndex((c) => c.id === id);
 afterEach(() => {
   CONFIG.debug.godMode = false;
   CONFIG.npcs.enabled = true;
+  selectBox('vip');
 });
 
 describe('título', () => {
@@ -193,6 +195,93 @@ describe('obstáculos', () => {
     run(g, 3, FWD, FWD);
     expect(hits).toBeGreaterThanOrEqual(1);
     expect(g.box.integrity).toBeLessThan(100);
+  });
+});
+
+describe('gato', () => {
+  it('solo hay dos cajas y la VIP no trae gato', () => {
+    expect(selectBox('vip').id).toBe('vip');
+    expect(CONFIG.box.cat.enabled).toBe(false);
+    expect(selectBox('gato').name).toBe('Caja del gato');
+    expect(CONFIG.box.cat.enabled).toBe(true);
+    expect(selectBox('otra')).toMatchObject({ id: 'vip' });
+  });
+
+  it('araña a un lado si uno va más lento y la caja se inclina', () => {
+    selectBox('gato');
+    const g = playingGame();
+    let scratch = null;
+    g.events.on('cat:scratch', (e) => (scratch = e));
+    run(g, 5, FWD, { x: 0, z: -0.4, jumpPressed: false });
+    expect(scratch).not.toBeNull();
+    expect([1, 2]).toContain(scratch.player);
+    expect(g.box.dropped).toBe(false);
+  });
+
+  it('no araña si caminan juntos, pero la rabia ya sube', () => {
+    selectBox('gato');
+    const g = playingGame();
+    let n = 0;
+    g.events.on('cat:scratch', () => n++);
+    run(g, 1, FWD, FWD);
+    expect(n).toBe(0);
+    expect(g.cat.phase).toBe('calm');
+    expect(g.cat.rage).toBeGreaterThan(1);
+    expect(g.cat.rage).toBeLessThan(CONFIG.box.cat.warnRage);
+  });
+
+  it('en la meta, quedarse quieto vacía la caja', () => {
+    selectBox('gato');
+    const g = playingGame();
+    g.teleport('goal');
+    run(g, 7.5, IDLE, IDLE);
+    expect(g.box.integrity).toBe(0);
+    expect(g.state).toBe('failed');
+    expect(g.failReason).toBe('empty');
+  });
+
+  it('en la meta, cruzar corriendo no la vacía', () => {
+    selectBox('gato');
+    const g = playingGame();
+    g.teleport('goal');
+    run(g, 1.5, FWD, FWD);
+    expect(g.state).not.toBe('failed');
+    expect(g.box.integrity).toBeGreaterThan(70);
+  });
+
+  it('la bomba explota si se acaba la mecha', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    expect(g.cat.phase).toBe('calm');
+    g.bomb.timeLeft = 0.25;
+    let boom = 0;
+    g.events.on('bomb:explode', () => boom++);
+    run(g, 2, IDLE, IDLE);
+    expect(boom).toBe(1);
+    expect(g.failReason).toBe('exploded');
+    expect(g.state).toBe('failed');
+  });
+
+  it('la bomba no explota si llegan a la meta', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    g.teleport('goal');
+    run(g, 1.5, FWD, FWD);
+    expect(g.bomb.exploded).toBe(false);
+    expect(g.state).not.toBe('failed');
+  });
+
+  it('apagado no araña ni cambia la derrota de siempre', () => {
+    selectBox('vip');
+    const g = playingGame();
+    let n = 0;
+    let fail = null;
+    g.events.on('cat:scratch', () => n++);
+    g.events.on('game:fail', (e) => (fail = e));
+    run(g, 4, FWD, BACK);
+    expect(n).toBe(0);
+    expect(g.box.dropped).toBe(true);
+    expect(fail.reason).toBe('dropped');
   });
 });
 

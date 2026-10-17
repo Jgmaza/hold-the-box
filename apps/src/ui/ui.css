@@ -98,6 +98,29 @@
   background: rgba(20, 20, 30, 0.55);
   border-radius: 12px;
 }
+.box-name {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  background: rgba(20, 20, 30, 0.55);
+  border-radius: 999px;
+}
+.box-name[data-box='gato'] {
+  background: #e07a3d;
+  color: #1d1d1d;
+}
+.box-name[data-box='bomba'] {
+  background: #3a2416;
+}
+.box-name.urgent {
+  background: var(--danger);
+  color: var(--paper);
+}
 
 /* Nivel de burbuja: muestra hacia dónde se inclina la caja */
 .level {
@@ -321,6 +344,45 @@ kbd {
   border-radius: 7px;
   background: #fff;
 }
+.pick-label {
+  font-weight: 800;
+  font-size: 15px;
+}
+.box-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+.box-pick button {
+  pointer-events: auto;
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  text-align: left;
+  color: var(--ink);
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  font-family: var(--font);
+}
+.box-pick button b {
+  font-size: 20px;
+  font-weight: 900;
+}
+.box-pick button span {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.box-pick button.on {
+  background: var(--ui);
+  transform: scale(1.03);
+}
+.box-pick button[data-box='gato'].on {
+  background: #ffb067;
+}
 .rules {
   display: grid;
   gap: 4px;
@@ -383,7 +445,8 @@ kbd {
     height: 72px;
   }
   .controls,
-  .stats {
+  .stats,
+  .box-pick {
     grid-template-columns: 1fr;
   }
 }
