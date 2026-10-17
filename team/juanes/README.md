@@ -1,6 +1,6 @@
 # Juanes — Diseño 1 (personajes + caja)
 
-GitHub: _(pendiente)_
+GitHub: [@ElRompeCasco](https://github.com/ElRompeCasco)
 
 ## Cómo empezar (3 pasos)
 

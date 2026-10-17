@@ -9,7 +9,7 @@ Repo: https://github.com/Jgmaza/no-sueltes-la-caja
 | Danel | [@danelmott](https://github.com/danelmott) | Write | Invitado |
 | Luis | [@turriago](https://github.com/turriago) | Write | Invitado |
 | Zharick | `@______` | Write | Pendiente |
-| Juanes | `@______` | Write | Pendiente |
+| Juanes | [@ElRompeCasco](https://github.com/ElRompeCasco) | Write | Invitado |
 | Matias | [@matiasaguilar633](https://github.com/matiasaguilar633) | Write | Invitado |
 
 Deben aceptar la invitación por email o en:  

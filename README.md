@@ -14,7 +14,7 @@ Ahí está el índice general. Luego entras a `team/<tu-nombre>/` para tus tarea
 | Gameplay (`apps/`) | Danel · [@danelmott](https://github.com/danelmott) | `team/danel/` |
 | Audio + color + **feel caja** | Luis · [@turriago](https://github.com/turriago) | `team/luis/` |
 | Dev apoyo | Zharick | `team/zharick/` |
-| Dibujo personajes/caja | Juanes | `team/juanes/` |
+| Dibujo personajes/caja | Juanes · [@ElRompeCasco](https://github.com/ElRompeCasco) | `team/juanes/` |
 | Dibujo señales/props | Matias · [@matiasaguilar633](https://github.com/matiasaguilar633) | `team/matias/` |
 
 **Visual:** diseño solo dibuja en papel → PNG. No Blender. Ver [`docs/visual/PLAN.md`](./docs/visual/PLAN.md).
