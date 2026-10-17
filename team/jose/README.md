@@ -1,25 +1,38 @@
-# Jose — Lead
+# Jose — Lead + **despliegue**
 
-## Cómo empezar (3 pasos)
+Rama: `work/jose`
 
-1. [`../../INDEX.md`](../../INDEX.md) — apunta al equipo aquí  
-2. Criterio demo: [`../../docs/START_TOMORROW.md`](../../docs/START_TOMORROW.md)  
-3. Visual congelado: [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — diseño **no** modela 3D
+## Cómo empezar
+
+1. [`../../INDEX.md`](../../INDEX.md)  
+2. Scope real: [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md)  
+3. Deploy: ver checklist abajo + [`../../apps/README.md`](../../apps/README.md)
 
 ## Tu rol
-Dirección, alcance, calidad, pitch. **No** eres el executor principal de código (`apps/` = Danel).
+Dirección y **sacar el juego a la calle**. No eres el bulk de código (`apps/` = Danel).  
+El core de caja ya está: tu foco es **no inflar sistemas**, coordinar entregas y **desplegar**.
 
 ## Tareas
 
-- [ ] Congelar MVP / demo slice
-- [ ] Priorizar caja (inclinación → hueco/mojada)
-- [ ] Playtest builds de Danel
-- [ ] Coordinar `deliveries/` → integración
-- [ ] Invitar GitHubs faltantes (Zharick, Juanes, Matias)
-- [ ] Pitch final
+### Alcance
+- [ ] Mantener congelado: sin features nuevas sin OK explícito
+- [ ] Playtest de aceptación (¿se ríen en 20 s?)
+- [ ] Pitch
 
-## Mensaje clave al equipo
-> Juanes/Matias solo dibujan papel→PNG. Danel usa primitivas primero. Nadie bloquea código esperando Blender.
+### Deploy (prioridad tuya)
+- [ ] En `main` o `dev` estable: `cd apps && npm ci && npm test && npm run build`
+- [ ] Publicar `apps/dist/` (itch.io HTML5 u otro host)
+- [ ] Documentar URL del build en este README o `docs/DEPLOY.md`
+- [ ] Promover `dev` → `main` cuando el build sea el de presentación ([`docs/BRANCHES.md`](../../docs/BRANCHES.md))
 
-## Skills / prompts
-`team/SKILLS.md` · [`prompts.md`](./prompts.md)
+### Equipo
+- [ ] Luis: perfiles de caja  
+- [ ] Juanes/Matias: visuales del muelle actual  
+- [ ] Zharick: UI  
+- [ ] GitHubs faltantes si aplica  
+
+## Mensaje al equipo
+> El juego ya tiene caja compleja. Luis la mejora por perfiles. Diseño viste este proyecto. Yo despliego.
+
+## Prompts
+[`prompts.md`](./prompts.md)

@@ -1,27 +1,21 @@
-# Prompts — Jose (Lead)
+# Prompts — Jose (Lead + deploy)
 
-## Congelar alcance
+## Checklist pre-deploy
 ```
-Eres product owner de un game jam. Juego: No Sueltes La Caja (PlayCanvas, 2P local).
-Lee GAME_DESIGN_DOCUMENT.md y MVP_SCOPE.md. Propón un corte de 48h priorizado:
-must / should / drop. La caja DEBE complicarse (inclinación + huequito o mojada).
-```
-
-## Criterios de aceptación
-```
-Genera criterios de aceptación checklist (Given/When/Then cortos) para:
-movimiento 2P, caja compartida, inclinación, mojada/hueco, meta, UI start/victoria.
-Sin features fuera de MVP_SCOPE.md.
+Soy lead de No Sueltes La Caja. El slice ya está en apps/ (Vite+PlayCanvas).
+Dame checklist corto pre-itch.io: tests, build, smoke 2P, UI fail/win,
+qué NO debe entrar en este deploy. Sin inventar features nuevas.
 ```
 
-## Review de PR / build
+## Pitch 3 min (con el build real)
 ```
-Revisa este cambio contra MVP_SCOPE.md. ¿Rompe alcance? ¿Falta feedback de caja frágil?
-Lista solo bloqueantes y nice-to-have. No reescribas el código; pide cambios a Danel.
+Con MVP_SCOPE.md y que el juego YA tiene tilt/leak/wet/nivel1,
+escribe pitch hablado 3 min: gancho Better Together, demo beat, por qué la caja
+es el chiste. Family-friendly. Sin prometer mods/skins.
 ```
 
-## Pitch (3 min)
+## Alcance — decir que no
 ```
-Con docs/pitch.md y el GDD, escribe un pitch hablado de 3 minutos: gancho, demo beat,
-por qué Better Together, y qué hace especial a la caja (hueco/mojada).
+Lista 5 pedidos típicos de jam que debemos rechazar ahora que el core ya es complejo
+(ej. online, segunda mecánica enorme). Una línea de "diálogo" para el equipo cada uno.
 ```

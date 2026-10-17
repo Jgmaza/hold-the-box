@@ -1,19 +1,21 @@
 # Mecánicas
 
-Fuente viva: `docs/visual/DECISIONS.md` · Feel owner: **Luis (Turriago)** · Código: **Danel**
+Fuente: código en `apps/src/sim/` + `apps/src/config.js`.  
+Feel / perfiles: **Luis** · Código: **Danel** · Scope: `MVP_SCOPE.md`
 
-## Caja compartida (MVP)
-- No se suelta. Ambos influyen siempre.
-- Velocidad normal; **slow solo si hay desync**.
-- Estirón fuerte → puede caer al piso → **daño a HP** (100, daño variable).
-- Sin curación. Inicio **permisivo** (`earlyGameForgiveness`).
-- Salto libre; si solo uno salta → más riesgo.
-- Números en `deliveries/luis/BOX_FEEL.md` (tuneables).
+## Core (ya en el build)
+- Caja compartida (resorte, no soltar)
+- Sincronía → velocidad / estabilidad
+- Inclinación + critical → drop
+- **Huequito** → baja integridad/contenido
+- **Mojado** → penalizaciones; chorros; fall al agua
+- Checkpoints, meta con rating (perfect / ok / dañada)
 
-## Post-MVP (no bloquear demo)
-1. **Huequito** / **mojada**
-2. Burla al fallar
-3. Mods visuales / skins
+## Trabajo de Luis
+Tunear knobs y definir **perfiles** en `deliveries/luis/BOX_VARIANTS.md` — no rehacer el motor.
+
+## Después (opcional)
+Burla al fallar · mods/skins · más perfiles de caja
 
 ## Obstáculos del nivel
 - Huecos entre plataformas

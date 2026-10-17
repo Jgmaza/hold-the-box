@@ -1,33 +1,28 @@
-# Juanes — Diseño 1 (personajes + caja)
+# Juanes — Visuales del juego actual (personajes + caja)
 
-GitHub: [@ElRompeCasco](https://github.com/ElRompeCasco)
+Rama: `work/juanes` · Entrega: `deliveries/juanes/`
 
-## Cómo empezar (3 pasos)
+## Cómo empezar
 
-1. Lee el índice: [`../../INDEX.md`](../../INDEX.md)  
-2. Lee el plan visual: [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — **no modelas en 3D**  
-3. Dibuja → Photopea → sube PNG a `deliveries/juanes/` ([pipeline](../../docs/visual/pipeline-papel.md))
+1. [`../../INDEX.md`](../../INDEX.md)  
+2. **Juega** `cd apps && npm run dev` — dibuja lo que ves / lo que el juego necesita  
+3. Pipeline: [`../../docs/visual/pipeline-papel.md`](../../docs/visual/pipeline-papel.md)
 
 ## Tu rol
-**Solo dibujas en papel.** No Blender. No PlayCanvas. No código.  
-Danel usa tus PNG como texturas/refs sobre cajas 3D simples.
+Visuales **de este proyecto**, no de un concepto paralelo.  
+Papel → Photopea → PNG. Sin Blender.
 
-## Tareas (prioridad)
+Estados que el juego ya usa: caja inclinada, integridad baja (goteo), mojada.
 
-- [ ] `caja-normal.png` (cartón + sello **VIP / FRÁGIL**, sin marca real)
-- [ ] `caja-inclinada.png`
-- [ ] `caja-danada.png` (vida baja — prioridad MVP)
-- [ ] `caja-huequito.png` / `caja-mojada.png` (después del demo)
-- [ ] `p1-frente.png` + `p1-cargar.png` (traje + gafas)
-- [ ] `p2-frente.png` + `p2-cargar.png` (gorra + camiseta)
+## Tareas
 
-Opcional después: más vistas / expresiones.
+- [ ] Caja VIP/FRÁGIL: normal, inclinada, dañada/goteando, mojada  
+- [ ] P1 traje+gafas: frente + cargando  
+- [ ] P2 gorra+camiseta: frente + cargando  
+- [ ] Subir PNG con nombres del README en `deliveries/juanes/`
 
-## Dónde entregar
-`deliveries/juanes/` — nombres exactos arriba.
-
-## Prompts (briefs de dibujo)
+## Prompts
 [`prompts.md`](./prompts.md)
 
 ## Done cuando
-Danel tiene al menos caja (4 estados) + siluetas P1/P2 para pegar o usar de referencia.
+Danel puede swapear texturas/sprites sin adivinar el look.

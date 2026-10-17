@@ -1,89 +1,42 @@
-# Decisiones de diseño (congeladas en entrevista Lead)
+# Decisiones de diseño (vivas)
 
-Fuente de verdad para `prompts/shared/*` y para el equipo.  
-Refs: [`refs/`](./refs/)
+Refs: [`refs/`](./refs/) · Ramas: [`../BRANCHES.md`](../BRANCHES.md) · Scope: [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md)
 
-**Owner del feel de la caja (core):** Luis / [@turriago](https://github.com/turriago)  
-**Implementación PlayCanvas:** Danel / [@danelmott](https://github.com/danelmott)  
-Los números son **tuneables** según playtest de Luis — no hardcodear magia sin exponer parámetros.
+**Piso técnico:** el vertical slice de Danel en `apps/` ya incluye inclinación, huequito, mojado, nivel 1, ratings.  
+**No** tratamos el core como “mecánica simple pendiente”.
 
----
-
-## Ronda 1 — Identidad, feel, cámara, tono
-
-- Jugabilidad: **Moving Out** sin soltar; reto = cuidar la caja; roce **Overcooked**.
-- Look: trazos **Fall Guys**; path **recto** con profundidad.
-- Cámara: una coop, mismo PC, 3ª persona profunda.
-- Tono: family-friendly primero; mods visuales después.
-- Fantasía: gracioso cooperar y discutir amistosamente.
-- Fail MVP: restart; post: burla.
-
----
-
-## Ronda 2 — Visual
-
-- Personajes: humanos stylized caricaturescos (como la ref).
-- Mods futuros opcionales (skins caricaturescas de figuras públicas) — no MVP.
-- Caja MVP: cartón + sello **VIP / FRÁGIL**.
-- Build 1: Capa A + 2–3 carteles laterales.
-- Luz: sol de mediodía caribeño.
-- Señales: a los lados, vibe Overcooked.
-
----
-
-## Ronda 3 — Control, vida, ownership
-
-### Velocidad / peso
-- **C:** misma velocidad base; se sienten **más lentos solo si están desincronizados**.
-
-### Castigo por desbalance
-- **C:** muy **permisivo al inicio** (casi no castiga); subir dureza con tuneo de Luis después del primer playtest.
-
-### Vida de la caja
-- **C:** **100 HP** con **daño variable** (caída al piso, golpes, etc.).
-- Sin recuperación de vida en MVP (**A:** no heal).
-
-### Salto
-- **A:** ambos pueden saltar; si uno salta solo → alto riesgo de desbalance/daño.
-
-### Ownership
-- Luis (Turriago) **diseña y tuneará** la mecánica de caja + narrativa/feel asociados.
-- Danel implementa sistemas **exponiendo parámetros** (script attrs / config) para que Luis itere sin reescribir todo.
-- Jose valida alcance MVP vs post (hueco, mojada, burla).
-
----
-
-## Parámetros que deben ser tuneables (lista mínima)
-
-Luis propone valores iniciales; Danel los expone en `apps/`:
-
-| Parámetro | Rol |
+| Rol | Ownership |
 |---|---|
-| `syncSlowThreshold` | Desde qué desfase se aplica slow |
-| `desyncSlowMultiplier` | Cuánto frenan al desincronizar |
-| `tiltWarnAngle` / stretch limit | Aviso visual antes de caer |
-| `dropDamage` | Daño al caer al piso |
-| `impactDamage` | Daño por golpes menores |
-| `boxMaxHp` | Default 100 |
-| `earlyGameForgiveness` | Multiplicador de daño/permisividad al inicio |
-| `jumpDesyncPenalty` | Extra riesgo/daño si solo uno salta |
-| `cameraFollow*` | Suavizado cámara coop (con Danel) |
+| **Luis / @turriago** | Diseño y mejora de **mecánicas por caja** + tuneo + audio/color |
+| **Danel / @danelmott** | Código `apps/` — estabilizar e integrar assets |
+| **Juanes / Matias** | Visuales papel→PNG alineados al juego actual |
+| **Zharick** | UI polish |
+| **Jose** | Alcance, pitch, **despliegue** |
 
 ---
 
-## Ronda 4 — UI + polish + audio
+## Identidad (Rondas 1–2, vigentes)
 
-- **HUD:** barra de vida de la caja (sobre caja o arriba) — A
-- **Fail:** placeholder para burla + Restart ya — C
-- **Timer:** solo pitch/demo, apagable — C
-- **Audio:** SFX de caja + loop en paralelo (mínimos) — C
-- Entrevista de prompts compartidos: **cerrada** (A)
+- Feel: Moving Out sin soltar + roce Overcooked  
+- Look: Fall Guys strokes, path recto, sol mediodía caribeño  
+- Family-friendly primero; mods/skins después  
+- Caja visual MVP: cartón **VIP / FRÁGIL**  
+- Señales laterales tipo Overcooked  
 
-## Estado prompts compartidos
+## Feel / ownership (Ronda 3, actualizada)
 
-| Archivo | Estado |
-|---|---|
-| `art.md` | OK |
-| `level_design.md` | OK |
-| `gameplay.md` | OK |
-| `ui.md` / `polish.md` | OK (R4) |
+- Luis no “inventa la caja desde cero”: **selecciona, tuneará y mejora** lo que ya corre.
+- Puede proponer **perfiles de caja** (misma sim, distintos números / reglas leves).
+- Todo vía `apps/src/config.js` + `deliveries/luis/BOX_FEEL.md` (+ `BOX_VARIANTS.md`).
+- Permisividad y diversión > hardcore. Sin heal forzado salvo que Luis lo pida tras playtest.
+
+## UI (Ronda 4)
+
+- HUD: barras de estado de caja (integridad / mojado)  
+- Fail + Restart (burla = después)  
+- Timer demo apagable  
+- Audio: SFX caja + loop en paralelo  
+
+## Prompts compartidos
+
+`prompts/shared/*` — identidad. Ejecución diaria en `team/<persona>/prompts.md`.

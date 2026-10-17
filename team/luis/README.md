@@ -1,40 +1,36 @@
-# Luis (Turriago) — Soundtrack + Color + **Feel de la caja (core)**
+# Luis (Turriago) — Feel + **diseño de cajas** + audio/color
 
-GitHub: [@turriago](https://github.com/turriago)
+GitHub: [@turriago](https://github.com/turriago) · Rama: `work/luis`
 
-## Cómo empezar (3 pasos)
+## Cómo empezar
 
-1. [`../../INDEX.md`](../../INDEX.md)  
-2. Lee el core: [`../../docs/visual/DECISIONS.md`](../../docs/visual/DECISIONS.md) (Ronda 3) + [`../../prompts/shared/gameplay.md`](../../prompts/shared/gameplay.md)  
-3. Define valores iniciales tuneables y súbelos a `deliveries/luis/` · Danel los expone en `apps/`
+1. [`../../INDEX.md`](../../INDEX.md) + juega el build (`dev` → `cd apps && npm run dev`)  
+2. Abre `apps/src/config.js` y `?debug` en el browser  
+3. Documenta tuneos en `deliveries/luis/BOX_FEEL.md` y perfiles en `BOX_VARIANTS.md`
 
-## Tu rol (ampliado)
+## Tu rol (actualizado)
 
-Eres dueño del **corazón del juego**: cómo se siente la caja (sync, daño, permisividad) y la narrativa/vibe alrededor.  
-También: **paleta** + **audio**.
+El core **ya está** (sync, tilt, leak/huequito, wet, ratings).  
+Tú **no** partes de cero: **seleccionas, mejoras y balances** cada perfil de caja.
 
-Danel **implementa**; tú **diseñas números y playtesteas**. Los valores deben ser modificables según UX — no hace falta que codes el motor.
+- Dueño del feel y de la **variedad de cajas** (misma sim, distintos números/énfasis)
+- Danel implementa presets cuando tú los dejes claros
+- También: paleta + audio
 
-## Tareas — Feel de caja (prioridad #1)
+## Tareas
 
-- [ ] Proponer defaults permisivos en `deliveries/luis/BOX_FEEL.md` (ver plantilla)
-- [ ] Playtest con Danel: ¿se siente gracioso o frustrante?
-- [ ] Subir/bajar dureza con `earlyGameForgiveness` y daños
-- [ ] Notas de narrativa corta de la caja VIP/FRÁGIL (por qué importa cuidarla) en el mismo doc o `NARRATIVE.md`
+### Cajas (prioridad #1)
+- [ ] Playtest 15–20 min y llenar log en `BOX_FEEL.md`
+- [ ] Dejar defaults “gracioso / permisivo” que se sientan Overcooked
+- [ ] Definir al menos **2 perfiles** en `BOX_VARIANTS.md` (ej. VIP estándar + otra con más leak o más wet)
+- [ ] Narrativa corta: por qué cada caja importa (family-friendly)
 
-### Parámetros que te pertenecen
-`syncSlowThreshold`, `desyncSlowMultiplier`, tilt/stretch, `dropDamage`, `impactDamage`, `boxMaxHp` (100), `earlyGameForgiveness`, `jumpDesyncPenalty`
-
-## Tareas — Color
-- [ ] `deliveries/luis/PALETTE.md` — sol mediodía caribeño
-
-## Tareas — Audio
-- [ ] Loop + SFX (inclinación warning, drop/daño, splash, meta, fail/win)
-- [ ] `deliveries/luis/audio/`
+### Color / audio
+- [ ] `PALETTE.md` mediodía caribeño
+- [ ] SFX: tilt warning, drop, leak, wet, splash, meta, win/fail + loop
 
 ## Prompts
-- Feel/caja: [`../../prompts/shared/gameplay.md`](../../prompts/shared/gameplay.md)  
-- Tuyos: [`prompts.md`](./prompts.md)
+[`prompts.md`](./prompts.md) · compartido: [`../../prompts/shared/gameplay.md`](../../prompts/shared/gameplay.md)
 
 ## Done cuando
-Hay una tabla de parámetros con defaults permisivos, Danel los tiene en `apps/`, y un playtest de 2 min se siente “Moving Out + Overcooked” sin rabia.
+Hay un perfil default divertido + al menos una variante documentada, y audio/paleta usables en `deliveries/luis/`.

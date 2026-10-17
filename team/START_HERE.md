@@ -1,20 +1,15 @@
-# Asignaciones del equipo
+# Asignaciones — fase post-slice
 
-Vienes del [`INDEX.md`](../INDEX.md). Elige tu nombre:
+Vienes del [`INDEX.md`](../INDEX.md). Scope: [`MVP_SCOPE.md`](../MVP_SCOPE.md).
 
-| Persona | Rol | Tu carpeta |
-|---|---|---|
-| **Jose** | Lead | [`jose/`](./jose/) |
-| **Danel** | Dev Estrella · `apps/` · Opus 5.5 | [`danel/`](./danel/) |
-| **Luis** | Soundtrack + Color + **feel caja (core)** | [`luis/`](./luis/) |
-| **Zharick** | Dev Apoyo | [`zharick/`](./zharick/) |
-| **Juanes** | Dibujo: personajes + caja | [`juanes/`](./juanes/) |
-| **Matias** | Dibujo: señales + props | [`matias/`](./matias/) |
+| Persona | Ahora | Carpeta | Rama |
+|---|---|---|---|
+| **Jose** | Deploy + alcance + pitch | [`jose/`](./jose/) | `work/jose` |
+| **Danel** | Estabilizar + integrar assets | [`danel/`](./danel/) | `work/danel` |
+| **Luis** | Perfiles/mejora de **cajas** + audio/color | [`luis/`](./luis/) | `work/luis` |
+| **Zharick** | UI polish | [`zharick/`](./zharick/) | `work/zharick` |
+| **Juanes** | Visuales del juego (caja/P1/P2) | [`juanes/`](./juanes/) | `work/juanes` |
+| **Matias** | Visuales del muelle (señales/props) | [`matias/`](./matias/) | `work/matias` |
 
-En tu carpeta:
-1. `README.md` — tareas  
-2. `prompts.md` — IA  
-
-Entregas → `deliveries/<tu-nombre>/`  
-Juego → `apps/` (solo Danel/Zharick)  
-Visual → [`../docs/visual/PLAN.md`](../docs/visual/PLAN.md)
+Cada carpeta: `README.md` (tareas) + `prompts.md`.  
+Entregas → `deliveries/<nombre>/` · Juego → `apps/`

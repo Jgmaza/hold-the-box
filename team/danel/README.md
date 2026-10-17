@@ -1,45 +1,24 @@
 # Danel — Dev Estrella (PlayCanvas)
 
-GitHub: [@danelmott](https://github.com/danelmott)
+GitHub: [@danelmott](https://github.com/danelmott) · Rama: `work/danel`
 
-## Cómo empezar (3 pasos)
+## Cómo empezar
 
-1. [`../../INDEX.md`](../../INDEX.md) + [`../../docs/START_TOMORROW.md`](../../docs/START_TOMORROW.md)  
-2. Cursor → modelo **Claude Opus 5.5** + skill `no-sueltes-playcanvas`  
-3. Ejecuta prompts en orden: [`prompts.md`](./prompts.md) · trabaja solo en `apps/`
+1. [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md) — el slice **ya cuenta como piso**  
+2. Trabaja desde `work/danel` → PR a `dev`  
+3. Opus 5.5 + skill `no-sueltes-playcanvas` si usas Agent
 
-## Tu rol
-**Owner de `apps/`.** Aquí va el vibe coding. Jose revisa; tú ejecutas.
+## Tu rol (fase actual)
+El vertical slice ya está. Prioridad:
 
-**Feel de la caja:** lo diseña/tunea **Luis (Turriago)** (`deliveries/luis/BOX_FEEL.md` + `prompts/shared/gameplay.md`).  
-Tú implementas sistemas y **expones parámetros** — no dejes magia hardcodeada sin attrs.
+1. **Estabilidad / bugs**  
+2. **Integrar** `deliveries/` (Juanes, Matias, Luis)  
+3. **Presets de caja** cuando Luis los documente en `BOX_VARIANTS.md`  
 
-## Visual (léelo)
-[`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md)
+**No** agregar sistemas grandes sin OK de Jose.
 
-1. **Capa A primero:** primitivas (cápsulas, cubos, planos) + colores de Luis.  
-2. **No esperes** dibujos de Juanes/Matias para el demo.  
-3. Cuando lleguen PNG en `deliveries/`, pégalos como texturas/carteles (Capa B).  
-4. Modelado 3D “bonito” = opcional y al final (Capa C). **No se lo pidas a diseño.**
+## Feel
+Luis tuneará números; tú mantienes todo en `config.js` / debug panel.
 
-## Tareas código
-
-- [x] Scaffold PlayCanvas en `apps/`
-- [x] P1 + P2 movimiento/salto
-- [x] Cámara
-- [x] Caja compartida + inclinación ← **corazón del demo**
-- [x] Fail (agua) + meta + win
-- [x] Huequito y se moja (+ chorros)
-- [x] Plataforma móvil, rodillo, respawn (+ elevador, puente de tablones)
-- [x] Integrar `deliveries/` (listo: los PNG/audio/paleta entran solos al subirlos; mientras, placeholders)
-- [ ] Playtest 2P y afinar números con `?debug`
-
-Cómo correrlo y estructura: [`apps/README.md`](../../apps/README.md).
-
-## Reglas
-- Ramas `apps/danel-*`
-- Sin online / inventario / powerups / ranking
-- Placeholders OK
-
-## Done (primer demo)
-Dos jugadores cargan la caja, se desbalancea si no coordinan, pueden ganar o perder.
+## Prompts
+[`prompts.md`](./prompts.md) — enfocados a fix/integrate, no a re-bootstrap.

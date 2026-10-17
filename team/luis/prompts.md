@@ -13,11 +13,21 @@ Propón nuevos valores para la tabla de deliveries/luis/BOX_FEEL.md.
 Explica en 1 línea cada cambio. No pidas reescribir el código, solo números.
 ```
 
-## Defaults permisivos (primera pasada)
+## Perfiles de caja (variantes)
 ```
-Propón defaults jam-friendly para: syncSlowThreshold, desyncSlowMultiplier,
-dropDamage, impactDamage, earlyGameForgiveness, jumpDesyncPenalty, tiltWarnAngle.
-boxMaxHp=100. Prioriza "gracioso" sobre "hardcore". Formato tabla markdown.
+El juego YA tiene tilt, leak (huequito/integridad), wet, sync en PlayCanvas (config.js).
+Ayúdame a definir 2 perfiles de caja con fantasía distinta para el mismo motor.
+Para cada uno: nombre, fantasía en 1 frase, qué enfatiza (tilt/leak/wet),
+y qué knobs de config.js tocaría (nombres reales del archivo si los conoces).
+Salida: markdown listo para deliveries/luis/BOX_VARIANTS.md.
+Prioriza diversión Overcooked, family-friendly, sin reescribir el motor.
+```
+
+## Defaults permisivos (tuneo del perfil default)
+```
+Dado apps/src/config.js (box.sync, box.tilt, box.leak, box.wet),
+propón valores más permisivos/graciosos tras un playtest. Tabla: knob | valor actual
+(si no lo sé pon TBD) | valor propuesto | por qué. No pidas rewrite de sistemas.
 ```
 
 ## Narrativa corta VIP/FRÁGIL

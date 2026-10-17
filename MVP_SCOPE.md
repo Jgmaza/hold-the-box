@@ -1,27 +1,38 @@
-# MVP Scope
+# MVP Scope — piso real (post vertical slice Danel)
 
-## Debe existir
-✅ Dos jugadores locales
-✅ Movimiento + salto
-✅ Caja compartida (ambos influyen; no se suelta)
-✅ Desync → slow; estirón → puede caer al piso → daño a **HP (100)**
-✅ Inicio permisivo; parámetros tuneables (owner feel: Luis)
-✅ Agua / caída total = fail + restart
-⬜ Huequito / se moja = **post-demo** (no bloquean primer show)
-✅ Plataforma móvil
-✅ Obstáculo tipo rodillo
-✅ Respawn
-✅ Meta + pantalla de victoria
+El código en `apps/` **ya supera** el MVP original. Este doc refleja eso.  
+No pensamos la caja como “mecánica simple”: el core ya es **complejo e interesante**.
 
-## Nice-to-have (si sobra tiempo)
-- Victoria “limpia” vs victoria “caja dañada”
-- Feedback visual: caja mojada / goteando / inclinada
-- Timer / score simple
+## Ya existe (piso congelado — no re-inventar)
 
-## No debe existir
-❌ Multiplayer online
-❌ Inventario
-❌ Powerups
-❌ Tienda
-❌ Ranking
-❌ Enemigos complejos / IA
+✅ Coop local 2P + cámara única  
+✅ Caja compartida (resorte / no soltar)  
+✅ Sincronía, inclinación (upright / tilting / critical), drop  
+✅ **Huequito** (integridad / contenido %)  
+✅ **Se moja** (wetness, chorros, penalizaciones)  
+✅ Nivel 1: plataformas, elevador, rodillo, agua, checkpoints, meta  
+✅ Win con rating (perfecta / ok / dañada) + fail + restart  
+✅ `config.js` + panel `?debug` tuneable  
+✅ UI placeholder + tests  
+
+## Fase actual — qué hace cada quien
+
+| Rol | Expectativa nueva |
+|---|---|
+| **Luis** | Dueño del **diseño de cajas**: tunear feel, proponer/mejorar perfiles de mecánica por caja, playtest |
+| **Juanes / Matias** | Visuales **del juego que ya existe** (caja VIP/FRÁGIL, P1/P2, carteles del muelle, estados leak/wet) |
+| **Zharick** | Pulir UI sobre eventos actuales (barra integridad/mojado, fail/win claros) |
+| **Danel** | Estabilizar, bugs, enganchar `deliveries/` — **no** sumar sistemas nuevos sin OK de Jose |
+| **Jose** | **Despliegue** + alcance + pitch (build itch / prod desde `main`) |
+
+## Nice-to-have (solo si sobra y no rompe el feel)
+
+- Más perfiles de caja (Luis define → Danel implementa preset)
+- Burla al fallar
+- Mods visuales / skins
+- Timer demo apagable (ya casi hay)
+
+## Sigue fuera
+
+❌ Online · inventario · powerups · tienda · ranking · enemigos con IA  
+❌ Reescribir el core de la caja desde cero  

@@ -1,30 +1,25 @@
-# Matias — Diseño 2 (señales + meta + props)
+# Matias — Visuales del juego actual (señales + props)
 
-GitHub: [@matiasaguilar633](https://github.com/matiasaguilar633)
+Rama: `work/matias` · Entrega: `deliveries/matias/`
 
-## Cómo empezar (3 pasos)
+## Cómo empezar
 
 1. [`../../INDEX.md`](../../INDEX.md)  
-2. [`../../docs/visual/PLAN.md`](../../docs/visual/PLAN.md) — **no modelas en 3D**  
-3. Dibuja → Photopea → `deliveries/matias/` ([pipeline](../../docs/visual/pipeline-papel.md))
+2. **Juega** el nivel (“El Muelle”) y mira carteles/META  
+3. Pipeline: [`../../docs/visual/pipeline-papel.md`](../../docs/visual/pipeline-papel.md)
 
 ## Tu rol
-**Solo dibujas en papel.** Carteles y props legibles de lejos.  
-Danel los pega como texturas en planos del nivel.
+Carteles y props **para este nivel**, vibe Overcooked a los lados. Papel → PNG.
 
-## Tareas (prioridad)
+## Tareas
 
-- [ ] `banner-meta.png` (+ bandera a cuadros si cabe)
-- [ ] `senal-cuidado-caja.png` — “¡CUIDADO QUE NO SE CAIGA!”
-- [ ] `senal-trabajo-equipo.png` — “TRABAJO EN EQUIPO = RESULTADOS”
-- [ ] `cartel-ron.png` — “AQUÍ SE TOMA EL RON”
-- [ ] `prop-rodillo.png` / `prop-plataforma.png` / `prop-palmera.png` (siluetas simples)
-
-## Dónde entregar
-`deliveries/matias/`
+- [ ] `banner-meta.png`  
+- [ ] `senal-cuidado-caja.png` / `senal-trabajo-equipo.png`  
+- [ ] 1–2 carteles más de humor family-friendly  
+- [ ] Siluetas props si hacen falta (rodillo, palmera, plataforma)
 
 ## Prompts
 [`prompts.md`](./prompts.md)
 
 ## Done cuando
-Hay META + al menos 2 señales listas para que Danel las ponga en el nivel.
+Hay set de señales listo para texturizar planos del muelle.

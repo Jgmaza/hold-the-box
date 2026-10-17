@@ -39,55 +39,50 @@ Cada carpeta de persona tiene:
 
 ---
 
-## 3) Tema visual (importante)
+## 3) Fase actual (leer esto)
 
-**Juanes y Matias NO modelan en 3D.** Solo dibujan en papel.
+El vertical slice **ya está** en `apps/` (caja compleja: tilt + huequito + mojado + nivel).  
+Scope real: **[`MVP_SCOPE.md`](./MVP_SCOPE.md)**
 
-Plan completo: **[`docs/visual/PLAN.md`](./docs/visual/PLAN.md)**  
-Decisiones (feel/cámara/tono): **[`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md)**  
-Refs visuales: **[`docs/visual/refs/`](./docs/visual/refs/)**  
-Pipeline papel → PNG: **[`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md)**
+| Quién | Ahora |
+|---|---|
+| **Luis** | Mejorar / seleccionar **perfiles de caja** + audio/color |
+| **Juanes / Matias** | Visuales **de este juego** (papel→PNG) |
+| **Zharick** | Pulir UI |
+| **Danel** | Estabilizar + integrar deliveries |
+| **Jose** | **Desplegar** + alcance + pitch → [`docs/DEPLOY.md`](./docs/DEPLOY.md) |
 
-Resumen:
-1. Danel arma el mundo con **primitivas 3D** (cápsulas, cajas, planos) + colores de Luis.  
-2. Sus dibujos se vuelven **texturas / carteles / refs** pegados en esos objetos.  
-3. Modelado “bonito” en Blender/Meshy es **opcional y no es tarea de diseño** — solo si sobra tiempo y lo hace Danel/Jose.
+## 4) Visual
+
+**Juanes/Matias NO modelan en 3D.** Papel → PNG.  
+[`docs/visual/PLAN.md`](./docs/visual/PLAN.md) · [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) · [`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md) · [`docs/visual/refs/`](./docs/visual/refs/)
+
+## 5) Correr / ramas
+
+```bash
+git checkout dev && cd apps && npm install && npm run dev
+```
+
+Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
 
 ---
 
-## 4) Primer demo (prioridad de código)
-
-Guía del día: [`docs/START_TOMORROW.md`](./docs/START_TOMORROW.md)
-
-Orden Danel: bootstrap → 2P mover → **caja + inclinación** → fail + meta.
-
----
-
-## 5) Mapa de documentos
+## 6) Mapa de documentos
 
 | Doc | Para qué |
 |---|---|
-| [`GAME_DESIGN_DOCUMENT.md`](./GAME_DESIGN_DOCUMENT.md) | Fantasía + caja complicada |
-| [`MVP_SCOPE.md`](./MVP_SCOPE.md) | Qué sí / qué no |
-| [`TASK_BOARD.md`](./TASK_BOARD.md) | Vista global de roles |
+| [`MVP_SCOPE.md`](./MVP_SCOPE.md) | Piso real post-slice |
+| [`TASK_BOARD.md`](./TASK_BOARD.md) | Roles fase actual |
+| [`docs/DEPLOY.md`](./docs/DEPLOY.md) | Deploy (Jose) |
+| [`docs/BRANCHES.md`](./docs/BRANCHES.md) | `main` / `dev` / `work/*` |
+| [`GAME_DESIGN_DOCUMENT.md`](./GAME_DESIGN_DOCUMENT.md) | Fantasía |
 | [`docs/mechanics.md`](./docs/mechanics.md) | Mecánicas |
-| [`docs/controls.md`](./docs/controls.md) | Controles |
-| [`docs/pitch.md`](./docs/pitch.md) | Pitch corto |
-| [`docs/visual/PLAN.md`](./docs/visual/PLAN.md) | Estrategia visual jam |
-| [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Feel/cámara/arte congelados |
-| [`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md) | Cómo digitalizar dibujos |
-| [`prompts/shared/`](./prompts/shared/) | Prompts de identidad (art, level, …) |
-| [`docs/BRANCHES.md`](./docs/BRANCHES.md) | `main` / `dev` / `work/<persona>` |
-| [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs del equipo |
-| [`team/SKILLS.md`](./team/SKILLS.md) | Skills Cursor por persona |
-
----
-
-## 6) Clone
+| [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Decisiones diseño |
+| [`prompts/shared/`](./prompts/shared/) | Prompts identidad |
+| [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs |
+| [`team/SKILLS.md`](./team/SKILLS.md) | Skills Cursor |
 
 ```bash
 git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
-cd no-sueltes-la-caja
+cd no-sueltes-la-caja && git checkout dev
 ```
-
-Abre **`INDEX.md`** → tu fila en la tabla → trabaja.

@@ -1,9 +1,10 @@
 # Box feel — Luis (Turriago)
 
-Owner del tuneo. Danel lee esto y expone los mismos nombres en PlayCanvas.
+Owner del tuneo del **motor que ya existe** (`apps/src/config.js`).  
+Perfiles / variantes de caja: [`BOX_VARIANTS.md`](./BOX_VARIANTS.md).
 
 ## Fantasía (recordatorio)
-Lentos solo si van desincronizados. Permisivo al inicio. 100 HP, daño variable, sin heal. Salto libre pero arriesgado si solo uno salta.
+Moving Out sin soltar + Overcooked. Sync, tilt, leak, wet ya corren — tú los haces divertidos.
 
 ## Defaults iniciales (permisivos — editar tras playtest)
 
