@@ -11,7 +11,7 @@
 //   game:respawn    { checkpoint, retry? }
 //   game:teleport   {}                       (debug) se movió a los jugadores
 //   game:fail       { reason, label, inWater }   reason: 'dropped' | 'empty' | 'soaked'
-//   game:win        { time, integrity, wetness, rating, ratingLabel }
+//   game:win        { time, integrity, wetness, bombLeft, rating, ratingLabel }   bombLeft: null sin bomba
 //   player:jump     { player }
 //   player:land     { player, speed }
 //   hazard:hit      { player }               el rodillo golpeó a alguien
@@ -25,6 +25,7 @@
 //   bomb:beep       { timeLeft }            tic de la mecha
 //   bomb:warn       { timeLeft }            entran los últimos segundos
 //   bomb:explode    {}                      se acabó el tiempo
+//   bomb:hit        { seconds, cause, timeLeft }   un golpe o agua le quitó segundos a la mecha
 //   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
@@ -64,6 +65,7 @@ export class Game {
     this.npcs = new NpcService(level, { world: this.world, box: this.box, events: this.events, seed });
     this.cat = new Cat();
     this.bomb = new Bomb();
+    this.box.bomb = this.bomb;
     this.weather = new WeatherService(level, { world: this.world, events: this.events, seed });
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
@@ -337,12 +339,18 @@ export class Game {
     const b = this.box;
     const R = CONFIG.rating;
     let rating = 'damaged';
-    if (b.integrity >= R.perfect.integrity && b.wetness <= R.perfect.wetness) rating = 'perfect';
+    const B = CONFIG.box.bomb;
+    const bombLeft = B.enabled ? this.bomb.timeLeft : null;
+    if (B.enabled) {
+      const life = bombLeft / Math.max(0.01, B.fuseTime);
+      rating = life >= B.rating.perfect ? 'perfect' : life >= B.rating.ok ? 'ok' : 'damaged';
+    } else if (b.integrity >= R.perfect.integrity && b.wetness <= R.perfect.wetness) rating = 'perfect';
     else if (b.integrity >= R.ok.integrity && b.wetness <= R.ok.wetness) rating = 'ok';
     this.result = {
       time: this.runTime,
       integrity: b.integrity,
       wetness: b.wetness,
+      bombLeft,
       rating,
       ratingLabel: RATING_LABELS[rating],
     };

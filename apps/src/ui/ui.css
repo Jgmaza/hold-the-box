@@ -65,6 +65,31 @@
 .meter.low .bar i {
   background: var(--danger);
 }
+/* Caja bomba: la etiqueta "Vida de bomba" es más larga y la barra cambia de color con el tiempo. */
+.meters.bomb .meter {
+  grid-template-columns: 116px 160px 48px;
+}
+.meter[data-k='bomb'] .bar i {
+  transition: width 0.1s linear, background 0.3s;
+}
+.meter[data-k='bomb'][data-level='mid'] .bar i {
+  background: var(--ui);
+}
+.meter[data-k='bomb'][data-level='low'] .bar i {
+  background: var(--danger);
+  animation: bomb-pulse 0.55s ease-in-out infinite;
+}
+.meter[data-k='bomb'][data-level='low'] b {
+  color: var(--danger);
+}
+.meter[data-k='bomb'].draining .bar {
+  box-shadow: 0 0 0 2px var(--water);
+}
+@keyframes bomb-pulse {
+  50% {
+    filter: brightness(1.5);
+  }
+}
 .meter.flash {
   animation: flash 0.4s;
 }
@@ -86,6 +111,10 @@
   font-variant-numeric: tabular-nums;
   background: rgba(20, 20, 30, 0.55);
   border-radius: 12px;
+}
+.timer.urgent {
+  background: var(--danger);
+  animation: bomb-pulse 0.55s ease-in-out infinite;
 }
 .box-name {
   position: absolute;

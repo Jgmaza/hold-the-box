@@ -3,11 +3,21 @@
 import * as pc from 'playcanvas';
 import { CONFIG } from '../config.js';
 import { imageUrl } from './deliveries.js';
-import { boxCanvas } from './signs.js';
+import { bombBoxCanvas, boxCanvas } from './signs.js';
 import pawUrl from '../../../deliveries/luis/models/pata-gato.glb?url';
+import bombUrl from '../../../deliveries/luis/models/caja-bomba.glb?url';
 
 // Largo del GLB (garras en +Z). Un poco más que la malla para que arranque dentro.
 const PAW_LEN = 0.4;
+
+// Medidas de caja-bomba.glb (origen en la tapa). Si se cambia make-bomb-glb.mjs hay que copiarlas aquí.
+const BOMB_PANEL_Y = 0.2608;
+const BOMB_DISPLAY = { x: -0.035, z: 0.02, h: 0.032, tilt: 18, w: 0.112, d: 0.054 };
+const BOMB_LED = [0.05, BOMB_PANEL_Y + 0.011, 0.047];
+const BOMB_FUSE = [0.345, 0.222, 0.12];
+
+// Segmentos encendidos por dígito: a arriba, b/c derecha, d abajo, e/f izquierda, g medio.
+const SEGMENTS = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc', 'abc', 'abcdefg', 'abcdfg'];
 
 const TEX_STATES = ['normal', 'inclinada', 'huequito', 'mojada'];
 
@@ -21,7 +31,10 @@ export class BoxView {
     const S = CONFIG.box.size;
 
     this.root = gfx.group('box');
-    this.textures = { normal: gfx.textureFromCanvas(boxCanvas(gfx.palette.box)) };
+    this.textures = {
+      normal: gfx.textureFromCanvas(boxCanvas(gfx.palette.box)),
+      bomba: gfx.textureFromCanvas(bombBoxCanvas(gfx.palette.box)),
+    };
     this.material = gfx.textured(this.textures.normal);
     this.mesh = gfx.prim('box', this.material, { parent: this.root, scale: [S.w, S.h, S.d], name: 'caja' });
 
@@ -108,14 +121,45 @@ export class BoxView {
     this.pawHole.enabled = false;
   }
 
-  /** Cuerpo negro y mecha. La chispa se acerca cuando queda menos tiempo. */
+  /**
+   * Atado de TNT (caja-bomba.glb) con reloj, LED y mecha. Mientras carga, o si falla,
+   * queda la bomba redonda de primitivas.
+   */
   _buildBomb() {
     const S = CONFIG.box.size;
     const body = this.gfx.solid('#2a2a2a');
-    const rope = this.gfx.solid('#d7c4a3');
+    const rope = this.gfx.solid('#d9bf8a');
     const spark = this.gfx.solid('#ffcc33', { emissive: 1 });
     this.bombLook = this.gfx.group('bomba', this.root);
-    this.gfx.prim('sphere', body, { parent: this.bombLook, pos: [0, S.h / 2 + 0.05, 0], scale: [0.2, 0.14, 0.2], name: 'cuerpo' });
+    this.bombBasic = this.gfx.prim('sphere', body, { parent: this.bombLook, pos: [0, S.h / 2 + 0.05, 0], scale: [0.2, 0.14, 0.2], name: 'cuerpo' });
+
+    this.bombTop = this.gfx.group('atado-tnt', this.bombLook, [0, S.h / 2, 0]);
+    this.bombTop.enabled = false;
+    this._bombGlb = false;
+
+    // Reloj: plano sobre la carcasa inclinada hacia la cámara.
+    const D = BOMB_DISPLAY;
+    const a = (D.tilt * Math.PI) / 180;
+    const lift = D.h / 2 + 0.0012;
+    const clock = this.gfx.group('reloj', this.bombTop, [D.x, BOMB_PANEL_Y + D.h / 2 + lift * Math.cos(a), D.z + lift * Math.sin(a)]);
+    clock.setLocalEulerAngles(D.tilt, 0, 0);
+    this.clockCanvas = document.createElement('canvas');
+    this.clockCanvas.width = 256;
+    this.clockCanvas.height = 124;
+    this.clockTex = this.gfx.textureFromCanvas(this.clockCanvas);
+    this.gfx.prim('plane', this.gfx.textured(this.clockTex, { unlit: true }), {
+      parent: clock,
+      scale: [D.w, 1, D.d],
+      shadows: false,
+      name: 'pantalla',
+    });
+    this._clockKey = '';
+    this._drawClock(CONFIG.box.bomb.fuseTime, true, false);
+
+    this.ledOn = this.gfx.solid('#ff2a1f', { emissive: 1.4 });
+    this.ledOff = this.gfx.solid('#5a1712', { gloss: 0.7 });
+    this.led = this.gfx.prim('sphere', this.ledOff, { parent: this.bombTop, pos: BOMB_LED, scale: [0.016, 0.014, 0.016], shadows: false, name: 'led' });
+
     this.fuse = this.gfx.prim('cylinder', rope, {
       parent: this.bombLook,
       pos: [0, S.h / 2 + 0.16, 0.04],
@@ -131,6 +175,74 @@ export class BoxView {
       name: 'chispa',
     });
     this.bombLook.enabled = false;
+    this._sparkAcc = 0;
+    this._loadBombModel();
+  }
+
+  _loadBombModel() {
+    const asset = new pc.Asset('caja-bomba', 'container', { url: bombUrl });
+    this.gfx.app.assets.add(asset);
+    asset.once('load', () => {
+      const entity = asset.resource.instantiateRenderEntity();
+      entity.name = 'tnt-glb';
+      this.bombTop.addChild(entity);
+      this.bombTop.enabled = true;
+      this.bombBasic.enabled = false;
+      this._bombGlb = true;
+    });
+    asset.once('error', () => console.warn('[bomba] no se pudo cargar caja-bomba.glb'));
+    this.gfx.app.assets.load(asset);
+  }
+
+  /** Reloj de 7 segmentos `M:SS`, rojo sobre negro, con los segmentos apagados apenas visibles. */
+  _drawClock(timeLeft, colon, urgent) {
+    const secs = Math.ceil(Math.max(0, timeLeft));
+    const key = `${secs}|${colon}|${urgent}`;
+    if (key === this._clockKey) return;
+    this._clockKey = key;
+    const c = this.clockCanvas;
+    const g = c.getContext('2d');
+    g.fillStyle = '#0d0b0b';
+    g.fillRect(0, 0, c.width, c.height);
+    g.strokeStyle = '#2b2b30';
+    g.lineWidth = 8;
+    g.strokeRect(4, 4, c.width - 8, c.height - 8);
+
+    const lit = urgent ? '#ff3b2f' : '#ff4a36';
+    const ghost = 'rgba(255, 70, 50, 0.1)';
+    const digits = [Math.min(9, Math.floor(secs / 60)), Math.floor((secs % 60) / 10), secs % 10];
+    const xs = [26, 118, 182];
+    const W = 50;
+    const H = 84;
+    const th = 10;
+    const y0 = 20;
+    const seg = {
+      a: [th / 2, 0, W - th, th],
+      b: [W - th, th / 2, th, H / 2 - th / 2],
+      c: [W - th, H / 2, th, H / 2 - th / 2],
+      d: [th / 2, H - th, W - th, th],
+      e: [0, H / 2, th, H / 2 - th / 2],
+      f: [0, th / 2, th, H / 2 - th / 2],
+      g: [th / 2, H / 2 - th / 2, W - th, th],
+    };
+    g.save();
+    g.transform(1, 0, -0.1, 1, 8, 0);
+    digits.forEach((d, i) => {
+      for (const [name, [x, y, w, h]] of Object.entries(seg)) {
+        const on = SEGMENTS[d].includes(name);
+        g.fillStyle = on ? lit : ghost;
+        g.shadowColor = on ? lit : 'transparent';
+        g.shadowBlur = on ? 10 : 0;
+        g.fillRect(xs[i] + x + 1, y0 + y + 1, w - 2, h - 2);
+      }
+    });
+    g.fillStyle = colon ? lit : ghost;
+    g.shadowColor = colon ? lit : 'transparent';
+    g.shadowBlur = colon ? 10 : 0;
+    g.fillRect(88, y0 + 22, 11, 11);
+    g.fillRect(88, y0 + 52, 11, 11);
+    g.restore();
+    this.clockTex.upload();
   }
 
   /** El GLB reemplaza la pata de cajas. Si falla, se queda el bloque simple. */
@@ -157,6 +269,7 @@ export class BoxView {
 
   _pickTexture() {
     const b = this.box;
+    if (CONFIG.box.bomb.enabled) return 'bomba';
     if (b.wetness > 50 && this.textures.mojada) return 'mojada';
     if (b.integrity < 60 && this.textures.huequito) return 'huequito';
     if (b.state !== 'upright' && this.textures.inclinada) return 'inclinada';
@@ -167,7 +280,7 @@ export class BoxView {
     const b = this.box;
     const S = CONFIG.box.size;
     this._updateCat(dt, time);
-    this._updateBomb(time);
+    this._updateBomb(dt, time);
 
     // Orientación: yaw según el eje P1→P2, luego roll (alrededor de F) y pitch (alrededor del eje).
     const yaw = (Math.atan2(-b.axis.z, b.axis.x) * 180) / Math.PI;
@@ -203,9 +316,9 @@ export class BoxView {
       this.material.update();
     }
 
-    // Huequito más grande con menos contenido. En la caja del gato no gotea.
+    // Huequito más grande con menos contenido. La caja del gato y la bomba no tienen.
     const catOn = CONFIG.box.cat.enabled;
-    this.hole.enabled = !catOn;
+    this.hole.enabled = !catOn && !CONFIG.box.bomb.enabled;
     const holeS = 0.08 + 0.16 * (1 - b.integrity / 100);
     this.hole.setLocalScale(holeS, 0.01, holeS);
 
@@ -267,21 +380,51 @@ export class BoxView {
     this.pawHole.setLocalPosition(side * S.w * 0.22 * ease, -S.h * 0.16, face + 0.008);
   }
 
-  /** Acorta la mecha según el tiempo que queda. */
-  _updateBomb(time) {
+  /** Acorta la mecha, mueve el reloj y prende el LED en cada tic. */
+  _updateBomb(dt, time) {
     const on = CONFIG.box.bomb.enabled && this.bomb;
     this.bombLook.enabled = on;
     if (!on) return;
-    const total = Math.max(0.01, CONFIG.box.bomb.fuseTime);
-    const left = Math.max(0, this.bomb.timeLeft / total);
+    const cfg = CONFIG.box.bomb;
+    const total = Math.max(0.01, cfg.fuseTime);
+    const timeLeft = Math.max(0, this.bomb.timeLeft);
+    const left = timeLeft / total;
+    const urgent = timeLeft <= cfg.warnTime;
     const S = CONFIG.box.size;
-    const height = 0.06 + left * 0.2;
+
+    // La mecha sale del casquillo del GLB; en la bomba redonda, de arriba de la esfera.
+    const base = this._bombGlb ? [BOMB_FUSE[0], S.h / 2 + BOMB_FUSE[1], BOMB_FUSE[2]] : [0, S.h / 2 + 0.08, 0.03];
+    const height = this._bombGlb ? 0.025 + left * 0.15 : 0.06 + left * 0.2;
     this.fuse.setLocalScale(0.018, height, 0.018);
-    this.fuse.setLocalPosition(0, S.h / 2 + 0.08 + height / 2, 0.03);
-    const tip = S.h / 2 + 0.08 + height;
+    this.fuse.setLocalPosition(base[0], base[1] + height / 2, base[2]);
     const flicker = 0.04 + (left < 0.25 ? 0.02 * Math.sin(time * 28) : 0.008 * Math.sin(time * 8));
-    this.spark.setLocalPosition(0, tip, 0.03);
+    this.spark.setLocalPosition(base[0], base[1] + height, base[2]);
     this.spark.setLocalScale(flicker, flicker, flicker);
+    if (!this._bombGlb) return;
+
+    const blink = urgent ? 2 : 1;
+    this._drawClock(timeLeft, timeLeft <= 0 || (timeLeft * blink) % 1 > 0.5, urgent);
+    const ledLit = timeLeft > 0 && this.bomb.sinceBeep < 0.12;
+    if (this.led.render.material !== (ledLit ? this.ledOn : this.ledOff)) this.led.render.material = ledLit ? this.ledOn : this.ledOff;
+
+    // Últimos 8 s: el atado tiembla un poco.
+    const shake = timeLeft > 0 && timeLeft <= 8 ? 0.004 * (1 - timeLeft / 8) : 0;
+    this.bombTop.setLocalPosition(Math.sin(time * 61) * shake, S.h / 2 + Math.abs(Math.sin(time * 47)) * shake, Math.cos(time * 53) * shake);
+
+    // Chispitas que saltan de la punta de la mecha.
+    if (this.box.dropped || timeLeft <= 0) return;
+    this._sparkAcc += dt * (urgent ? 22 : 9);
+    if (this._sparkAcc < 1) return;
+    const p = this.spark.getPosition();
+    while (this._sparkAcc >= 1) {
+      this._sparkAcc -= 1;
+      this.particles.emit(p.x, p.y, p.z, (Math.random() - 0.5) * 1.4, 0.6 + Math.random() * 0.9, (Math.random() - 0.5) * 1.4, {
+        color: 'ui',
+        life: 0.25 + Math.random() * 0.2,
+        size: 0.025 + Math.random() * 0.02,
+        gravity: 0.35,
+      });
+    }
   }
 
   _drips(dt, b, S) {

@@ -180,7 +180,9 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `game:splash` | `{ player, x, y, z }` |
 | `game:respawn` | `{ checkpoint, retry? }` |
 | `game:fail` | `{ reason: 'dropped'\|'empty'\|'soaked', label, inWater }` |
-| `game:win` | `{ time, integrity, wetness, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` |
+| `game:win` | `{ time, integrity, wetness, bombLeft, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` (`bombLeft`: segundos que sobraron, `null` sin bomba) |
+| `bomb:beep` / `bomb:warn` / `bomb:explode` | `{ timeLeft }` / `{ timeLeft }` / `{}` |
+| `bomb:hit` | `{ seconds, cause, timeLeft }` (con la caja bomba, un golpe o agua le quitó segundos a la mecha) |
 | `player:jump` / `player:land` | `{ player }` / `{ player, speed }` |
 | `hazard:hit` | `{ player }` |
 | `geyser:hit` | `{}` |

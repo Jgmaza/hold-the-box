@@ -282,6 +282,10 @@ export class MenuStage {
     this.cat.rage = 30 + 25 * Math.sin(t * 0.8);
     this.cat.phase = t % 4 > 3 ? 'warn' : 'calm';
     this.cat.side = cycle % 2 ? 1 : 2;
+    // La bomba de la vitrina cuenta hacia atrás en bucle, con su tic cada segundo.
+    const fuse = CONFIG.box.bomb.fuseTime;
+    this.bomb.timeLeft = fuse - (t % fuse);
+    this.bomb.sinceBeep = t % 1;
     this.boxView.update(dt, t);
   }
 }

@@ -11,6 +11,9 @@
 //   dropped    true cuando la soltaron
 //   center/axis/forward  geometría para dibujarla
 //
+// Con la caja bomba (`bomb` lo pone Game) no hay huequito ni mojado: integrity y wetness se quedan
+// fijos y cada golpe o chorro de agua le quita segundos a la mecha.
+//
 // Eventos (en game.events): box:state, box:impact, box:drop, box:wet
 import { CONFIG } from '../config.js';
 import { DEG, clamp, damp, lerp, len2, v3 } from './math.js';
@@ -25,7 +28,12 @@ export class Box {
     this.forward = { x: 0, z: 1 }; // perpendicular: (-axis.z, axis.x)
     this.tilt = { roll: 0, pitch: 0, mag: 0 };
     this.target = { roll: 0, pitch: 0 };
+    this.bomb = null;
     this.reset();
+  }
+
+  get bombMode() {
+    return CONFIG.box.bomb.enabled && !!this.bomb;
   }
 
   reset({ integrity = 100, wetness = 0 } = {}) {
@@ -88,14 +96,16 @@ export class Box {
 
   damage(amount, cause) {
     if (this.invuln > 0 || amount <= 0) return;
-    this.integrity = clamp(this.integrity - amount, 0, 100);
+    if (this.bombMode) this.bomb.hit(amount * CONFIG.box.bomb.secondsPerDamage, cause, this.events);
+    else this.integrity = clamp(this.integrity - amount, 0, 100);
     this.events.emit('box:impact', { amount, cause, integrity: this.integrity });
   }
 
   addWet(amount, cause) {
     if (amount <= 0) return;
     const before = this.wetness;
-    this.wetness = clamp(this.wetness + amount, 0, 100);
+    if (this.bombMode) this.bomb.hit(amount * CONFIG.box.bomb.secondsPerWet, cause, this.events);
+    else this.wetness = clamp(this.wetness + amount, 0, 100);
     this.events.emit('box:wet', { amount, cause, wetness: this.wetness, before });
   }
 
@@ -191,6 +201,15 @@ export class Box {
     }
     if (next === 'critical' && this.invuln <= 0) this.criticalTime += dt;
     else this.criticalTime = Math.max(0, this.criticalTime - dt * T.criticalRecover);
+
+    if (this.bombMode) {
+      // Sin huequito ni mojado: el viento y el agua que caen encima gastan la mecha.
+      const B = CONFIG.box.bomb;
+      this.leakRate = 0;
+      if (this.invuln <= 0) this.bomb.drain((ext.drain * B.secondsPerDamage + this.wetRate * B.secondsPerWet) * dt);
+      if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
+      return;
+    }
 
     // --- Huequito: fuga proporcional a la inclinación + lo que se lleva el viento (external.drain).
     let leak = ext.drain;

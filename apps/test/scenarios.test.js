@@ -273,6 +273,40 @@ describe('gato', () => {
     expect(g.state).not.toBe('failed');
   });
 
+  it('con la bomba, golpes y agua le quitan segundos sin tocar contenido ni mojado', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    const B = CONFIG.box.bomb;
+    const hits = [];
+    g.events.on('bomb:hit', (e) => hits.push(e));
+    const start = g.bomb.timeLeft;
+    g.box.damage(10, 'sweeper');
+    g.box.addWet(20, 'fall');
+    expect(g.bomb.timeLeft).toBeCloseTo(start - 10 * B.secondsPerDamage - 20 * B.secondsPerWet);
+    expect(hits.map((h) => h.cause)).toEqual(['sweeper', 'fall']);
+    expect(g.box.integrity).toBe(100);
+    expect(g.box.wetness).toBe(0);
+  });
+
+  it('la caja bomba no gotea aunque vaya inclinada', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    run(g, 1.5, FWD, { x: 0, z: -0.4, jumpPressed: false });
+    expect(g.box.integrity).toBe(100);
+    expect(g.box.leakRate).toBe(0);
+  });
+
+  it('con la bomba, la calificación sale de la vida que sobra', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    g.teleport('goal');
+    g.bomb.timeLeft = CONFIG.box.bomb.fuseTime * 0.1;
+    run(g, 1.5, FWD, FWD);
+    expect(g.state).toBe('won');
+    expect(g.result.bombLeft).toBeGreaterThan(0);
+    expect(g.result.rating).toBe('damaged');
+  });
+
   it('apagado no araña ni cambia la derrota de siempre', () => {
     selectBox('vip');
     const g = playingGame();

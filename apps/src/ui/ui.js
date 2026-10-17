@@ -16,6 +16,20 @@ const fmtTime = (t) => {
   const s = t - m * 60;
   return `${String(m).padStart(2, '0')}:${s.toFixed(1).padStart(4, '0')}`;
 };
+const fmtClock = (t) => {
+  const s = Math.ceil(Math.max(0, t));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
+// Causa del golpe → texto del aviso con la caja bomba.
+const BOMB_HIT = {
+  landing: '¡Golpe!',
+  sweeper: '¡Rodillo!',
+  fall: '¡Al agua!',
+  'npc-easy': '¡Pellizco!',
+  'npc-medium': '¡Chorro!',
+  'npc-hard': '¡Embestida!',
+};
 
 const STATE_LABEL = { upright: 'ESTABLE', tilting: 'INCLINADA', critical: '¡SE CAE!' };
 
@@ -56,6 +70,8 @@ export class UI {
     }
     this._lastJump = { 1: -10, 2: -10 };
     this._timers = new Set();
+    this.bombMode = CONFIG.box.bomb.enabled;
+    if (this.bombMode) this._setupBombHud();
     this._bind(game.events);
     this._bindButtons();
     this.show(game.state);
@@ -80,20 +96,47 @@ export class UI {
     this.root.innerHTML = '';
   }
 
+  /** Caja bomba: la primera barra es la vida de la bomba y no hay mojado (ni en el HUD ni al ganar). */
+  _setupBombHud() {
+    this.$('.meters').classList.add('bomb');
+    const life = this.meters.integrity;
+    life.el.dataset.k = 'bomb';
+    life.el.querySelector('span').textContent = 'Vida de bomba';
+    this.meters.wetness.el.style.display = 'none';
+    this.$('.win .integrity').previousSibling.textContent = 'Vida de bomba';
+    this.$('.win .wetness').parentElement.style.display = 'none';
+  }
+
   _paintBoxName() {
     const id = CONFIG.box.profile;
     const name = this.$('.box-name');
     let label = 'VIP';
     if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
-    if (CONFIG.box.bomb.enabled) {
-      const t = Math.max(0, this.game.bomb.timeLeft);
-      const m = Math.floor(t / 60);
-      const s = Math.floor(t % 60);
-      label = `BOMBA ${m}:${String(s).padStart(2, '0')}`;
-    }
-    name.textContent = label;
+    if (this.bombMode) label = 'BOMBA';
+    if (name.textContent !== label) name.textContent = label;
     name.dataset.box = id;
-    name.classList.toggle('urgent', CONFIG.box.bomb.enabled && this.game.bomb.timeLeft <= CONFIG.box.bomb.warnTime);
+    name.classList.toggle('urgent', this.bombMode && this.game.bomb.timeLeft <= CONFIG.box.bomb.warnTime);
+  }
+
+  /** Barra de vida de la bomba: verde, amarilla desde la mitad y roja en los últimos `warnTime` segundos. */
+  _paintBombLife() {
+    const B = CONFIG.box.bomb;
+    const bomb = this.game.bomb;
+    const t = Math.max(0, bomb.timeLeft);
+    const m = this.meters.integrity;
+    const level = t <= B.warnTime ? 'low' : t <= B.fuseTime / 2 ? 'mid' : 'high';
+    const text = fmtClock(t);
+    if (m._text !== text) {
+      m._text = text;
+      m.val.textContent = text;
+    }
+    m.bar.style.width = `${Math.min(100, (t / Math.max(0.01, B.fuseTime)) * 100).toFixed(1)}%`;
+    if (m.el.dataset.level !== level) m.el.dataset.level = level;
+    m.el.classList.toggle('draining', bomb.sinceDrain < 0.15);
+
+    const timer = this.$('.timer');
+    timer.textContent = fmtTime(t);
+    timer.classList.toggle('urgent', t <= B.warnTime);
   }
 
   show(state) {
@@ -126,27 +169,32 @@ export class UI {
     ev.on('game:start', () => this.show('playing'));
     ev.on('game:pause', (e) => this.show(e.paused ? 'paused' : 'playing'));
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
-    ev.on('game:splash', () => this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
+    ev.on('game:splash', () => !this.bombMode && this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
-    ev.on('hazard:hit', () => this.toast('¡Rodillo! La caja se sacude', 'bad'));
+    ev.on('hazard:hit', () => !this.bombMode && this.toast('¡Rodillo! La caja se sacude', 'bad'));
     ev.on('cat:warn', (e) => this.toast(`El gato asoma la pata hacia P${e.player}`, 'bad'));
     ev.on('cat:scratch', (e) => this.toast(`¡El gato arañó a P${e.player}!`, 'bad'));
     ev.on('cat:shred', () => this.toast('¡El gato está rompiendo la caja!', 'bad'));
     ev.on('cat:goal', () => this.toast('¡Quietos en la meta! El gato vacía la caja', 'bad'));
     ev.on('bomb:warn', () => this.toast('¡La mecha está corta!', 'bad'));
-    ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('bomb:hit', (e) => {
+      if (e.seconds < 0.5) return;
+      this.toast(`${BOMB_HIT[e.cause] ?? '¡Golpe!'} −${Math.round(e.seconds)} s de bomba`, 'bad');
+      this.flash('integrity');
+    });
+    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua gasta la mecha!' : '¡Se moja la caja!', 'wet'));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...NPC_HIT[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
       if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
     });
     ev.on('box:impact', (e) => {
-      if (e.cause === 'cat') return;
+      if (e.cause === 'cat' || this.bombMode) return;
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
       this.flash('integrity');
     });
-    ev.on('box:wet', () => this.flash('wetness'));
+    ev.on('box:wet', () => !this.bombMode && this.flash('wetness'));
     ev.on('player:jump', (e) => {
       const now = this.game.time;
       this._lastJump[e.player] = now;
@@ -157,7 +205,7 @@ export class UI {
       this.$('.win .rating').textContent = r.ratingLabel;
       this.$('.win .rating').className = `rating ${r.rating}`;
       this.$('.win .time').textContent = fmtTime(r.time);
-      this.$('.win .integrity').textContent = `${Math.round(r.integrity)}%`;
+      this.$('.win .integrity').textContent = r.bombLeft != null ? fmtClock(r.bombLeft) : `${Math.round(r.integrity)}%`;
       this.$('.win .wetness').textContent = `${Math.round(r.wetness)}%`;
       this.show('won');
     });
@@ -175,10 +223,14 @@ export class UI {
     if (g.state === 'title') return;
     this._paintBoxName();
 
-    this._meter('integrity', b.integrity, b.integrity < 35);
-    this._meter('wetness', b.wetness, b.wetness > 65);
+    if (this.bombMode) {
+      this._paintBombLife();
+    } else {
+      this._meter('integrity', b.integrity, b.integrity < 35);
+      this._meter('wetness', b.wetness, b.wetness > 65);
+      this.$('.timer').textContent = fmtTime(g.runTime);
+    }
     this._meter('sync', b.sync * 100, b.sync < 0.4);
-    this.$('.timer').textContent = fmtTime(g.runTime);
 
     const zone = g.weather.current;
     const chip = this.$('.weather');

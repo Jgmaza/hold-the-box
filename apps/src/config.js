@@ -110,6 +110,10 @@ export const CONFIG = {
       enabled: false,
       fuseTime: 90, // segundos para llegar
       warnTime: 20, // a partir de aquí la chispa se apura y la caja se pone roja
+      // Con la bomba no hay mojado ni huequito: golpes y agua le quitan segundos a la mecha.
+      secondsPerDamage: 0.4, // por cada 1 % de golpe (rodillo 8 % → 3.2 s, cangrejo 4 % → 1.6 s)
+      secondsPerWet: 0.1, // por cada 1 % de agua (chorro del niño 14 % → 1.4 s, caer al agua 45 % → 4.5 s)
+      rating: { perfect: 0.5, ok: 0.2 }, // vida que les sobra al llegar (fracción de fuseTime)
     },
 
     // Se moja: más peso, menos agarre, menos estabilidad.
