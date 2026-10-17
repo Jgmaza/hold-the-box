@@ -5,10 +5,18 @@ import * as pc from 'playcanvas';
 import { island, rock, seeded } from './nature.js';
 import { Parts } from './parts.js';
 import { boxCanvas, plankCanvas } from './signs.js';
+import { Water } from './water.js';
 
 export const DECK_TOP = -0.1;
 const SEA_Y = -0.7;
 const DOCK = { w: 10, back: -2.1, front: 2.9 };
+// Islas del menú (compartidas entre mar y escenario para alinear la espuma del agua).
+const ISLANDS = [
+  { x: -13, z: -9, w: 13, d: 7, h: 2.2, palms: 3, bushes: 4, rocks: 3, seed: 11 },
+  { x: 14, z: -15, w: 11, d: 6, h: 2, palms: 2, bushes: 3, rocks: 2, seed: 23 },
+  { x: -38, z: -55, w: 26, d: 14, h: 4, palms: 3, bushes: 4, rocks: 3, seed: 5 },
+  { x: 34, z: -62, w: 30, d: 16, h: 5, palms: 2, bushes: 3, rocks: 3, seed: 9 },
+];
 
 export class MenuScenery {
   constructor(gfx) {
@@ -86,29 +94,17 @@ export class MenuScenery {
   }
 
   _buildSea() {
-    const P = this.P;
-    P.gfx.prim('plane', P.gfx.solid('water', { gloss: 0.85 }), { pos: [0, SEA_Y, 0], scale: [400, 1, 400], shadows: false, name: 'mar' });
-    // Zona clarita bajo el muelle (agua poco profunda).
-    P.disc(P.gfx.root, P.gfx.solid('#5fd0e6', { gloss: 0.8 }), [0, SEA_Y + 0.01, 0.4], 9, 0.01, { shadows: false, name: 'bajo' });
-    // Manchas de espuma que suben y bajan.
-    const foam = P.gfx.solid('foam', { opacity: 0.7, gloss: 0 });
-    for (let i = 0; i < 28; i++) {
-      const r = this.rand;
-      const a = r() * Math.PI * 2;
-      const d = 7 + r() * 22;
-      const e = P.ball(P.gfx.root, foam, [Math.cos(a) * d, SEA_Y + 0.02, Math.sin(a) * d * 0.7 - 4], [0.9 + r() * 1.6, 0.04, 0.18 + r() * 0.2], { shadows: false, rot: [0, r() * 40 - 20, 0], name: 'espuma' });
-      this.foam.push({ e, phase: r() * 6, base: e.getLocalScale().x });
-    }
+    // Mismo agua que en los niveles: olas, agua clara y espuma alrededor del muelle y las islas.
+    const shores = [{ x: 0, z: (DOCK.back + DOCK.front) / 2, w: DOCK.w, d: DOCK.front - DOCK.back }, { x: 6.8, z: 1.5, w: 1.6, d: 1.6, round: true }];
+    for (const s of ISLANDS) shores.push({ x: s.x, z: s.z, w: s.w * 1.05, d: s.d * 1.05, round: true });
+    this.water = new Water(this.gfx, { y: SEA_Y, shores, amp: 0.07, center: [0, -60] });
   }
 
   _buildIslands() {
     const P = this.P;
     const root = P.gfx.root;
     // Cerca (se ven en detalle detrás del muelle) y lejos (con el faro).
-    island(P, root, { x: -13, z: -9, w: 13, d: 7, h: 2.2, seaY: SEA_Y, palms: 3, bushes: 4, rocks: 3, seed: 11 });
-    island(P, root, { x: 14, z: -15, w: 11, d: 6, h: 2, seaY: SEA_Y, palms: 2, bushes: 3, rocks: 2, seed: 23 });
-    island(P, root, { x: -38, z: -55, w: 26, d: 14, h: 4, seaY: SEA_Y, palms: 3, bushes: 4, rocks: 3, seed: 5 });
-    island(P, root, { x: 34, z: -62, w: 30, d: 16, h: 5, seaY: SEA_Y, palms: 2, bushes: 3, rocks: 3, seed: 9 });
+    for (const s of ISLANDS) island(P, root, { ...s, seaY: SEA_Y });
     this._lighthouse(42, SEA_Y + 2.6, -64);
     // Rocas sueltas en el agua cerca del muelle.
     rock(P, root, [6.8, SEA_Y - 0.1, 1.5], 0.9, seeded(31));
@@ -233,6 +229,7 @@ export class MenuScenery {
   }
 
   update(dt, t) {
+    this.water?.update(t);
     for (const c of this.clouds) {
       const p = c.e.getLocalPosition();
       let x = p.x + c.speed * dt;
@@ -245,10 +242,6 @@ export class MenuScenery {
       } else if (f.ring) {
         const s = 1 + 0.15 * Math.sin(t * 1.6 + f.phase);
         f.e.setLocalScale(s, 1, s);
-      } else {
-        const s = f.base * (0.8 + 0.25 * Math.sin(t * 0.9 + f.phase));
-        const cur = f.e.getLocalScale();
-        f.e.setLocalScale(s, cur.y, cur.z);
       }
     }
     for (const gl of this.gulls) {

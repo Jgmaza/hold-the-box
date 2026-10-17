@@ -89,6 +89,8 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 | [`docs/mechanics.md`](./docs/mechanics.md) | Mecánicas |
 | [`docs/clima.md`](./docs/clima.md) | Clima: lluvia / viento y cómo instanciar secciones |
 | [`docs/rieles.md`](./docs/rieles.md) | Rieles asimétricos (P1/P2) y `railsPair()` |
+| [`docs/escenografia.md`](./docs/escenografia.md) | Props Kenney y `dressLevel()` / `dressIsland()` |
+| [`docs/agua.md`](./docs/agua.md) | Agua 3D (olas en código) y MCP del Editor PlayCanvas |
 | [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) | Decisiones diseño |
 | [`prompts/shared/`](./prompts/shared/) | Prompts identidad |
 | [`docs/COLLABORATORS.md`](./docs/COLLABORATORS.md) | GitHubs |

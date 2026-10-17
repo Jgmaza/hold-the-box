@@ -7,9 +7,9 @@
 //   → isla lluvia → isla viento (clima: campo `weather` de la plataforma, ver src/sim/weather/)
 //   → muelle → hueco → ferry → CP1 → rodillo → rieles asimétricos → chorros → CP2 → escalones → elevador → bar + META.
 
-import { rainIsland, railsPair, windIsland } from './sections.js';
+import { dressLevel, rainIsland, railsPair, windIsland } from './sections.js';
 
-export default {
+const level = {
   id: 'muelle',
   name: 'El Muelle',
   waterLevel: 0,
@@ -103,101 +103,6 @@ export default {
     { x: -12, z: -40, top: 0, w: 7, h: 3, post: 3.5, text: 'SE BUSCAN AYUDANTES\nPARA CARGAR CAJAS\nPAGO: GRATITUD', art: 'matias/billboard-humor.png', style: 'billboard' },
   ],
 
-  // Barcos en el agua (top 0). El resto, en grupos, sobre el piso y fuera del centro.
-  scenery: [
-    // Barcos, de la salida a la meta, alternando orilla.
-    { art: 'ship-large', x: -9.2, z: 58, top: -0.15, yaw: 0, s: 0.5 },
-    { art: 'ship-pirate-large', x: 9.2, z: 44, top: -0.15, yaw: 180, s: 0.5 },
-    { art: 'ship-medium', x: -9.2, z: 28, top: -0.15, yaw: 0, s: 0.5 },
-    { art: 'ship-pirate-medium', x: 9.2, z: 14, top: -0.15, yaw: 180, s: 0.5 },
-    { art: 'ship-small', x: -9.2, z: -2, top: -0.15, yaw: 0, s: 0.5 },
-    { art: 'ship-pirate-small', x: 9.2, z: -18, top: -0.15, yaw: 180, s: 0.5 },
-    { art: 'ship-ghost', x: -9.4, z: -38, top: -0.15, yaw: 0, s: 0.5 },
-    { art: 'ship-wreck', x: 9.4, z: -60, top: -0.15, yaw: 180, s: 0.5 },
-    { art: 'boat-row-small', x: -6.4, z: 56, top: -0.04, yaw: 20, s: 0.55 },
-    { art: 'boat-row-large', x: 6.4, z: 40, top: -0.04, yaw: -15, s: 0.55 },
-
-    // Inicio: palmeras en las esquinas y carga a los lados.
-    { art: 'palm-straight', x: -3.8, z: 60.6, top: 1, yaw: 0, s: 0.42 },
-    { art: 'palm-bend', x: 3.8, z: 60.6, top: 1, yaw: 0, s: 0.42 },
-    { art: 'barrel', x: -3.7, z: 56.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'crate', x: 3.7, z: 56.2, top: 1, yaw: 15, s: 0.42 },
-    { art: 'tool-shovel', x: -4.3, z: 57.6, top: 1, yaw: 25, s: 0.42 },
-    { art: 'tool-paddle', x: 4.3, z: 57.6, top: 1, yaw: -20, s: 0.42 },
-
-    // Isla fácil: rocas, hierba y dos banderas.
-    { art: 'rocks-a', x: -3.6, z: 48, top: 1, yaw: 0, s: 0.4 },
-    { art: 'palm-detailed-straight', x: 3.7, z: 48.2, top: 1, yaw: 0, s: 0.4 },
-    { art: 'grass-patch', x: -3.6, z: 42.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'grass-plant', x: 3.7, z: 42.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'flag', x: -3.8, z: 45, top: 1, yaw: 0, s: 0.42 },
-    { art: 'flag-pirate', x: 3.8, z: 45, top: 1, yaw: 0, s: 0.42 },
-    { art: 'bottle', x: -3.5, z: 44.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'bottle-large', x: 3.5, z: 44.2, top: 1, yaw: 0, s: 0.42 },
-
-    // Isla media: campamento de un lado, carga del otro.
-    { art: 'structure', x: -3.7, z: 33.4, top: 1, yaw: 0, s: 0.42 },
-    { art: 'structure-roof', x: -3.7, z: 30.6, top: 1, yaw: 0, s: 0.42 },
-    { art: 'structure-fence', x: -3.7, z: 27.6, top: 1, yaw: 90, s: 0.42 },
-    { art: 'rocks-b', x: 3.6, z: 33.2, top: 1, yaw: 0, s: 0.38 },
-    { art: 'chest', x: 3.6, z: 29.4, top: 1, yaw: 10, s: 0.42 },
-    { art: 'crate-bottles', x: 3.6, z: 27.2, top: 1, yaw: -8, s: 0.42 },
-    { art: 'flag-high', x: -3.8, z: 25.4, top: 1, yaw: 0, s: 0.4 },
-    { art: 'flag-pirate-high', x: 3.8, z: 25.4, top: 1, yaw: 0, s: 0.4 },
-
-    // Isla difícil: castillo a la izquierda, torres a la derecha.
-    { art: 'castle-wall', x: -4.6, z: 18.6, top: 1, yaw: 0, s: 0.4 },
-    { art: 'castle-door', x: -4.6, z: 16.2, top: 1, yaw: 0, s: 0.4 },
-    { art: 'castle-window', x: -4.6, z: 13.8, top: 1, yaw: 0, s: 0.4 },
-    { art: 'castle-gate', x: -4.6, z: 11.2, top: 1, yaw: 0, s: 0.4 },
-    { art: 'tower-base', x: 4.6, z: 18.6, top: 1, yaw: 0, s: 0.4 },
-    { art: 'tower-base-door', x: 4.6, z: 16, top: 1, yaw: 0, s: 0.4 },
-    { art: 'tower-middle', x: 4.6, z: 13.4, top: 1, yaw: 0, s: 0.4 },
-    { art: 'tower-middle-windows', x: 4.6, z: 10.8, top: 1, yaw: 0, s: 0.4 },
-    { art: 'palm-detailed-bend', x: -2.6, z: 19.2, top: 1, yaw: 0, s: 0.38 },
-    { art: 'cannon', x: 2.8, z: 19.2, top: 1, yaw: 90, s: 0.42 },
-    { art: 'cannon-mobile', x: 2.8, z: 16.8, top: 1, yaw: 70, s: 0.42 },
-    { art: 'cannon-ball', x: 2.6, z: 14.8, top: 1, yaw: 0, s: 0.42 },
-
-    // Salida del muelle.
-    { art: 'structure-platform-dock', x: -3.6, z: 3.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'structure-platform', x: 3.6, z: 3.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'platform', x: -3.6, z: -1.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'platform-planks', x: 3.6, z: -1.2, top: 1, yaw: 0, s: 0.42 },
-    { art: 'structure-platform-dock-small', x: -3.6, z: -4.4, top: 1, yaw: 0, s: 0.42 },
-    { art: 'structure-platform-small', x: 3.6, z: -4.4, top: 1, yaw: 0, s: 0.42 },
-    { art: 'flag-pennant', x: -3.8, z: 1, top: 1, yaw: 0, s: 0.4 },
-    { art: 'flag-pirate-pennant', x: 3.8, z: 1, top: 1, yaw: 0, s: 0.4 },
-
-    // Después del hueco.
-    { art: 'rocks-c', x: -2.8, z: -11, top: 1, yaw: 0, s: 0.36 },
-    { art: 'hole', x: 2.8, z: -13.4, top: 1, yaw: 0, s: 0.36 },
-    { art: 'grass', x: -2.6, z: -14.2, top: 1, yaw: 0, s: 0.42 },
-
-    // Checkpoint y rodillo: rocas en las orillas, lejos del eje.
-    { art: 'flag-high-pennant', x: -3.2, z: -29, top: 1, yaw: 0, s: 0.38 },
-    { art: 'flag-pirate-high-pennant', x: 3.2, z: -29, top: 1, yaw: 0, s: 0.38 },
-    { art: 'rocks-sand-a', x: -4.6, z: -41, top: 1, yaw: 0, s: 0.36 },
-    { art: 'rocks-sand-b', x: 4.6, z: -41, top: 1, yaw: 0, s: 0.36 },
-    { art: 'rocks-sand-c', x: -4.6, z: -35, top: 1, yaw: 0, s: 0.36 },
-    { art: 'patch-grass', x: 4.6, z: -35.2, top: 1, yaw: 0, s: 0.36 },
-    { art: 'mast', x: -4.8, z: -37.6, top: 1, yaw: 0, s: 0.32 },
-
-    // Chorros: solo piezas chicas en el borde.
-    { art: 'structure-fence-sides', x: -2.3, z: -57, top: 1, yaw: 90, s: 0.36 },
-    { art: 'patch-grass-foliage', x: 2.2, z: -64, top: 1, yaw: 0, s: 0.28 },
-
-    // Terraza: torres altas y arena, sin tapar la meta.
-    { art: 'tower-complete-small', x: -4.6, z: -93, top: 5, yaw: 0, s: 0.4 },
-    { art: 'tower-complete-large', x: 4.6, z: -93, top: 5, yaw: 0, s: 0.38 },
-    { art: 'tower-roof', x: -4.8, z: -95.4, top: 5, yaw: 0, s: 0.38 },
-    { art: 'tower-watch', x: 4.8, z: -95.4, top: 5, yaw: 0, s: 0.4 },
-    { art: 'tower-top', x: -5.1, z: -100.2, top: 5, yaw: 0, s: 0.36 },
-    { art: 'mast-ropes', x: 5, z: -91.6, top: 5, yaw: 0, s: 0.28 },
-    { art: 'patch-sand', x: -2.6, z: -91.4, top: 5, yaw: 0, s: 0.26 },
-    { art: 'patch-sand-foliage', x: 2.6, z: -91.4, top: 5, yaw: 0, s: 0.24 },
-  ],
-
   props: [
     { type: 'palm', x: -4.2, z: 94.5, top: 1 },
     { type: 'palm', x: 4.2, z: 74, top: 1 },
@@ -224,3 +129,15 @@ export default {
     { type: 'flag', x: 3.5, z: -87, top: 1, checkpoint: 7 },
   ],
 };
+
+// Modelos Kenney: playa en las islas, pirata en el muelle y la terraza; barcos a ambos lados.
+level.scenery = dressLevel(
+  level,
+  {
+    beach: ['inicio', 'isla-easy', 'isla-medium', 'isla-hard', 'isla-lluvia', 'isla-viento', 'tras-hueco'],
+    pirate: ['salida', 'cp1', 'rodillo', 'chorros', 'escalon-3', 'terraza'],
+  },
+  { seed: 1 },
+);
+
+export default level;

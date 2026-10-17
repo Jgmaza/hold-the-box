@@ -20,6 +20,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Servidor local con recarga automática (también al subir archivos a `deliveries/`) |
+| `npm run dev` → `/?level=muelle\|bahia\|tormenta` | Niveles 1–3 (salta el menú) |
 | `npm run dev` → `/?level=npcs` | **Arena de prueba de NPCs** (easy / medium / hard). `&seed=N` repite el mismo azar |
 | `npm run dev` → `/?level=rieles` | **Arena de prueba de rieles** asimétricos (piedras / huecos / topes por carril) |
 | `npm test` | Tests de la simulación (sin navegador) |
@@ -98,14 +99,18 @@ apps/
         rain.js  wind.js   lluvia (mojado, carpas, piso resbaloso) y viento (empuje, inclinación, contenido)
       world.js          colliders del nivel y triggers
       collision.js      AABB
-    levels/index.js     niveles disponibles + MAPS (tarjetas del selector de mapas; ?level=<clave> entra directo)
-    levels/level1.js    "El Muelle" descrito como datos
+    levels/index.js     niveles disponibles + MAPS (tarjetas del selector; ?level=<clave> entra directo)
+    levels/level1.js    Nivel 1 "El Muelle"
+    levels/level2.js    Nivel 2 "La Bahía"
+    levels/level3.js    Nivel 3 "La Tormenta"
     levels/npcArena.js  arena de prueba de NPCs
     levels/railsArena.js arena de prueba de rieles asimétricos
-    levels/sections.js  secciones listas: rainIsland() / windIsland() / railsPair()
+    levels/sections.js  rainIsland / windIsland / railsPair / dressLevel
     view/               PlayCanvas: dibuja el estado de la sim
       gameView.js       escena, luz, une todo
-      levelView.js      plataformas, agua, obstáculos, carteles, props, meta
+      levelView.js      plataformas, agua, obstáculos, carteles, props Kenney, meta
+      water.js          agua 3D con olas (también en el menú)
+      backdrop.js       cielo + islas lejanas del nivel
       playerView.js     jugadores (o sprite de Juanes)
       characters.js     personajes escogibles (Ejecutivo / Repartidor): CHARACTERS + buildCharacter()
       menuStage.js      escena 3D del menú: pedestales que giran, latigazo al cambiar, LISTO con salto
@@ -140,6 +145,8 @@ apps/
 - **Secciones de clima en una línea** (`levels/sections.js`, guía completa en [`docs/clima.md`](../docs/clima.md)):
   `rainIsland({ id, from, length, shelters? })` → isla de lluvia de cualquier largo con carpas **alternadas izquierda / derecha** repartidas solas; `windIsland({ id, from, length, dir? })` → isla de viento.
 - **Rieles asimétricos** (`...railsPair({ id, from, length?, hazards? })`, guía en [`docs/rieles.md`](../docs/rieles.md)): dos carriles con piedras / huecos / topes **repartidos solos** según el largo (como las carpas de `rainIsland`); devuelve un **array** (usar spread).
+- **Escenografía Kenney** (`dressLevel` / `dressIsland`, [`docs/escenografia.md`](../docs/escenografia.md)): props en las orillas con semilla fija; barcos en el agua.
+- **Agua 3D** (`view/water.js`, [`docs/agua.md`](../docs/agua.md)): olas y espuma en código; la física sigue en `waterLevel`.
 - `weather` en una plataforma (opcional, a mano): `'rain'` | `'wind'` o `{ type, strength, dir, shelters }`. Esa isla pasa a tener clima, sin tocar nada más. Números en `CONFIG.weather`.
   - lluvia: `shelters: [{ x, z, w, d }]` = carpas donde no se moja (que entre la pareja: `w` ≥ 3.2).
   - viento: `dir: 'alternate'` (izq./der. alternado) | `'random'` | grados (0 = hacia +X).
