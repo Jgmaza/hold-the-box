@@ -29,10 +29,11 @@ export class PlayerView {
       // Pegado al costado del torso (cápsula ~radio 0.3).
       shoulder.setLocalPosition(side * 0.34, 1.02, -0.06);
 
-      const joint = gfx.prim('sphere', skin, {
+      // Hombro = manga/ropa (mismo material que torso), no piel.
+      const joint = gfx.prim('sphere', suit, {
         parent: shoulder,
         pos: [0, 0, 0],
-        scale: [0.18, 0.18, 0.18],
+        scale: [0.22, 0.22, 0.22],
         name: 'joint',
       });
       const arm = gfx.prim('box', suit, {
@@ -41,6 +42,7 @@ export class PlayerView {
         scale: [0.12, 0.12, 0.5],
         name: 'arm',
       });
+      // Puño = piel (sale de la manga).
       const fist = gfx.prim('sphere', skin, {
         parent: shoulder,
         pos: [0, 0, -0.52],
