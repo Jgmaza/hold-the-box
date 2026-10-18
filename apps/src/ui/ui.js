@@ -129,6 +129,7 @@ export class UI {
     this.$('.win .integrity').previousSibling.textContent = 'Bomba';
     this.$('.win .wetness').parentElement.style.display = 'none';
     this._lastDesyncToast = -10;
+    this._recoveryTold = null;
   }
 
   /** Caja del gato: la primera barra es el % que queda (¡Miau!); sin cronómetro ni número de rabia. */
@@ -212,6 +213,17 @@ export class UI {
     ev.on('game:start', () => this.show('playing'));
     ev.on('game:pause', (e) => this.show(e.paused ? 'paused' : 'playing'));
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
+    ev.on('recovery:tick', (e) => {
+      if (this._recoveryTold === e.id) return;
+      this._recoveryTold = e.id;
+      if (e.kinds.includes('refill')) this.toast('¡Se recarga la caja!', 'good');
+      else if (e.kinds.includes('cat')) this.toast('El gato se calma…', 'good');
+      else if (e.kinds.includes('bomb')) this.toast('Reparando la bomba…', 'good');
+      else if (e.kinds.includes('dry')) this.toast('Secando…', 'wet');
+    });
+    ev.on('recovery:exit', () => {
+      this._recoveryTold = null;
+    });
     ev.on('game:splash', () => !this.bombMode && this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
     ev.on('game:life', (e) => {

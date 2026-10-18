@@ -21,6 +21,14 @@ const EDGE = 0.8; // distancia mínima de la carpa al borde de la isla
 const PATH = 0.4; // mitad del pasillo libre en el centro (entre carpas de lados opuestos)
 
 /**
+ * Trigger de una estación de recuperación. `kind` es el aparato (el jugador prueba cuál le sirve):
+ * `refill` cerveza · `cat` galletas · `bomb` mesa de taller · `dry` abanicos.
+ */
+export function recovery({ id = 'recovery', kind = 'refill', x = 0, z = 0, top = 1, w = 2.2, d = 2 } = {}) {
+  return { id, kind, x, z, top, w, d };
+}
+
+/**
  * Isla de lluvia con carpas ALTERNADAS izquierda / derecha, repartidas parejo a lo largo.
  * La sección puede ser tan larga como se quiera: las carpas se reparten solas.
  *
@@ -441,6 +449,7 @@ export function dressLevel(level, sets, { seed = 1, density = 1, ships = true } 
     ...(level.props ?? []).map((p) => ({ x: p.x, z: p.z, r: p.type === 'bar' ? 2.2 : 1.2 })),
     ...(level.geysers ?? []).map((g) => ({ x: g.x, z: g.z, r: g.radius + 0.8 })),
     ...(level.sweepers ?? []).map((s) => ({ x: s.x, z: s.z, r: s.length + 0.4 })),
+    ...(level.recovery ?? []).map((r) => ({ x: r.x, z: r.z, r: 1.8 })),
   ];
   if (level.goal) keepOut.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 1, d: level.goal.d + 1 });
   const byId = new Map(level.platforms.map((p) => [p.id, p]));

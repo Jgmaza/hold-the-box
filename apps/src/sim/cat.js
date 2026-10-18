@@ -82,6 +82,19 @@ export class Cat {
     this.anim = Math.max(0, this.anim - dt * 4);
   }
 
+  /** Galletas en estación: baja rage y corta el zarpazo en curso. */
+  calm(amount) {
+    if (amount <= 0) return 0;
+    const before = this.rage;
+    this.rage = Math.max(0, this.rage - amount);
+    if (this.phase === 'swipe' || this.phase === 'windup') {
+      this.phase = 'calm';
+      this.anim = 0;
+      this.swipeLeft = 0;
+    }
+    return before - this.rage;
+  }
+
   _upset(game) {
     const b = game.box;
     return b.sync < CONFIG.box.cat.syncThreshold || b.state !== 'upright';

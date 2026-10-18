@@ -8,6 +8,7 @@ import { LevelView } from './levelView.js';
 import { NpcViews } from './npcView.js';
 import { Particles } from './particles.js';
 import { PlayerView } from './playerView.js';
+import { RecoveryView } from './recoveryView.js';
 import { WeatherViews } from './weatherView.js';
 
 // Qué salpica cuando un NPC le pega a la caja: contenido (se bota) y/o agua (se moja).
@@ -33,6 +34,7 @@ export class GameView {
     this.box = new BoxView(this.gfx, game.box, this.particles, game.cat, game.bomb);
     this.npcs = new NpcViews(this.gfx, game.npcs, this.particles, { theme: game.world.level.theme, biome: game.world.level.biome });
     this.weather = new WeatherViews(this.gfx, game.weather, { particles: this.particles, scene: app.scene, sun: this.sun, theme: game.world.level.theme });
+    this.recovery = new RecoveryView(this.gfx, game.world.recovery, this.particles);
     this._bind(game.events);
     this.camera.snap(game);
   }
@@ -140,6 +142,7 @@ export class GameView {
       const c = this.game.box.center;
       this.particles.burst(c.x, c.y + 0.5, c.z, 24, { color: 'goal', speed: 3, up: 6, life: 1, size: 0.12 });
     });
+    events.on('recovery:tick', (e) => this.recovery.onTick(e, this.game.box.center));
     events.on('game:win', () => {
       const c = this.game.box.center;
       for (const color of ['goal', 'ui', 'danger', 'p2']) this.particles.burst(c.x, c.y + 1, c.z, 18, { color, speed: 5, up: 9, life: 1.6, size: 0.15 });
@@ -163,6 +166,7 @@ export class GameView {
     this.box.update(dt, this.time);
     this.npcs.update(dt, this.time, camPos);
     this.weather.update(dt, this.time, game, camPos);
+    this.recovery.update(dt, this.time);
     this.particles.update(dt);
   }
 }
