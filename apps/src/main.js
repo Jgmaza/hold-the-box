@@ -1,7 +1,7 @@
 // Arranque: PlayCanvas + menú + partida (simulación + vista + UI) + audio.
 //   Menú (ui/menu.js + view/menuStage.js) → startRun(selección) → partida → backToMenu() borra la partida.
 // Orden de cada frame en partida: teclas globales → input de jugadores → simulación (paso fijo) → vista → UI
-// ?level=<clave> salta el menú y entra directo a ese nivel (también ?level=bahia&debug).
+// ?level=<clave> salta el menú y entra directo a ese nivel (también ?level=bahia&debug, ?level=level2&box=bomba).
 import * as pc from 'playcanvas';
 import { CONFIG, selectBox } from './config.js';
 import { Input } from './input.js';
@@ -123,7 +123,7 @@ app.on('update', (dt) => {
 });
 
 if (params.has('level')) {
-  startRun({ level: params.get('level'), box: CONFIG.box.profile, chars: DEFAULT_CHARS });
+  startRun({ level: params.get('level'), box: params.get('box') ?? CONFIG.box.profile, chars: DEFAULT_CHARS });
 }
 
 app.start();

@@ -15,10 +15,6 @@ export const DEFAULT_PALETTE = {
   p1: '#2b3a55', // traje
   p2: '#ff7a3d', // camiseta
   cap: '#2f9e5b', // gorra P2
-  // Colores alternos: el segundo jugador que escoge el mismo personaje sale con estos
-  p1Alt: '#7a2f4f', // traje vino
-  p2Alt: '#3d8bff', // camiseta azul
-  capAlt: '#e8453c', // gorra roja
   skin: '#f1c27d',
   dark: '#1d1d1d',
   sand: '#f2d7a0',
@@ -44,12 +40,6 @@ const LABELS = [
   ['meta', 'goal'],
   ['exito', 'goal'],
   ['tablon', 'plank'],
-  // Los alternos van antes: la fila se busca por la palabra con la que empieza.
-  ['p1 alterno', 'p1Alt'],
-  ['traje alterno', 'p1Alt'],
-  ['p2 alterno', 'p2Alt'],
-  ['camiseta alterna', 'p2Alt'],
-  ['gorra alterna', 'capAlt'],
   ['p1', 'p1'],
   ['traje', 'p1'],
   ['p2', 'p2'],

@@ -11,7 +11,7 @@
 //   game:respawn    { checkpoint, retry? }
 //   game:teleport   {}                       (debug) se movió a los jugadores
 //   game:fail       { reason, label, inWater }   reason: 'dropped' | 'empty' | 'soaked'
-//   game:win        { time, integrity, wetness, rating, ratingLabel }
+//   game:win        { time, integrity, wetness, bombHealth, rating, ratingLabel }   bombHealth: null sin bomba
 //   player:jump     { player }
 //   player:land     { player, speed }
 //   hazard:hit      { player }               el rodillo golpeó a alguien
@@ -22,9 +22,11 @@
 //   cat:scratch     { player }               arañazo; el tropiezo lo hace sim/cat.js
 //   cat:shred       {}                       la rabia ya resta contenido
 //   cat:goal        {}                       se quedaron en la meta y el gato vacía la caja
-//   bomb:beep       { timeLeft }            tic de la mecha
-//   bomb:warn       { timeLeft }            entran los últimos segundos
-//   bomb:explode    {}                      se acabó el tiempo
+//   bomb:beep       { health }              tic de la bomba (más rápido cuanto más dañada)
+//   bomb:warn       { health }              bajó de warnHealth
+//   bomb:explode    {}                      llegó a 0 %
+//   bomb:hit        { amount, cause, health }   un golpe o agua le bajó el %
+//   bomb:desync     {}                      empezaron a ir desincronizados (la bomba se daña)
 //   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
@@ -64,6 +66,7 @@ export class Game {
     this.npcs = new NpcService(level, { world: this.world, box: this.box, events: this.events, seed });
     this.cat = new Cat();
     this.bomb = new Bomb();
+    this.box.bomb = this.bomb;
     this.weather = new WeatherService(level, { world: this.world, events: this.events, seed });
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
@@ -76,7 +79,7 @@ export class Game {
   _resetRun() {
     this.runTime = 0;
     this.checkpointIndex = -1;
-    this.checkpointSnapshot = { integrity: 100, wetness: 0 };
+    this.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 100 };
     this.ready = { p1: false, p2: false };
     this.respawnTimer = 0;
     this._teleported = true;
@@ -123,7 +126,7 @@ export class Game {
     if (this.state !== 'failed') return;
     this.box.reset(this.checkpointSnapshot);
     this.cat.reset();
-    this.bomb.reset();
+    this.bomb.reset(this.checkpointSnapshot.bomb);
     this.box.invuln = CONFIG.respawn.invulnTime;
     this.failReason = null;
     this._placeAtSpawn(this.currentSpawn);
@@ -267,7 +270,7 @@ export class Game {
     const cp = this.world.checkpointAt(c);
     if (cp > this.checkpointIndex) {
       this.checkpointIndex = cp;
-      this.checkpointSnapshot = this.box.snapshot();
+      this.checkpointSnapshot = { ...this.box.snapshot(), bomb: this.bomb.health };
       this.events.emit('game:checkpoint', { index: cp });
     }
 
@@ -337,12 +340,17 @@ export class Game {
     const b = this.box;
     const R = CONFIG.rating;
     let rating = 'damaged';
-    if (b.integrity >= R.perfect.integrity && b.wetness <= R.perfect.wetness) rating = 'perfect';
+    const B = CONFIG.box.bomb;
+    const bombHealth = B.enabled ? this.bomb.health : null;
+    if (B.enabled) {
+      rating = bombHealth >= B.rating.perfect ? 'perfect' : bombHealth >= B.rating.ok ? 'ok' : 'damaged';
+    } else if (b.integrity >= R.perfect.integrity && b.wetness <= R.perfect.wetness) rating = 'perfect';
     else if (b.integrity >= R.ok.integrity && b.wetness <= R.ok.wetness) rating = 'ok';
     this.result = {
       time: this.runTime,
       integrity: b.integrity,
       wetness: b.wetness,
+      bombHealth,
       rating,
       ratingLabel: RATING_LABELS[rating],
     };

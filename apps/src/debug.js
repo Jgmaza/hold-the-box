@@ -81,8 +81,10 @@ export class DebugPanel {
     const BombCfg = CONFIG.box.bomb;
     const fBomb = gui.addFolder('Bomba');
     fBomb.add(BombCfg, 'enabled').name('bomba activa');
-    fBomb.add(BombCfg, 'fuseTime', 10, 180, 1).name('mecha (s)');
-    fBomb.add(BombCfg, 'warnTime', 3, 40, 1).name('aviso (s)');
+    fBomb.add(BombCfg, 'warnHealth', 5, 60, 1).name('aviso (%)');
+    fBomb.add(BombCfg, 'wetFactor', 0, 1, 0.05).name('agua × factor');
+    fBomb.add(BombCfg, 'desyncBelow', 0, 1, 0.05).name('sincronía mínima');
+    fBomb.add(BombCfg, 'desyncPerSec', 0, 20, 0.5).name('desync %/s');
 
     const W = CONFIG.box.wet;
     const f6 = gui.addFolder('Mojado').close();

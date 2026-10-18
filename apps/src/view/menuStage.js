@@ -156,7 +156,8 @@ export class MenuStage {
     }
     s.pending = { id, alt };
     s.whip = 0;
-    s.hopV = Math.max(s.hopV, 3.5);
+    // Solo salta desde el pedestal: si ya va en el aire no se vuelve a impulsar (cambiar rápido lo sacaba de la pantalla).
+    if (s.hopY <= 0) s.hopV = 3.5;
   }
 
   setReady(slot, ready) {
@@ -166,14 +167,14 @@ export class MenuStage {
     s.ringMat.diffuse = this.gfx.color(ready ? 'goal' : RING[slot]);
     s.ringMat.update();
     if (!ready) return;
-    s.hopV = 7;
+    if (s.hopY <= 0) s.hopV = 7;
     const p = s.pivot.getPosition();
     for (const color of ['goal', 'ui', 'p2', 'water']) this.particles.burst(p.x, p.y + 1.7, p.z, 9, { color, speed: 3, up: 6, life: 1.1, size: 0.09 });
   }
 
   /** Saltito de la caja al escogerla. */
   bumpBox() {
-    this.boxHopV = 4.5;
+    if (this.boxHopY <= 0) this.boxHopV = 4.5;
   }
 
   /** Dónde queda en pantalla (px CSS) el frente del pedestal: ahí se pone el panel de cada jugador. */
@@ -282,6 +283,9 @@ export class MenuStage {
     this.cat.rage = 30 + 25 * Math.sin(t * 0.8);
     this.cat.phase = t % 4 > 3 ? 'warn' : 'calm';
     this.cat.side = cycle % 2 ? 1 : 2;
+    // La bomba de la vitrina baja de 100 % a 0 % en bucle (20 s), con su tic cada segundo.
+    this.bomb.health = 100 - ((t * 5) % 100);
+    this.bomb.sinceBeep = t % 1;
     this.boxView.update(dt, t);
   }
 }

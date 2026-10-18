@@ -2,7 +2,7 @@
 // Brazos: pivote en el hombro del torso → se estiran a la caja; el puño va siempre en la punta.
 // Desync de salto: el que quedó abajo agita los brazos + signo de rabia; el que saltó bien sostiene la caja por debajo.
 import { CONFIG } from '../config.js';
-import { buildCharacter, character } from './characters.js';
+import { buildCharacter } from './characters.js';
 import { imageUrl } from './deliveries.js';
 import { angerMarkCanvas, signCanvas } from './signs.js';
 
@@ -19,7 +19,6 @@ export class PlayerView {
     this.bob = 0;
     this.flailT = 0;
 
-    this.char = character(charId);
     this.armRigs = buildCharacter(gfx, this.parts, charId, { alt });
 
     const label = signCanvas(`P${player.id}`, { style: player.id === 1 ? 'info' : 'warn', aspect: 1.4 });
@@ -41,7 +40,7 @@ export class PlayerView {
     });
     this.anger.enabled = false;
 
-    this._tryBillboard(this.char.sprite);
+    this._tryBillboard(`p${player.id}`); // PNG de Juanes por jugador (juanes/p1-cargar.png …)
   }
 
   async _tryBillboard(prefix) {

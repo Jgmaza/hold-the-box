@@ -112,7 +112,9 @@ apps/
       water.js          agua 3D con olas (también en el menú)
       backdrop.js       cielo + islas lejanas del nivel
       playerView.js     jugadores (o sprite de Juanes)
-      characters.js     personajes escogibles (Ejecutivo / Repartidor): CHARACTERS + buildCharacter()
+      characters.js     personajes escogibles (Alebarto, Gustambo, Alcázar, Matías, Melith, Manolo): CHARACTERS + buildCharacter()
+      charFeatures.js   frijol base en piezas suaves (mangas, manos), cara (ojos, cejas, boca) y rasgos: gafas, gorros, bufanda, chaleco…
+      lowpolyHead.js    cabeza low-poly de los personajes: forma con nariz y mandíbula, pelo y barba en casquetes facetados
       menuStage.js      escena 3D del menú: pedestales que giran, latigazo al cambiar, LISTO con salto
       menuScenery.js    escenario del menú: cielo, sol, nubes, mar con espuma, islas, faro, velero, gaviotas, muelle
       nature.js         palmeras, arbustos, rocas e islas por capas (menú y palmeras del nivel)
@@ -180,7 +182,10 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `game:splash` | `{ player, x, y, z }` |
 | `game:respawn` | `{ checkpoint, retry? }` |
 | `game:fail` | `{ reason: 'dropped'\|'empty'\|'soaked', label, inWater }` |
-| `game:win` | `{ time, integrity, wetness, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` |
+| `game:win` | `{ time, integrity, wetness, bombHealth, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` (`bombHealth`: % de la bomba al llegar, `null` sin bomba) |
+| `bomb:beep` / `bomb:warn` / `bomb:explode` | `{ health }` / `{ health }` / `{}` |
+| `bomb:hit` | `{ amount, cause, health }` (con la caja bomba, un golpe o agua le quitó `amount` %) |
+| `bomb:desync` | `{}` (con la caja bomba, empezaron a ir desincronizados y la bomba pierde % por segundo) |
 | `player:jump` / `player:land` | `{ player }` / `{ player, speed }` |
 | `hazard:hit` | `{ player }` |
 | `geyser:hit` | `{}` |
