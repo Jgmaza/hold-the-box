@@ -12,7 +12,9 @@ El slice jugable vive en `apps/` (PlayCanvas + Vite).
 | **itch.io** (HTML5) | Destino del jam / presentación oficial | Zip manual (cuenta itch) |
 | **GitHub Pages** | Link de producción del repo | **CI/CD** al mergear a `main` |
 
-**URL GitHub Pages:** https://jgmaza.github.io/no-sueltes-la-caja/  
+**Nombre del juego:** Hold the Box  
+**Repo:** https://github.com/Jgmaza/hold-the-box  
+**URL GitHub Pages:** https://jgmaza.github.io/hold-the-box/  
 **URL itch.io:** `_crear página y pegar aquí_`
 
 ---
@@ -50,8 +52,8 @@ Zip para itch (contenido de `dist/`, no la carpeta padre):
 
 ```bash
 cd apps/dist
-zip -r ../no-sueltes-la-caja-itch.zip .
-# archivo: apps/no-sueltes-la-caja-itch.zip
+zip -r ../hold-the-box-itch.zip .
+# archivo: apps/hold-the-box-itch.zip
 ```
 
 Smoke del build: `npm run preview` → http://127.0.0.1:4173/
@@ -61,12 +63,13 @@ Smoke del build: `npm run preview` → http://127.0.0.1:4173/
 ## itch.io (oficial jam)
 
 1. Crear juego en https://itch.io/game/new  
-2. Kind: **HTML**  
-3. Subir `apps/no-sueltes-la-caja-itch.zip`  
-4. “This file will be played in the browser”  
-5. Viewport: p.ej. `1280x720` o fullscreen  
-6. Publicar (Draft → Restricted/Public según el jam)  
-7. Pegar URL arriba en este doc  
+2. Kind: **HTML** · Classification: **Games**  
+3. **Cover image:** subir [`docs/jam/hold-the-box-itch-cover.png`](./jam/hold-the-box-itch-cover.png) (630×500)  
+4. Subir `apps/hold-the-box-itch.zip`  
+5. “This file will be played in the browser”  
+6. Viewport: p.ej. `1280x720` o fullscreen  
+7. Publicar (Draft → Restricted/Public según el jam)  
+8. Pegar URL arriba en este doc  
 
 ---
 
@@ -75,7 +78,7 @@ Smoke del build: `npm run preview` → http://127.0.0.1:4173/
 Tras merge a `main`:
 
 1. Actions → workflow **Deploy Pages**  
-2. Si sale verde → https://jgmaza.github.io/no-sueltes-la-caja/
+2. Si sale verde → https://jgmaza.github.io/hold-the-box/
 
 Redeploy manual (mismo commit de `main`): Actions → Deploy Pages → **Run workflow**.
 

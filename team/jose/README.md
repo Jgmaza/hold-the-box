@@ -26,7 +26,7 @@ Foco: no inflar sistemas, coordinar entregas, **promover a `main`** y subir itch
 2. PR **`dev` → `main`**  
 3. CI verde (tus PRs los mergeas como admin; los del equipo los apruebas tú como QA)  
 4. Merge → Actions **Deploy Pages**  
-5. Verificar https://jgmaza.github.io/no-sueltes-la-caja/
+5. Verificar https://jgmaza.github.io/hold-the-box/
 
 **itch.io (manual, entrega jam)**  
 1. Con build bueno (idealmente el de `main`): `cd apps && npm ci && npm test && npm run build`  

@@ -1,7 +1,7 @@
 # Prompt compartido — POLISH (jam, < 30 min c/u)
 
 ```
-Sugiere mejoras jam-friendly (< 30 min cada una) para "No Sueltes La Caja".
+Sugiere mejoras jam-friendly (< 30 min cada una) para "Hold the Box".
 Prioriza feedback de la caja (HP, desync, caída) y humor coop.
 
 YA EN MVP / NO DISTRAER

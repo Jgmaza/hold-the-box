@@ -1,7 +1,7 @@
 # Rieles asimétricos
 
 Código: `railsPair()` / `railsBeats()` en [`apps/src/levels/sections.js`](../apps/src/levels/sections.js) · vista: `kind: 'rock' | 'bump'` en `levelView.js`.  
-Issue: [#16](https://github.com/Jgmaza/no-sueltes-la-caja/issues/16).
+Issue: [#16](https://github.com/Jgmaza/hold-the-box/issues/16).
 
 Dos rieles paralelos (uno por jugador) sobre el agua. Cada carril tiene **obstáculos distintos y desfasados en Z**: uno salta o espera mientras el otro camina. Si no se coordinan, la caja se inclina.
 

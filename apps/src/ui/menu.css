@@ -159,7 +159,7 @@
   text-shadow: 0 8px 0 var(--ink);
   transform: rotate(-3deg);
 }
-/* "LA CAJA" como caja de cartón: cinta clara cruzada y sello de FRÁGIL. */
+/* "BOX" como caja de cartón: cinta clara cruzada y sello de FRÁGIL. */
 .m-logo .l2 {
   position: relative;
   margin-top: 10px;

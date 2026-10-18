@@ -7,7 +7,7 @@ import { saveAudioPrefs } from './view/audioPrefs.js';
 export class DebugPanel {
   constructor(game) {
     this.game = game;
-    const gui = (this.gui = new GUI({ title: 'No Sueltes La Caja · debug (F2)' }));
+    const gui = (this.gui = new GUI({ title: 'Hold the Box · debug (F2)' }));
 
     const live = (this.live = { estado: '', caja: '', inclinación: 0, sincronía: 0, contenido: 0, mojado: 0, npcs: '', clima: '', fps: 0 });
     const f0 = gui.addFolder('En vivo');

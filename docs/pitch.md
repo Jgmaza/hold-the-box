@@ -1,1 +1,1 @@
-No Sueltes La Caja is a cooperative platformer where teamwork is the only way to reach the goal.
+Hold the Box is a cooperative platformer where teamwork is the only way to reach the goal.

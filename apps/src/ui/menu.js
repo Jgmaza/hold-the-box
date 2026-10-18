@@ -342,8 +342,8 @@ const TEMPLATE = /* html */ `
       <div class="m-logo-wrap">
         <div class="m-rays"></div>
         <div class="m-logo">
-          <span class="l1">NO SUELTES</span>
-          <span class="l2">LA CAJA</span>
+          <span class="l1">HOLD THE</span>
+          <span class="l2">BOX</span>
         </div>
       </div>
       <nav class="m-home">
