@@ -182,7 +182,10 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `game:splash` | `{ player, x, y, z }` |
 | `game:respawn` | `{ checkpoint, retry? }` |
 | `game:fail` | `{ reason: 'dropped'\|'empty'\|'soaked', label, inWater }` |
-| `game:win` | `{ time, integrity, wetness, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` |
+| `game:win` | `{ time, integrity, wetness, bombHealth, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` (`bombHealth`: % de la bomba al llegar, `null` sin bomba) |
+| `bomb:beep` / `bomb:warn` / `bomb:explode` | `{ health }` / `{ health }` / `{}` |
+| `bomb:hit` | `{ amount, cause, health }` (con la caja bomba, un golpe o agua le quitó `amount` %) |
+| `bomb:desync` | `{}` (con la caja bomba, empezaron a ir desincronizados y la bomba pierde % por segundo) |
 | `player:jump` / `player:land` | `{ player }` / `{ player, speed }` |
 | `hazard:hit` | `{ player }` |
 | `geyser:hit` | `{}` |

@@ -150,7 +150,7 @@ export class GameAudio {
     events.on('box:state', (e) => e.to === 'critical' && this.play('sfx-inclinacion'));
     events.on('cat:warn', () => this.playOrTone('sfx-maullido', 'meow'));
     events.on('cat:scratch', () => this.playOrTone('sfx-aranyo', 'scratch'));
-    events.on('bomb:beep', (e) => this.playOrTone('sfx-mecha', e.timeLeft <= 8 ? 'beepFast' : 'beep'));
+    events.on('bomb:beep', (e) => this.playOrTone('sfx-mecha', e.health <= 10 ? 'beepFast' : 'beep'));
     events.on('bomb:explode', () => this.playOrTone('sfx-explosion', 'boom'));
     events.on('geyser:hit', () => this.play('sfx-mojado'));
     events.on('game:splash', () => this.play('sfx-splash'));

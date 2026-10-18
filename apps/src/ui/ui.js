@@ -11,13 +11,22 @@ const TIPS = {
   dropped: 'Tip: si la caja se pone roja, frenen un momento y muévanse al mismo ritmo.',
   empty: 'Tip: el huequito gotea cuando la caja va inclinada. Caminen juntos y salten juntos.',
   soaked: 'Tip: esperen a que los chorros se apaguen (burbujas = va a salir agua) y no se caigan al agua.',
-  exploded: 'Tip: la mecha no espera. Crucen juntos antes de que llegue a cero.',
+  exploded: 'Tip: cada golpe, cada chorro y cada paso descoordinado daña la bomba. Vayan juntos.',
 };
 
 const fmtTime = (t) => {
   const m = Math.floor(t / 60);
   const s = t - m * 60;
   return `${String(m).padStart(2, '0')}:${s.toFixed(1).padStart(4, '0')}`;
+};
+// Causa del golpe → texto del aviso con la caja bomba.
+const BOMB_HIT = {
+  landing: '¡Golpe!',
+  sweeper: '¡Rodillo!',
+  fall: '¡Al agua!',
+  'npc-easy': '¡Pellizco!',
+  'npc-medium': '¡Chorro!',
+  'npc-hard': '¡Embestida!',
 };
 
 const STATE_LABEL = { upright: 'ESTABLE', tilting: 'INCLINADA', critical: '¡SE CAE!' };
@@ -60,6 +69,8 @@ export class UI {
     }
     this._lastJump = { 1: -10, 2: -10 };
     this._timers = new Set();
+    this.bombMode = CONFIG.box.bomb.enabled;
+    if (this.bombMode) this._setupBombHud();
     this._bind(game.events);
     this._bindButtons();
     this.show(game.state);
@@ -85,20 +96,46 @@ export class UI {
     this.root.innerHTML = '';
   }
 
+  /** Caja bomba: la primera barra es el % de la bomba (¡BUM!); no hay mojado ni cronómetro grande. */
+  _setupBombHud() {
+    this.$('.hud').classList.add('bomb');
+    this.$('.meters').classList.add('bomb');
+    const life = this.meters.integrity;
+    life.el.dataset.k = 'bomb';
+    life.el.querySelector('span').textContent = '¡BUM!';
+    this.meters.wetness.el.style.display = 'none';
+    this.$('.timer').style.display = 'none';
+    this.$('.win .integrity').previousSibling.textContent = 'Bomba';
+    this.$('.win .wetness').parentElement.style.display = 'none';
+    this._lastDesyncToast = -10;
+  }
+
   _paintBoxName() {
     const id = CONFIG.box.profile;
     const name = this.$('.box-name');
     let label = 'VIP';
     if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
-    if (CONFIG.box.bomb.enabled) {
-      const t = Math.max(0, this.game.bomb.timeLeft);
-      const m = Math.floor(t / 60);
-      const s = Math.floor(t % 60);
-      label = `BOMBA ${m}:${String(s).padStart(2, '0')}`;
-    }
-    name.textContent = label;
+    if (this.bombMode) label = 'BOMBA';
+    if (name.textContent !== label) name.textContent = label;
     name.dataset.box = id;
-    name.classList.toggle('urgent', CONFIG.box.bomb.enabled && this.game.bomb.timeLeft <= CONFIG.box.bomb.warnTime);
+    name.classList.toggle('urgent', this.bombMode && this.game.bomb.health <= CONFIG.box.bomb.warnHealth);
+  }
+
+  /** Barra de la bomba: verde, amarilla bajo 50 % y roja palpitando bajo `warnHealth`. */
+  _paintBombLife() {
+    const bomb = this.game.bomb;
+    const h = Math.max(0, bomb.health);
+    const m = this.meters.integrity;
+    const level = h <= CONFIG.box.bomb.warnHealth ? 'low' : h <= 50 ? 'mid' : 'high';
+    const text = `${Math.ceil(h)}%`;
+    if (m._text !== text) {
+      m._text = text;
+      m.val.textContent = text;
+    }
+    m.bar.style.width = `${h.toFixed(1)}%`;
+    if (m.el.dataset.level !== level) m.el.dataset.level = level;
+    m.el.classList.toggle('draining', bomb.sinceDrain < 0.15);
+    m.el.classList.toggle('desync', bomb.desync > 0);
   }
 
   show(state) {
@@ -131,27 +168,37 @@ export class UI {
     ev.on('game:start', () => this.show('playing'));
     ev.on('game:pause', (e) => this.show(e.paused ? 'paused' : 'playing'));
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
-    ev.on('game:splash', () => this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
+    ev.on('game:splash', () => !this.bombMode && this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
-    ev.on('hazard:hit', () => this.toast('¡Rodillo! La caja se sacude', 'bad'));
+    ev.on('hazard:hit', () => !this.bombMode && this.toast('¡Rodillo! La caja se sacude', 'bad'));
     ev.on('cat:warn', (e) => this.toast(`El gato asoma la pata hacia P${e.player}`, 'bad'));
     ev.on('cat:scratch', (e) => this.toast(`¡El gato arañó a P${e.player}!`, 'bad'));
     ev.on('cat:shred', () => this.toast('¡El gato está rompiendo la caja!', 'bad'));
     ev.on('cat:goal', () => this.toast('¡Quietos en la meta! El gato vacía la caja', 'bad'));
-    ev.on('bomb:warn', () => this.toast('¡La mecha está corta!', 'bad'));
-    ev.on('geyser:hit', () => this.toast('¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('bomb:warn', () => this.toast('¡La bomba está por explotar!', 'bad'));
+    ev.on('bomb:desync', () => {
+      if (this.game.time - this._lastDesyncToast < 4) return;
+      this._lastDesyncToast = this.game.time;
+      this.toast('¡Sin sincronía la bomba se daña!', 'bad');
+    });
+    ev.on('bomb:hit', (e) => {
+      if (e.amount < 1) return;
+      this.toast(`${BOMB_HIT[e.cause] ?? '¡Golpe!'} −${Math.round(e.amount)}% de bomba`, 'bad');
+      this.flash('integrity');
+    });
+    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : '¡Se moja la caja!', 'wet'));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...NPC_HIT[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
       if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
     });
     ev.on('box:impact', (e) => {
-      if (e.cause === 'cat') return;
+      if (e.cause === 'cat' || this.bombMode) return;
       if (e.cause === 'landing') this.toast(`¡Golpe! −${Math.round(e.amount)}% contenido`, 'bad');
       this.flash('integrity');
     });
-    ev.on('box:wet', () => this.flash('wetness'));
+    ev.on('box:wet', () => !this.bombMode && this.flash('wetness'));
     ev.on('player:jump', (e) => {
       const now = this.game.time;
       this._lastJump[e.player] = now;
@@ -162,7 +209,7 @@ export class UI {
       this.$('.win .rating').textContent = r.ratingLabel;
       this.$('.win .rating').className = `rating ${r.rating}`;
       this.$('.win .time').textContent = fmtTime(r.time);
-      this.$('.win .integrity').textContent = `${Math.round(r.integrity)}%`;
+      this.$('.win .integrity').textContent = `${Math.round(r.bombHealth ?? r.integrity)}%`;
       this.$('.win .wetness').textContent = `${Math.round(r.wetness)}%`;
       const scoreEl = this.$('.win .score');
       const campaign = isCampaignLevel(this.game.level.id);
@@ -187,10 +234,14 @@ export class UI {
     if (g.state === 'title') return;
     this._paintBoxName();
 
-    this._meter('integrity', b.integrity, b.integrity < 35);
-    this._meter('wetness', b.wetness, b.wetness > 65);
+    if (this.bombMode) {
+      this._paintBombLife();
+    } else {
+      this._meter('integrity', b.integrity, b.integrity < 35);
+      this._meter('wetness', b.wetness, b.wetness > 65);
+      this.$('.timer').textContent = fmtTime(g.runTime);
+    }
     this._meter('sync', b.sync * 100, b.sync < 0.4);
-    this.$('.timer').textContent = fmtTime(g.runTime);
 
     const zone = g.weather.current;
     const chip = this.$('.weather');

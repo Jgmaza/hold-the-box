@@ -90,6 +90,161 @@ export function boxCanvas(baseHex) {
   return c;
 }
 
+/** Cartón de la caja bomba: etiqueta de envío, franja de peligro y los iconos de embalaje. */
+export function bombBoxCanvas(baseHex) {
+  const c = canvas(512, 512);
+  const g = c.getContext('2d');
+  g.fillStyle = baseHex;
+  g.fillRect(0, 0, 512, 512);
+  // Ondas del cartón corrugado.
+  g.fillStyle = 'rgba(60, 30, 10, 0.06)';
+  for (let x = 0; x < 512; x += 12) g.fillRect(x, 0, 4, 512);
+  g.strokeStyle = 'rgba(60, 30, 10, 0.55)';
+  g.lineWidth = 10;
+  g.strokeRect(5, 5, 502, 502);
+
+  // Etiqueta de envío con código de barras.
+  g.save();
+  g.translate(256, 112);
+  g.rotate(-0.02);
+  g.fillStyle = 'rgba(40, 20, 5, 0.25)';
+  g.fillRect(-196, -60, 400, 128);
+  g.fillStyle = '#fbfaf5';
+  g.fillRect(-200, -66, 400, 128);
+  g.strokeStyle = '#3a2414';
+  g.lineWidth = 4;
+  g.strokeRect(-200, -66, 400, 128);
+  let seed = 7;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#1d1d1d';
+  for (let x = -184; x < -30; ) {
+    const w = 2 + Math.floor(rand() * 3) * 2;
+    g.fillRect(x, -48, w, 74);
+    x += w + 2 + Math.floor(rand() * 3) * 2;
+  }
+  g.font = '600 15px ui-monospace, Consolas, monospace';
+  g.textAlign = 'left';
+  g.textBaseline = 'middle';
+  g.fillText('0 451207 990123 3', -184, 44);
+  g.textAlign = 'center';
+  g.font = '900 40px system-ui, "Arial Black", sans-serif';
+  g.fillText('ENTREGA', 88, -18);
+  g.font = '700 20px system-ui, sans-serif';
+  g.fillStyle = '#c0281f';
+  g.fillText('URGENTE', 88, 26);
+  g.restore();
+
+  // Franja amarilla y negra con ¡PELIGRO!
+  g.save();
+  g.beginPath();
+  g.rect(0, 206, 512, 96);
+  g.clip();
+  g.fillStyle = '#ffcc33';
+  g.fillRect(0, 206, 512, 96);
+  g.fillStyle = '#1d1d1d';
+  for (let x = -120; x < 600; x += 56) {
+    g.beginPath();
+    g.moveTo(x, 302);
+    g.lineTo(x + 28, 302);
+    g.lineTo(x + 124, 206);
+    g.lineTo(x + 96, 206);
+    g.closePath();
+    g.fill();
+  }
+  g.fillStyle = '#ffcc33';
+  g.fillRect(118, 222, 276, 64);
+  g.strokeStyle = '#1d1d1d';
+  g.lineWidth = 5;
+  g.strokeRect(118, 222, 276, 64);
+  g.fillStyle = '#c0281f';
+  g.font = '900 50px system-ui, "Arial Black", sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('¡PELIGRO!', 256, 256);
+  g.restore();
+
+  g.fillStyle = '#3a2414';
+  g.font = '900 42px system-ui, "Arial Black", sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText('NO SOLTAR', 256, 344);
+
+  // Iconos: no mojar, frágil, este lado arriba.
+  g.strokeStyle = '#3a2414';
+  g.fillStyle = '#3a2414';
+  g.lineWidth = 5;
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  const icons = [116, 256, 396];
+  for (const x of icons) g.strokeRect(x - 52, 392, 104, 96);
+  // Paraguas con gotas.
+  {
+    const x = icons[0];
+    g.beginPath();
+    g.moveTo(x - 32, 446);
+    g.quadraticCurveTo(x, 396, x + 32, 446);
+    g.closePath();
+    g.fill();
+    g.beginPath();
+    g.moveTo(x, 446);
+    g.lineTo(x, 472);
+    g.quadraticCurveTo(x, 480, x - 8, 476);
+    g.stroke();
+    for (const [dx, dy] of [[-30, 410], [-12, 404], [26, 408]]) {
+      g.beginPath();
+      g.ellipse(x + dx, dy, 2.5, 5, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+  // Copa frágil.
+  {
+    const x = icons[1];
+    g.beginPath();
+    g.moveTo(x - 20, 404);
+    g.lineTo(x + 20, 404);
+    g.quadraticCurveTo(x + 22, 440, x, 444);
+    g.quadraticCurveTo(x - 22, 440, x - 20, 404);
+    g.fill();
+    g.beginPath();
+    g.moveTo(x, 444);
+    g.lineTo(x, 472);
+    g.moveTo(x - 16, 474);
+    g.lineTo(x + 16, 474);
+    g.stroke();
+    g.strokeStyle = baseHex;
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(x + 4, 406);
+    g.lineTo(x - 4, 418);
+    g.lineTo(x + 5, 426);
+    g.lineTo(x - 2, 436);
+    g.stroke();
+    g.strokeStyle = '#3a2414';
+    g.lineWidth = 5;
+  }
+  // Dos flechas arriba con su raya.
+  {
+    const x = icons[2];
+    for (const dx of [-16, 16]) {
+      g.beginPath();
+      g.moveTo(x + dx, 402);
+      g.lineTo(x + dx + 13, 420);
+      g.lineTo(x + dx + 5, 420);
+      g.lineTo(x + dx + 5, 462);
+      g.lineTo(x + dx - 5, 462);
+      g.lineTo(x + dx - 5, 420);
+      g.lineTo(x + dx - 13, 420);
+      g.closePath();
+      g.fill();
+    }
+    g.beginPath();
+    g.moveTo(x - 34, 474);
+    g.lineTo(x + 34, 474);
+    g.stroke();
+  }
+  return c;
+}
+
 /** Globo de rabia (estilo cómic) para desync de salto. */
 export function angerMarkCanvas() {
   const c = canvas(128, 128);

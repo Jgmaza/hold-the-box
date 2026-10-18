@@ -93,7 +93,7 @@ export const CONFIG = {
       scratchRage: 22, // primer arañazo (~12 s juntos, ~4 s separados)
       damageRage: 55, // a partir de aquí también baja la integridad
       chipPerSec: 1.2, // % de contenido por segundo en esa etapa
-      swipeHold: 0.55, // un solo zarpazo, no varios seguidos
+      swipeHold: 0.7, // un zarpazo: sale, se queda y vuelve (la vista lee esto)
       cooldown: 6.5, // pausa entre arañazos; la rabia no se reinicia
       knock: 3.4, // empujón horizontal al jugador arañado (m/s)
       knockUp: 1.1,
@@ -105,11 +105,16 @@ export const CONFIG = {
       goalRagePerSec: 12, // rabia extra mientras se quedan ahí
     },
 
-    // Bomba: la mecha corre siempre. Llegar a la meta la apaga. En cero, explota.
+    // Bomba: arranca al 100 % y no baja sola. Golpes, agua y falta de sincronía la dañan. En 0 %, explota.
+    // Con la bomba no hay mojado ni huequito.
     bomb: {
       enabled: false,
-      fuseTime: 90, // segundos para llegar
-      warnTime: 20, // a partir de aquí la chispa se apura y la caja se pone roja
+      warnHealth: 25, // desde aquí la chispa se apura, la caja palpita y avisa
+      // Golpes: el mismo % que le quitarían a la caja VIP (rodillo 8, aterrizaje fuerte 6+, cangrejo 4, perro 9).
+      wetFactor: 0.3, // agua: % de mojado × esto (caer al agua 45 → 13.5, chorro del niño 14 → 4.2)
+      desyncBelow: 0.5, // por debajo de esta sincronía la bomba se daña
+      desyncPerSec: 6, // % por segundo con sincronía 0 (uno contra el otro); caminar uno solo (0.35) ≈ 1.8 %/s
+      rating: { perfect: 85, ok: 50 }, // % de bomba que les sobra al llegar
     },
 
     // Se moja: más peso, menos agarre, menos estabilidad.
@@ -290,7 +295,7 @@ export const CONFIG = {
 export const BOX_CHOICES = [
   { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
   { id: 'gato', name: 'Caja del gato', blurb: 'Se ve el gato. Si se separan, saca las garras.' },
-  { id: 'bomba', name: 'Caja bomba', blurb: 'Mecha de 90 s. Si no llegan, explota.' },
+  { id: 'bomba', name: 'Caja bomba', blurb: 'Golpes, agua y desorden la dañan. En 0 %, explota.' },
 ];
 
 /** Activa una caja. VIP no tiene gato ni mecha. */
