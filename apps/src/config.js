@@ -93,7 +93,7 @@ export const CONFIG = {
       scratchRage: 22, // primer arañazo (~12 s juntos, ~4 s separados)
       damageRage: 55, // a partir de aquí también baja la integridad
       chipPerSec: 1.2, // % de contenido por segundo en esa etapa
-      swipeHold: 0.55, // un solo zarpazo, no varios seguidos
+      swipeHold: 0.7, // un zarpazo: sale, se queda y vuelve (la vista lee esto)
       cooldown: 6.5, // pausa entre arañazos; la rabia no se reinicia
       knock: 3.4, // empujón horizontal al jugador arañado (m/s)
       knockUp: 1.1,

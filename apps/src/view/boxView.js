@@ -2,6 +2,7 @@
 // Si Juanes entrega caja-normal/inclinada/huequito/mojada.png, se usan como textura según el estado.
 import * as pc from 'playcanvas';
 import { CONFIG } from '../config.js';
+import { damp } from '../sim/math.js';
 import { imageUrl } from './deliveries.js';
 import { bombBoxCanvas, boxCanvas } from './signs.js';
 import pawUrl from '../../../deliveries/luis/models/pata-gato.glb?url';
@@ -9,6 +10,8 @@ import bombUrl from '../../../deliveries/luis/models/caja-bomba.glb?url';
 
 // Largo del GLB (garras en +Z). Un poco más que la malla para que arranque dentro.
 const PAW_LEN = 0.4;
+const _easeOut = (t) => 1 - (1 - t) * (1 - t);
+const _easeIn = (t) => t * t;
 
 // Medidas de caja-bomba.glb (origen en la tapa). Si se cambia make-bomb-glb.mjs hay que copiarlas aquí.
 const BOMB_PANEL_Y = 0.2608;
@@ -57,6 +60,8 @@ export class BoxView {
     this._dripAcc = 0;
     this._current = 'normal';
     this._pawOut = 0;
+    this._pawSwipe = 0;
+    this._pawSide = 1;
     this._buildCat();
     this._buildBomb();
     this._loadTextures();
@@ -350,33 +355,46 @@ export class BoxView {
     this.catLook.enabled = on;
     if (!on) {
       this._pawOut = 0;
+      this._pawSwipe = 0;
       this.paw.enabled = false;
       this.pawHole.enabled = false;
       return;
     }
     const rage = Math.min(1, (cat.rage ?? 0) / 100);
-    const wag = 2 + rage * 22;
-    this.tail.setLocalEulerAngles(0, Math.sin(time * wag) * (12 + rage * 34), 0);
-    const shiver = Math.sin(time * (6 + rage * 26)) * rage * 7;
-    this.catLook.setLocalEulerAngles(shiver, 0, 0);
+    // Cola y cara: un meneo lento. Antes la frecuencia subía tanto que vibraban.
+    this.tail.setLocalEulerAngles(0, Math.sin(time * (1.6 + rage * 1.8)) * (10 + rage * 14), 0);
+    this.catLook.setLocalEulerAngles(Math.sin(time * (2.2 + rage * 1.6)) * rage * 2.4, 0, 0);
 
-    // 0 = toda la pata detrás del cartón. 1 = garras afuera.
-    const target = cat.phase === 'swipe' ? 1 : cat.phase === 'warn' ? 0.72 : cat.anim > 0.55 ? (cat.anim - 0.55) * 0.6 : 0;
-    const follow = target > this._pawOut ? 2.6 : 5;
-    this._pawOut += (target - this._pawOut) * Math.min(1, dt * follow);
+    // 0 = detrás del cartón. El aviso asoma y se queda; el zarpazo sale un poco más.
+    const peek = Math.max(0, Math.min(1, cat.anim ?? 0)) * 0.55;
+    const target = cat.phase === 'swipe' ? 1 : cat.phase === 'warn' ? 0.7 : peek;
+    this._pawOut = damp(this._pawOut, target, target > this._pawOut ? 0.12 : 0.16, dt);
     const out = this._pawOut;
     const visible = out > 0.04;
     this.paw.enabled = visible;
     this.pawHole.enabled = visible;
-    if (!visible) return;
+    if (!visible) {
+      this._pawSwipe = 0;
+      return;
+    }
 
     const ease = out * out * (3 - 2 * out);
-    const side = cat.side === 1 ? -1 : 1;
+    this._pawSide = damp(this._pawSide, cat.side === 1 ? -1 : 1, 0.14, dt);
+    const side = this._pawSide;
     const face = S.d / 2;
     this.paw.setLocalPosition(side * S.w * 0.22 * ease, -S.h * 0.16, face - PAW_LEN + ease * 0.34);
-    const swipeT = cat.phase === 'swipe' ? 1 - cat.swipeLeft / CONFIG.box.cat.swipeHold : 0;
-    const swipe = cat.phase === 'swipe' ? Math.sin(swipeT * Math.PI) * 28 * ease : Math.sin(time * 2.5) * 3 * ease;
-    this.paw.setLocalEulerAngles(8 * ease + swipe, side * 18 * ease, side * -8 * ease);
+
+    // Un tajo: sale, se queda y vuelve. Sin el aleteo senoidal ni el temblor de aviso.
+    const hold = Math.max(0.01, CONFIG.box.cat.swipeHold);
+    const t = cat.phase === 'swipe' ? 1 - cat.swipeLeft / hold : 0;
+    let slash = 0;
+    if (cat.phase === 'swipe') {
+      if (t < 0.32) slash = _easeOut(t / 0.32);
+      else if (t < 0.72) slash = 1;
+      else slash = 1 - _easeIn((t - 0.72) / 0.28);
+    }
+    this._pawSwipe = damp(this._pawSwipe, slash * 32, 0.05, dt);
+    this.paw.setLocalEulerAngles(8 * ease + this._pawSwipe, side * 16 * ease, side * -6 * ease);
     const hole = 0.04 + ease * 0.14;
     this.pawHole.setLocalScale(hole, 0.012, hole * 0.8);
     this.pawHole.setLocalPosition(side * S.w * 0.22 * ease, -S.h * 0.16, face + 0.008);
