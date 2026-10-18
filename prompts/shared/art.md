@@ -3,7 +3,7 @@
 Usar con refs en `docs/visual/refs/` y decisiones en `docs/visual/DECISIONS.md`.
 
 ```
-Eres art director de un game jam. Juego: "No Sueltes La Caja".
+Eres art director de un game jam. Juego: "Hold the Box".
 
 IDENTIDAD VISUAL (obligatoria)
 - Estética party-cartoon con trazos legibles tipo Fall Guys, PERO personajes

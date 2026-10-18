@@ -2,19 +2,22 @@
 
 **Una sola página.** Si solo lees esto y tu `team/<nombre>/README.md`, ya sabes qué hacer.
 
-Repo: https://github.com/Jgmaza/no-sueltes-la-caja  
-Juego online (prod): https://jgmaza.github.io/no-sueltes-la-caja/
+Repo: https://github.com/Jgmaza/hold-the-box  
+Juego online (prod): https://jgmaza.github.io/hold-the-box/
 
 ---
 
 ## 1) Arranque (15 min)
 
-1. Acepta la invitación de GitHub (mail o [invitations](https://github.com/Jgmaza/no-sueltes-la-caja/invitations)).
+1. Acepta la invitación de GitHub (mail o [invitations](https://github.com/Jgmaza/hold-the-box/invitations)).
 2. Clona y entra a **tu** rama:
 
 ```bash
-git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
-cd no-sueltes-la-caja
+git clone https://github.com/Jgmaza/hold-the-box.git
+cd hold-the-box
+
+> Si ya tenías el repo clonado con el nombre viejo, actualiza el remote:
+> `git remote set-url origin https://github.com/Jgmaza/hold-the-box.git`
 git checkout work/<tu-nombre>   # jose | danel | luis | zharick | juanes | matias
 git pull
 ```

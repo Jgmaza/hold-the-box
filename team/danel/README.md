@@ -6,7 +6,7 @@ GitHub: [@danelmott](https://github.com/danelmott) · Rama: `work/danel`
 
 1. [`../../MVP_SCOPE.md`](../../MVP_SCOPE.md) — el slice **ya cuenta como piso**  
 2. Trabaja desde `work/danel` → PR a `dev`  
-3. Opus 5.5 + skill `no-sueltes-playcanvas` si usas Agent
+3. Opus 5.5 + skill `hold-the-box-playcanvas` si usas Agent
 
 ## Tu rol (fase actual)
 El vertical slice ya está. Prioridad:

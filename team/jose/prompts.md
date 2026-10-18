@@ -2,7 +2,7 @@
 
 ## Checklist pre-deploy
 ```
-Soy lead de No Sueltes La Caja. El slice ya está en apps/ (Vite+PlayCanvas).
+Soy lead de Hold the Box. El slice ya está en apps/ (Vite+PlayCanvas).
 Dame checklist corto pre-itch.io: tests, build, smoke 2P, UI fail/win,
 qué NO debe entrar en este deploy. Sin inventar features nuevas.
 ```

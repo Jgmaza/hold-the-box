@@ -2,7 +2,7 @@
 
 ## UI PlayCanvas
 ```
-Crea UI PlayCanvas jam-friendly: Start screen (título No Sueltes La Caja + Play),
+Crea UI PlayCanvas jam-friendly: Start screen (título Hold the Box + Play),
 HUD mínimo (opcional timer), Victory screen, Fail screen, botón Restart.
 Usa paleta de deliveries/luis/PALETTE.md si existe; si no, placeholders.
 Textos en español. Sin tienda ni ranking.

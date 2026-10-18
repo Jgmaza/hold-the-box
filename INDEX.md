@@ -1,4 +1,4 @@
-# ÍNDICE GENERAL — No Sueltes La Caja
+# ÍNDICE GENERAL — Hold the Box
 
 **Lee esto primero.** Luego ve a tu asignación. No hace falta recorrer todo el repo.
 
@@ -98,6 +98,6 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 | [`team/SKILLS.md`](./team/SKILLS.md) | Skills Cursor |
 
 ```bash
-git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
-cd no-sueltes-la-caja && git checkout dev
+git clone https://github.com/Jgmaza/hold-the-box.git
+cd hold-the-box && git checkout dev
 ```
