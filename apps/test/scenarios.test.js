@@ -233,6 +233,22 @@ describe('gato', () => {
     expect(g.box.integrity).toBeCloseTo(100 - CONFIG.box.cat.scratchDamage);
   });
 
+  it('después de calmarse, vuelve a avisar cuando asoma la pata', () => {
+    selectBox('gato');
+    const g = playingGame();
+    let warns = 0;
+    g.events.on('cat:warn', () => warns++);
+    g.cat.rage = CONFIG.box.cat.warnRage;
+    run(g, 0.2, FWD, FWD);
+    expect(warns).toBe(1);
+    g.cat.calm(100);
+    run(g, 0.2, FWD, FWD);
+    expect(g.cat.rage).toBeLessThan(CONFIG.box.cat.warnRage);
+    g.cat.rage = CONFIG.box.cat.warnRage;
+    run(g, 0.2, FWD, FWD);
+    expect(warns).toBe(2);
+  });
+
   it('no araña si caminan juntos, pero la rabia ya sube', () => {
     selectBox('gato');
     const g = playingGame();

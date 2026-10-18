@@ -322,7 +322,6 @@ export const SCENERY_SETS = {
     'nature/tree_palm', 'nature/tree_palmTall', 'nature/tree_palmBend', 'nature/tree_palmDetailedTall', 'nature/tree_default', 'nature/tree_detailed', 'nature/tree_fat', 'nature/tree_tall', 'nature/tree_oak',
     'nature/plant_bush', 'nature/plant_bushLarge', 'nature/plant_bushDetailed', 'nature/plant_bushSmall',
     'nature/grass', 'nature/grass_leafs', 'nature/grass_large',
-    'nature/crops_bambooStageB',
     'nature/rock_smallA', 'nature/stump_round', 'nature/log',
   ],
   temple: [
@@ -451,6 +450,9 @@ export function dressLevel(level, sets, { seed = 1, density = 1, ships = true } 
     ...(level.sweepers ?? []).map((s) => ({ x: s.x, z: s.z, r: s.length + 0.4 })),
     ...(level.recovery ?? []).map((r) => ({ x: r.x, z: r.z, r: 1.8 })),
   ];
+  // La franja del spawn queda libre a los dos lados: si no, un tronco tapa la salida al agua.
+  const home = (level.platforms ?? []).find((p) => level.spawn && Math.abs(level.spawn.p1.x - p.x) <= p.w / 2 && Math.abs(level.spawn.p1.z - p.z) <= p.d / 2 && !p.kind);
+  if (home) keepOut.push({ x: home.x, z: level.spawn.p1.z, w: home.w, d: 2.4 });
   if (level.goal) keepOut.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 1, d: level.goal.d + 1 });
   const byId = new Map(level.platforms.map((p) => [p.id, p]));
   const out = [];
@@ -724,15 +726,6 @@ export function villageHouses(spots) {
     const back = -1;
     out.push({ art: 'nature/fence_simple', x: round(h.x + door.x * back * s * 0.72), z: round(h.z - 0.95), top: h.top, yaw: 90, s: 2.15 });
     out.push({ art: 'nature/fence_simple', x: round(h.x + door.x * back * s * 0.72), z: round(h.z + 0.95), top: h.top, yaw: 90, s: 2.15 });
-    out.push({
-      art: 'nature/crops_bambooStageB',
-      x: round(h.x + door.x * back * s * 0.98),
-      z: round(h.z + side * 0.15),
-      top: h.top,
-      yaw: side * 12,
-      s: 2.15,
-      motion: 'sway',
-    });
     out.push({
       art: 'nature/log_stack',
       x: round(h.x + door.x * back * 0.35 + side * s * 0.62),

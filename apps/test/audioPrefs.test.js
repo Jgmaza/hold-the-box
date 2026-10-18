@@ -18,7 +18,8 @@ describe('mezcla de audio', () => {
   it('la selva tiene su tema y el muelle se queda con el suyo', () => {
     expect(musicSlotFor('aldea')).toBe('musica-selva');
     expect(musicSlotFor('muelle')).toBe('musica-loop');
-    expect(musicSlotFor('campamento')).toBe('musica-loop');
+    expect(musicSlotFor('campamento')).toBe('musica-desierto');
     expect(slotKind('musica-selva')).toBe('music');
+    expect(slotKind('musica-desierto')).toBe('music');
   });
 });
