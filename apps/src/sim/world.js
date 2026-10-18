@@ -49,9 +49,11 @@ export class World {
     this.level = level;
     this.waterLevel = level.waterLevel ?? 0;
 
+    // `holes`: círculos del piso donde no hay suelo (islas de viento con `weather.holes`): se cae al agua.
     this.statics = level.platforms.map((p) => ({
       def: p,
       aabb: platformAABB({ ...p, h: p.h ?? p.top - this.waterLevel + 0.6 }),
+      holes: p.weather?.holes,
     }));
     this.movers = (level.moving ?? []).map((m) => new MovingPlatform(m));
     this.sweepers = (level.sweepers ?? []).map((s) => new Sweeper(s));
@@ -115,6 +117,7 @@ export class World {
     for (const c of this.colliders) {
       const a = c.aabb;
       if (x < a.min.x || x > a.max.x || z < a.min.z || z > a.max.z) continue;
+      if (c.holes?.some((h) => Math.hypot(x - h.x, z - h.z) <= h.r)) continue;
       if (a.max.y <= maxY && a.max.y > best) best = a.max.y;
     }
     return best;

@@ -242,7 +242,18 @@ export const CONFIG = {
       pushSpeed: 2.6, // m/s que empuja con intensidad 1 (se compensa caminando en contra)
       leanDeg: 16, // inclinación extra de la caja con intensidad 1
       drainRate: 4, // % de contenido por segundo con intensidad 1
+      dryRate: 6, // % de mojado que quita por segundo con intensidad 1 (brisa ≈ 0.7 %/s). Solo seca si nada la está mojando
       syncRelief: 0.8, // desincronizados pierden hasta (1 + esto)× más contenido
+      // Huecos: círculos SIN piso en la isla (windHoles() en levels/sections.js). Quien pisa uno cae al agua.
+      // Van cerca del centro alternando izquierda / derecha: hay que esquivarlos en slalom (y el viento empuja hacia ellos).
+      holeLayout: {
+        spacing: 3.5, // un hueco cada tantos metros de isla (solo hay que definir el largo)
+        radiusMin: 0.9,
+        radiusMax: 1.25,
+        margin: 2, // metros sin huecos al entrar y al salir de la isla
+        center: { min: 0.6, max: 1.7 }, // qué tan corrido del eje queda el centro de cada hueco (su borde siempre pisa la huella de la pareja)
+        zGap: 1, // metros mínimos en Z entre un hueco y el siguiente (para girar)
+      },
       period: 5.5,
       warnTime: 0.9,
       activeTime: 2.2,

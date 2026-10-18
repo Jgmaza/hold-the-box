@@ -53,7 +53,7 @@ export class Box {
     this.leakRate = 0; // %/s actual (la vista dibuja gotas con esto)
     this.wetRate = 0; // %/s que entra este paso (chorros + lluvia)
     // Fuerzas de afuera que el mundo fija cada paso (clima: viento): inclinación extra (grados) y vaciado (%/s).
-    this.external = { roll: 0, pitch: 0, drain: 0 };
+    this.external = { roll: 0, pitch: 0, drain: 0, dry: 0 };
     this.wettingSources = 0;
     this.dropped = false;
     this.dropVel = v3();
@@ -230,12 +230,12 @@ export class Box {
     this.leakRate = this.invuln > 0 ? 0 : leak;
     this.integrity = clamp(this.integrity - this.leakRate * dt, 0, 100);
 
-    // --- Mojado: entra por chorros y lluvia (wetRate lo fija el mundo cada paso) o se seca.
+    // --- Mojado: entra por chorros y lluvia (wetRate lo fija el mundo cada paso) o se seca (sola, y más con viento).
     if (this.wetRate > 0) {
       this.wetness = clamp(this.wetness + this.wetRate * dt, 0, 100);
     } else if (this.wetness < 100) {
       // Al 100% ya se deshizo: no hay vuelta atrás.
-      this.wetness = clamp(this.wetness - W.dryRate * dt, 0, 100);
+      this.wetness = clamp(this.wetness - (W.dryRate + ext.dry) * dt, 0, 100);
     }
 
     if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
@@ -263,7 +263,7 @@ export class Box {
     this.rollVel = this.pitchVel = 0;
     this.criticalTime = 0;
     this.leakRate = 0;
-    this.external.roll = this.external.pitch = this.external.drain = 0;
+    this.external.roll = this.external.pitch = this.external.drain = this.external.dry = 0;
     this.sync = this.syncRaw = 1;
     this._groupVel = null;
     this._accel.x = this._accel.z = 0;

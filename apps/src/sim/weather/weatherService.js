@@ -8,7 +8,8 @@
 //
 // update() devuelve los efectos del paso (game.js los aplica):
 //   wetRate      %/s de mojado para la caja          (lluvia, ola)
-//   drain        %/s de contenido que se lleva        (viento)
+//   drain        %/s de contenido que se lleva        (viento, huecos de la ventisca)
+//   dry          %/s de mojado que quita              (viento; solo si nada moja a la caja)
 //   tilt         { roll, pitch } grados extra caja    (viento, ola)
 //   push         { 1: {x, z}, 2: {x, z} } m/s         (viento, ola)
 //   gripMul      { 1, 2 } multiplicador de agarre     (lluvia: piso resbaloso)
@@ -47,7 +48,7 @@ export class WeatherService {
       if (!s.def.id) throw new Error(`[clima] una plataforma con clima "${type}" necesita \`id\``);
       this.zones.push(new Type(`${type}-${s.def.id}`, s.def, s.aabb, opts, this.rng));
     }
-    this.fx = { wetRate: 0, drain: 0, tilt: { roll: 0, pitch: 0 }, push: { 1: { x: 0, z: 0 }, 2: { x: 0, z: 0 } }, gripMul: { 1: 1, 2: 1 } };
+    this.fx = { wetRate: 0, drain: 0, dry: 0, tilt: { roll: 0, pitch: 0 }, push: { 1: { x: 0, z: 0 }, 2: { x: 0, z: 0 } }, gripMul: { 1: 1, 2: 1 } };
     this.current = null; // zona donde está la caja
     this.sheltered = false; // la caja está bajo una carpa
   }
@@ -99,7 +100,7 @@ export class WeatherService {
 
   _clear() {
     const fx = this.fx;
-    fx.wetRate = fx.drain = 0;
+    fx.wetRate = fx.drain = fx.dry = 0;
     fx.tilt.roll = fx.tilt.pitch = 0;
     for (const id of [1, 2]) {
       fx.push[id].x = fx.push[id].z = 0;
