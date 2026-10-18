@@ -1,6 +1,9 @@
 // UI de la partida en HTML encima del canvas. Solo ESCUCHA a la simulación (eventos + lectura de estado).
 // El título / selección vive en ui/menu.js. Zharick: el contrato está en apps/README.md (sección UI).
 import { CONFIG } from '../config.js';
+import { submitWin } from '../leaderboard/api.js';
+import { computeScore, isCampaignLevel } from '../leaderboard/score.js';
+import { ArcadeOverlay } from './arcade.js';
 import './theme.css';
 import './ui.css';
 
@@ -59,6 +62,7 @@ export class UI {
     for (const k of ['ui', 'danger', 'goal', 'water', 'box']) root.style.setProperty(`--${k}`, palette[k]);
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
+    this.arcade = new ArcadeOverlay(root);
     this.meters = {};
     for (const el of root.querySelectorAll('.meter')) {
       this.meters[el.dataset.k] = { el, bar: el.querySelector('i'), val: el.querySelector('b') };
@@ -88,6 +92,7 @@ export class UI {
     this.root.removeEventListener('mousedown', this._noFocus);
     this.root.removeEventListener('click', this._onClick);
     for (const t of this._timers) clearTimeout(t);
+    this.arcade?.destroy();
     this.root.innerHTML = '';
   }
 
@@ -206,7 +211,14 @@ export class UI {
       this.$('.win .time').textContent = fmtTime(r.time);
       this.$('.win .integrity').textContent = `${Math.round(r.bombHealth ?? r.integrity)}%`;
       this.$('.win .wetness').textContent = `${Math.round(r.wetness)}%`;
+      const scoreEl = this.$('.win .score');
+      const campaign = isCampaignLevel(this.game.level.id);
+      if (scoreEl) {
+        scoreEl.hidden = !campaign;
+        scoreEl.querySelector('b').textContent = campaign ? String(computeScore(r)) : '—';
+      }
       this.show('won');
+      if (campaign) this._submitArcade(r);
     });
     ev.on('game:fail', (r) => {
       this.$('.fail h2').textContent = r.label;
@@ -270,6 +282,20 @@ export class UI {
     m.val.textContent = `${v}%`;
     m.el.classList.toggle('low', low);
   }
+
+  /** Envía score al backend; si ya completó los 3 mapas, ofrece guardar nombre arcade. */
+  async _submitArcade(win) {
+    const status = await submitWin(this.game.level.id, win);
+    if (!status) return;
+    const note = this.$('.win .lb-note');
+    if (note) {
+      note.hidden = false;
+      note.textContent = status.improved === false
+        ? `Mejor en este mapa: ${status.bests[this.game.level.id]} · Total ${status.total}`
+        : `¡Nuevo mejor! Total campaña: ${status.total}`;
+    }
+    if (status.canSave && !status.saved) await this.arcade.promptSave(status);
+  }
 }
 
 const TEMPLATE = /* html */ `
@@ -308,7 +334,9 @@ const TEMPLATE = /* html */ `
         <div>Tiempo<b class="time">00:00.0</b></div>
         <div>Contenido<b class="integrity">100%</b></div>
         <div>Mojado<b class="wetness">0%</b></div>
+        <div class="score" hidden>Puntos<b>—</b></div>
       </div>
+      <p class="lb-note" hidden></p>
       <div class="actions">
         <button type="button" class="btn big go" data-act="restart">Otra vez</button>
         <button type="button" class="btn light" data-act="menu">Menú</button>
