@@ -3,6 +3,7 @@
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
 import { CHARACTERS, character } from '../view/characters.js';
+import { ArcadeOverlay } from './arcade.js';
 import { MenuState } from './menuState.js';
 import './theme.css';
 import './menu.css';
@@ -22,7 +23,7 @@ const SLOT_KEYS = {
   p2: { left: ['ArrowLeft'], right: ['ArrowRight'], ok: ['Enter', 'NumpadEnter'] },
 };
 
-const HOME_ACTS = ['play', 'controls'];
+const HOME_ACTS = ['play', 'scores', 'controls'];
 
 export class Menu {
   /**
@@ -43,6 +44,7 @@ export class Menu {
 
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
+    this.arcade = new ArcadeOverlay(root);
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
@@ -108,6 +110,7 @@ export class Menu {
   _act(act) {
     const s = this.state;
     if (act === 'play') s.go('map');
+    else if (act === 'scores') return this.arcade.showBoard();
     else if (act === 'controls') this.overlay = true;
     else if (act === 'close') this.overlay = false;
     else if (act === 'back') s.back();
@@ -324,6 +327,7 @@ const TEMPLATE = /* html */ `
       </div>
       <nav class="m-home">
         <button type="button" class="btn big" data-act="play"><span class="ico">▶</span>Jugar</button>
+        <button type="button" class="btn light" data-act="scores"><span class="ico">🏆</span>Records</button>
         <button type="button" class="btn light" data-act="controls"><span class="ico">🎮</span>Controles</button>
       </nav>
       <p class="m-hint"><kbd>↑</kbd><kbd>↓</kbd> elegir · <kbd>Espacio</kbd> / <kbd>Enter</kbd> aceptar</p>
