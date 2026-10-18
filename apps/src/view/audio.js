@@ -4,8 +4,15 @@ import { CONFIG } from '../config.js';
 import { mixVolume, slotKind } from './audioPrefs.js';
 import { AUDIO } from './deliveries.js';
 
+/** La selva (aldea, templo y puente) comparte un tema. El muelle se queda con el suyo. */
+export function musicSlotFor(levelId) {
+  if (levelId === 'aldea' || levelId === 'templo' || levelId === 'puente') return 'musica-selva';
+  return 'musica-loop';
+}
+
 const SLOTS = {
-  'musica-loop': { volume: 0.35, loop: true },
+  'musica-loop': { volume: 1, loop: true },
+  'musica-selva': { volume: 1, loop: true },
   'sfx-salto': { volume: 0.6 },
   'sfx-inclinacion': { volume: 0.7 },
   'sfx-mojado': { volume: 0.7 },
@@ -35,6 +42,7 @@ export class GameAudio {
     app.root.addChild(this.entity);
     this.available = new Set();
     this._wantMusic = false;
+    this._musicName = 'musica-loop';
 
     for (const [name, opts] of Object.entries(SLOTS)) {
       const url = AUDIO[name];
@@ -57,10 +65,26 @@ export class GameAudio {
       const slot = this.entity.sound.slot(name);
       if (slot) slot.volume = this._level(name);
     }
-    if (this._wantMusic && CONFIG.audio.music > 0 && this.available.has('musica-loop')) {
-      const loop = this.entity.sound.slot('musica-loop');
-      if (loop && !loop.isPlaying) this.entity.sound.play('musica-loop');
-    }
+    this._resumeMusic();
+  }
+
+  /** El loop del nivel. Si falta el archivo de la selva, sigue el del muelle. */
+  useLevel(level) {
+    const pick = musicSlotFor(level?.id);
+    this._musicName = this.available.has(pick) ? pick : 'musica-loop';
+  }
+
+  _resumeMusic() {
+    if (!this._wantMusic || CONFIG.audio.music <= 0 || !this.available.has(this._musicName)) return;
+    const loop = this.entity.sound.slot(this._musicName);
+    if (!loop || loop.isPlaying) return;
+    // Si todavía está cargando, no lo reinicies: play() cortaría la espera.
+    if (!loop.isLoaded && loop.instances.length > 0) return;
+    this.entity.sound.play(this._musicName);
+  }
+
+  _stopMusic() {
+    for (const name of ['musica-loop', 'musica-selva']) this.stop(name);
   }
 
   play(name) {
@@ -159,8 +183,9 @@ export class GameAudio {
     for (const name of this.available) this.entity.sound.stop(name);
   }
 
-  /** Cada frame: el loop del clima sube y baja con la intensidad (llovizna ↔ aguacero, brisa ↔ ráfaga). */
+  /** Cada frame: la música sigue hasta ganar o perder, y el clima sube con su intensidad. */
   update(game) {
+    if (game.state === 'playing' || game.state === 'paused' || game.state === 'failing') this._resumeMusic();
     const zone = game.weather.current;
     if (!zone) return;
     const name = WEATHER_LOOP[zone.type];
@@ -169,14 +194,15 @@ export class GameAudio {
     if (slot) slot.volume = this._level(name, 0.35 + 0.65 * zone.intensity);
   }
 
-  /** Conecta los eventos del juego con los sonidos. */
-  bind(events) {
+  /** Conecta los eventos del juego con los sonidos. `level` elige el loop (selva o muelle). */
+  bind(events, level) {
+    this.useLevel(level);
     events.on('game:start', () => {
       this.stop('musica-victoria');
       this.stop('musica-derrota');
-      this.stop('musica-loop');
+      this._stopMusic();
       this._wantMusic = true;
-      this.play('musica-loop');
+      this.play(this._musicName);
     });
     events.on('player:jump', () => this.play('sfx-salto'));
     events.on('box:state', (e) => e.to === 'critical' && this.play('sfx-inclinacion'));
@@ -198,20 +224,20 @@ export class GameAudio {
     events.on('game:checkpoint', () => this.play('sfx-meta'));
     events.on('game:win', () => {
       this._wantMusic = false;
-      this.stop('musica-loop');
+      this._stopMusic();
       this.play('sfx-meta');
       this.play('musica-victoria');
     });
     events.on('game:fail', () => {
       this._wantMusic = false;
-      this.stop('musica-loop');
+      this._stopMusic();
       this.play('musica-derrota');
     });
     events.on('game:respawn', (e) => {
       if (e.retry) {
         this.stop('musica-derrota');
         this._wantMusic = true;
-        this.play('musica-loop');
+        this.play(this._musicName);
       }
     });
   }
