@@ -1,7 +1,7 @@
 // Arranque: PlayCanvas + menú + partida (simulación + vista + UI) + audio.
 //   Menú (ui/menu.js + view/menuStage.js) → startRun(selección) → partida → backToMenu() borra la partida.
 // Orden de cada frame en partida: teclas globales → input de jugadores → simulación (paso fijo) → vista → UI
-// ?level=<clave> salta el menú y entra directo a ese nivel (también ?level=bahia&debug, ?level=level2&box=bomba).
+// ?level=<clave> salta el menú y entra directo (muelle / bahia / tormenta / aldea / templo / puente).
 import * as pc from 'playcanvas';
 import { CONFIG, selectBox } from './config.js';
 import { Input } from './input.js';
@@ -11,6 +11,7 @@ import { Game } from './sim/game.js';
 import { Menu } from './ui/menu.js';
 import { UI } from './ui/ui.js';
 import { GameAudio } from './view/audio.js';
+import { loadAudioPrefs } from './view/audioPrefs.js';
 import { DEFAULT_CHARS } from './view/characters.js';
 import { PALETTE_MD, reportDeliveries } from './view/deliveries.js';
 import { GameView } from './view/gameView.js';
@@ -28,12 +29,14 @@ window.addEventListener('resize', () => app.resizeCanvas());
 const palette = buildPalette(PALETTE_MD);
 if (palette._custom.length) console.info('[paleta] colores de Luis:', palette._custom.join(', '));
 reportDeliveries();
+loadAudioPrefs();
 
 // ?seed=N repite el mismo azar (NPCs y clima).
 const params = new URLSearchParams(location.search);
 const newSeed = () => (params.has('seed') ? Number(params.get('seed')) : (Math.random() * 2 ** 32) >>> 0);
 
 const audio = new GameAudio(app);
+window.audio = audio;
 const input = new Input(window);
 const uiRoot = document.getElementById('ui');
 const stage = new MenuStage(app, palette);
@@ -43,6 +46,7 @@ const menu = new Menu(document.getElementById('menu'), {
   palette,
   initial: { box: CONFIG.box.profile, ...DEFAULT_CHARS },
   onStart: (sel) => startRun(sel),
+  audio,
 });
 
 /** Partida en curso: { game, view, ui } o null mientras se está en el menú. */
@@ -63,8 +67,8 @@ function startRun({ level, box, chars }) {
   selectBox(box);
   const game = new Game(LEVELS[level] ?? LEVELS[DEFAULT_LEVEL], { seed: newSeed() });
   const view = new GameView(app, game, palette, { chars });
-  const ui = new UI(uiRoot, game, palette, { onMenu: backToMenu });
-  audio.bind(game.events);
+  const ui = new UI(uiRoot, game, palette, { onMenu: backToMenu, audio });
+  audio.bind(game.events, game.level);
   run = { game, view, ui };
   menu.show(false);
   stage.show(false);

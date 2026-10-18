@@ -2,6 +2,7 @@
 // Edita CONFIG directamente: lo que funcione, se copia a src/config.js.
 import GUI from 'lil-gui';
 import { CONFIG } from './config.js';
+import { saveAudioPrefs } from './view/audioPrefs.js';
 
 export class DebugPanel {
   constructor(game) {
@@ -70,6 +71,7 @@ export class DebugPanel {
     fCat.add(Cat, 'desyncMul', 1, 4, 0.1).name('prisa si se separan');
     fCat.add(Cat, 'warnRage', 1, 80, 1).name('pata (rabia)');
     fCat.add(Cat, 'scratchRage', 1, 90, 1).name('arañazo (rabia)');
+    fCat.add(Cat, 'scratchDamage', 1, 40, 1).name('zarpazo %');
     fCat.add(Cat, 'damageRage', 1, 100, 1).name('romper (rabia)');
     fCat.add(Cat, 'chipPerSec', 0, 20, 0.5).name('daño lento %/s');
     fCat.add(Cat, 'cooldown', 0.5, 12, 0.1).name('pausa arañazo (s)');
@@ -85,6 +87,15 @@ export class DebugPanel {
     fBomb.add(BombCfg, 'wetFactor', 0, 1, 0.05).name('agua × factor');
     fBomb.add(BombCfg, 'desyncBelow', 0, 1, 0.05).name('sincronía mínima');
     fBomb.add(BombCfg, 'desyncPerSec', 0, 20, 0.5).name('desync %/s');
+
+    const Aud = CONFIG.audio;
+    const fAud = gui.addFolder('Audio');
+    const applyAud = () => {
+      saveAudioPrefs();
+      window.audio?.applyMix();
+    };
+    fAud.add(Aud, 'music', 0, 1, 0.05).name('música').onChange(applyAud);
+    fAud.add(Aud, 'sfx', 0, 1, 0.05).name('sonidos').onChange(applyAud);
 
     const W = CONFIG.box.wet;
     const f6 = gui.addFolder('Mojado').close();

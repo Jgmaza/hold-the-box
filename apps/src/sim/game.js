@@ -28,6 +28,8 @@
 //   bomb:hit        { amount, cause, health }   un golpe o agua le bajó el %
 //   bomb:desync     {}                      empezaron a ir desincronizados (la bomba se daña)
 //   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
+//   glass:break     { id, x, y, z }          un vidrio normal se rompió bajo un jugador
+//   glass:restore   {}                       los paneles vuelven (reinicio del nivel)
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
 import { Box } from './box.js';
@@ -136,6 +138,8 @@ export class Game {
 
   /** Reinicia el nivel desde cero (sin pasar por el título). */
   restart() {
+    this.world.restoreGlass();
+    this.events.emit('glass:restore', {});
     this._resetRun();
     this._placeAtSpawn(this.level.spawn);
     this.state = 'playing';
@@ -236,6 +240,7 @@ export class Game {
 
     for (const p of this.players) {
       p.endStep(dt);
+      this._stepGlass(p);
       if (p.justJumped) this.events.emit('player:jump', { player: p.id });
       if (p.justLanded) this.events.emit('player:land', { player: p.id, speed: p.landSpeed });
     }
@@ -277,6 +282,16 @@ export class Game {
     if (this._checkFail()) return;
 
     if (this.world.inGoal(c)) this._win();
+  }
+
+  /** Si está parado en vidrio normal, el panel se va y al siguiente paso cae. */
+  _stepGlass(p) {
+    const g = p.ground;
+    if (!g?.def || g.def.kind !== 'glass' || g.def.tempered || g.broken) return;
+    if (!this.world.breakGlass(g)) return;
+    p.grounded = false;
+    p.ground = null;
+    this.events.emit('glass:break', { id: g.def.id, x: p.pos.x, y: g.def.top, z: p.pos.z });
   }
 
   _splash(player) {

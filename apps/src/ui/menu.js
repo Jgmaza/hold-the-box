@@ -3,6 +3,7 @@
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
 import { CHARACTERS, character } from '../view/characters.js';
+import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import { ArcadeOverlay } from './arcade.js';
 import { MenuState } from './menuState.js';
 import './theme.css';
@@ -29,12 +30,14 @@ export class Menu {
   /**
    * @param {HTMLElement} root
    * @param {{ stage: import('../view/menuStage.js').MenuStage, maps: object[], palette: object,
-   *           initial?: object, onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
+   *           initial?: object, audio?: import('../view/audio.js').GameAudio,
+   *           onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
    */
-  constructor(root, { stage, maps, palette, initial, onStart }) {
+  constructor(root, { stage, maps, palette, initial, onStart, audio = null }) {
     this.root = root;
     this.stage = stage;
     this.onStart = onStart;
+    this.audio = audio;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box', 'p2']) root.style.setProperty(`--${k}`, palette[k]);
     this.state = new MenuState({ maps, boxes: BOX_CHOICES, characters: CHARACTERS, initial });
     this.homeFocus = 0;
@@ -48,6 +51,7 @@ export class Menu {
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
+    bindVolumeSliders(this.root, () => this.audio?.applyMix());
     selectBox(this.state.box);
     this._syncStage(true);
     this.show(true);
@@ -92,6 +96,7 @@ export class Menu {
       const el = e.target.closest('button');
       if (!el || el.disabled) return;
       if (el.dataset.act) return this._act(el.dataset.act);
+      if (el.dataset.scroll) return this._scrollMaps(Number(el.dataset.scroll));
       if (el.dataset.level) return this._setLevel(el.dataset.level);
       if (el.dataset.box) return this._setBox(el.dataset.box);
       if (el.dataset.dir) return this._stepChar(el.dataset.slot, Number(el.dataset.dir));
@@ -120,11 +125,18 @@ export class Menu {
     else if (act === 'close') this.overlay = false;
     else if (act === 'back') s.back();
     else if (act === 'next') s.go('chars');
+    else if (act === 'audio') return;
     else if (act === 'fullscreen') {
       if (document.fullscreenElement) document.exitFullscreen?.();
       else document.documentElement.requestFullscreen?.().catch(() => {});
     }
     this._syncStage();
+  }
+
+  /** Desplaza la fila de mapas casi una pantalla hacia un lado. */
+  _scrollMaps(dir) {
+    const row = this.$('.m-maps');
+    row.scrollBy({ left: dir * row.clientWidth * 0.8, behavior: 'smooth' });
   }
 
   _setLevel(key) {
@@ -185,7 +197,11 @@ export class Menu {
     this.$('.m-overlay').classList.toggle('on', this.overlay && s.screen === 'home');
     HOME_ACTS.forEach((act, i) => this.$(`[data-act="${act}"]`).classList.toggle('focus', !this.overlay && i === this.homeFocus));
 
-    for (const el of this.root.querySelectorAll('.m-map')) el.classList.toggle('on', el.dataset.level === s.level);
+    for (const el of this.root.querySelectorAll('.m-map')) {
+      const on = el.dataset.level === s.level;
+      el.classList.toggle('on', on);
+      if (on && this.visible && s.screen === 'map') el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    }
     for (const el of this.root.querySelectorAll('.m-box')) el.classList.toggle('on', el.dataset.box === s.box);
     this.$('.m-maps').classList.toggle('focus', this.mapRow === 0);
     this.$('.m-boxes').classList.toggle('focus', this.mapRow === 1);
@@ -350,6 +366,10 @@ const TEMPLATE = /* html */ `
           ${padCard('p2', 'Jugador 2', ['', '↑', '', '←', '↓', '→'], 'Enter')}
         </div>
         <section class="m-section">
+          <h3>Audio</h3>
+          ${VOLUME_SLIDERS_HTML}
+        </section>
+        <section class="m-section">
           <h3>En partida</h3>
           <div class="m-chips">
             <span class="m-chip"><kbd>P</kbd><kbd>Esc</kbd>Pausa</span>
@@ -375,7 +395,11 @@ const TEMPLATE = /* html */ `
       <button type="button" class="btn icon light" data-act="back" aria-label="Atrás">◀</button>
       <h2>Elige el mapa</h2>
     </header>
-    <div class="m-maps"></div>
+    <div class="m-maps-wrap">
+      <button type="button" class="btn icon light m-arrow" data-scroll="-1" aria-label="Mapas anteriores">◀</button>
+      <div class="m-maps"></div>
+      <button type="button" class="btn icon light m-arrow" data-scroll="1" aria-label="Mapas siguientes">▶</button>
+    </div>
     <h3 class="m-sub">¿Qué caja llevan?</h3>
     <div class="m-boxes"></div>
     <footer class="m-foot">

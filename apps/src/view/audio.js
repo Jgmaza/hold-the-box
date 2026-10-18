@@ -1,9 +1,18 @@
 // Audio de Luis (deliveries/luis/audio/). Si un archivo no existe, ese sonido simplemente no suena.
 import * as pc from 'playcanvas';
+import { CONFIG } from '../config.js';
+import { mixVolume, slotKind } from './audioPrefs.js';
 import { AUDIO } from './deliveries.js';
 
+/** La selva (aldea, templo y puente) comparte un tema. El muelle se queda con el suyo. */
+export function musicSlotFor(levelId) {
+  if (levelId === 'aldea' || levelId === 'templo' || levelId === 'puente') return 'musica-selva';
+  return 'musica-loop';
+}
+
 const SLOTS = {
-  'musica-loop': { volume: 0.35, loop: true },
+  'musica-loop': { volume: 1, loop: true },
+  'musica-selva': { volume: 1, loop: true },
   'sfx-salto': { volume: 0.6 },
   'sfx-inclinacion': { volume: 0.7 },
   'sfx-mojado': { volume: 0.7 },
@@ -19,6 +28,8 @@ const SLOTS = {
   'sfx-trueno': { volume: 0.8 },
   'sfx-olas': { volume: 0.5, loop: true },
   'sfx-ola': { volume: 0.85 },
+  'sfx-mecha': { volume: 0.45 },
+  'sfx-explosion': { volume: 0.85 },
 };
 
 const WEATHER_LOOP = { rain: 'sfx-lluvia', wind: 'sfx-viento', waves: 'sfx-olas' };
@@ -30,6 +41,8 @@ export class GameAudio {
     this.entity.addComponent('sound', { positional: false });
     app.root.addChild(this.entity);
     this.available = new Set();
+    this._wantMusic = false;
+    this._musicName = 'musica-loop';
 
     for (const [name, opts] of Object.entries(SLOTS)) {
       const url = AUDIO[name];
@@ -37,19 +50,59 @@ export class GameAudio {
       const asset = new pc.Asset(name, 'audio', { url });
       app.assets.add(asset);
       app.assets.load(asset);
-      this.entity.sound.addSlot(name, { asset: asset.id, volume: opts.volume, loop: !!opts.loop, overlap: !opts.loop, autoPlay: false });
+      this.entity.sound.addSlot(name, { asset: asset.id, volume: this._level(name), loop: !!opts.loop, overlap: !opts.loop, autoPlay: false });
       this.available.add(name);
     }
   }
 
+  _level(name, weather = 1) {
+    return mixVolume(SLOTS[name].volume * weather, slotKind(name));
+  }
+
+  /** Aplica la mezcla actual (sliders). Si suben la música a media partida, el loop vuelve. */
+  applyMix() {
+    for (const name of this.available) {
+      const slot = this.entity.sound.slot(name);
+      if (slot) slot.volume = this._level(name);
+    }
+    this._resumeMusic();
+  }
+
+  /** El loop del nivel. Si falta el archivo de la selva, sigue el del muelle. */
+  useLevel(level) {
+    const pick = musicSlotFor(level?.id);
+    this._musicName = this.available.has(pick) ? pick : 'musica-loop';
+  }
+
+  _resumeMusic() {
+    if (!this._wantMusic || CONFIG.audio.music <= 0 || !this.available.has(this._musicName)) return;
+    const loop = this.entity.sound.slot(this._musicName);
+    if (!loop || loop.isPlaying) return;
+    // Si todavía está cargando, no lo reinicies: play() cortaría la espera.
+    if (!loop.isLoaded && loop.instances.length > 0) return;
+    this.entity.sound.play(this._musicName);
+  }
+
+  _stopMusic() {
+    for (const name of ['musica-loop', 'musica-selva']) this.stop(name);
+  }
+
   play(name) {
-    if (this.available.has(name)) this.entity.sound.play(name);
+    if (!this.available.has(name)) return;
+    this._applyOne(name);
+    if (this._level(name) <= 0) return;
+    this.entity.sound.play(name);
+  }
+
+  _applyOne(name, weather = 1) {
+    const slot = this.entity.sound.slot(name);
+    if (slot) slot.volume = this._level(name, weather);
   }
 
   /** Si no hay archivo en deliveries/luis/audio/, suena un tono corto (sin copyright). */
   playOrTone(name, kind) {
     if (this.available.has(name)) this.play(name);
-    else this._tone(kind);
+    else if (CONFIG.audio.sfx > 0) this._tone(kind);
   }
 
   _tone(kind) {
@@ -59,6 +112,7 @@ export class GameAudio {
     const ctx = this._ctx;
     if (ctx.state === 'suspended') ctx.resume();
     const t = ctx.currentTime;
+    const sfx = Math.max(0, CONFIG.audio.sfx);
     const gain = ctx.createGain();
     gain.connect(ctx.destination);
     if (kind === 'beep' || kind === 'beepFast') {
@@ -66,7 +120,7 @@ export class GameAudio {
       osc.type = 'square';
       osc.frequency.value = kind === 'beepFast' ? 880 : 520;
       osc.connect(gain);
-      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.setValueAtTime(0.05 * sfx, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
       osc.start(t);
       osc.stop(t + 0.07);
@@ -83,7 +137,7 @@ export class GameAudio {
       filter.frequency.value = 400;
       src.connect(filter);
       filter.connect(gain);
-      gain.gain.setValueAtTime(0.22, t);
+      gain.gain.setValueAtTime(0.22 * sfx, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
       src.start(t);
       src.stop(t + 0.4);
@@ -100,7 +154,7 @@ export class GameAudio {
       filter.frequency.value = 1400;
       src.connect(filter);
       filter.connect(gain);
-      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.setValueAtTime(0.12 * sfx, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
       src.start(t);
       src.stop(t + 0.14);
@@ -113,7 +167,7 @@ export class GameAudio {
     osc.frequency.exponentialRampToValueAtTime(280, t + 0.28);
     osc.connect(gain);
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(0.07, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.07 * sfx, t + 0.03);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
     osc.start(t);
     osc.stop(t + 0.32);
@@ -125,26 +179,30 @@ export class GameAudio {
 
   /** Al salir al menú: corta música y loops de la partida. */
   stopAll() {
+    this._wantMusic = false;
     for (const name of this.available) this.entity.sound.stop(name);
   }
 
-  /** Cada frame: el loop del clima sube y baja con la intensidad (llovizna ↔ aguacero, brisa ↔ ráfaga). */
+  /** Cada frame: la música sigue hasta ganar o perder, y el clima sube con su intensidad. */
   update(game) {
+    if (game.state === 'playing' || game.state === 'paused' || game.state === 'failing') this._resumeMusic();
     const zone = game.weather.current;
     if (!zone) return;
     const name = WEATHER_LOOP[zone.type];
     if (!this.available.has(name)) return;
     const slot = this.entity.sound.slot(name);
-    if (slot) slot.volume = SLOTS[name].volume * (0.35 + 0.65 * zone.intensity);
+    if (slot) slot.volume = this._level(name, 0.35 + 0.65 * zone.intensity);
   }
 
-  /** Conecta los eventos del juego con los sonidos. */
-  bind(events) {
+  /** Conecta los eventos del juego con los sonidos. `level` elige el loop (selva o muelle). */
+  bind(events, level) {
+    this.useLevel(level);
     events.on('game:start', () => {
       this.stop('musica-victoria');
       this.stop('musica-derrota');
-      this.stop('musica-loop');
-      this.play('musica-loop');
+      this._stopMusic();
+      this._wantMusic = true;
+      this.play(this._musicName);
     });
     events.on('player:jump', () => this.play('sfx-salto'));
     events.on('box:state', (e) => e.to === 'critical' && this.play('sfx-inclinacion'));
@@ -165,18 +223,21 @@ export class GameAudio {
     events.on('box:drop', () => this.play('sfx-golpe'));
     events.on('game:checkpoint', () => this.play('sfx-meta'));
     events.on('game:win', () => {
-      this.stop('musica-loop');
+      this._wantMusic = false;
+      this._stopMusic();
       this.play('sfx-meta');
       this.play('musica-victoria');
     });
     events.on('game:fail', () => {
-      this.stop('musica-loop');
+      this._wantMusic = false;
+      this._stopMusic();
       this.play('musica-derrota');
     });
     events.on('game:respawn', (e) => {
       if (e.retry) {
         this.stop('musica-derrota');
-        this.play('musica-loop');
+        this._wantMusic = true;
+        this.play(this._musicName);
       }
     });
   }

@@ -217,7 +217,17 @@ describe('gato', () => {
     run(g, 5, FWD, { x: 0, z: -0.4, jumpPressed: false });
     expect(scratch).not.toBeNull();
     expect([1, 2]).toContain(scratch.player);
-    expect(g.box.dropped).toBe(false);
+  });
+
+  it('cada zarpazo quita %; el huequito no gotea', () => {
+    selectBox('gato');
+    const g = playingGame();
+    g.cat.rage = CONFIG.box.cat.scratchRage;
+    run(g, 0.3, IDLE, IDLE);
+    expect(g.box.integrity).toBeCloseTo(100 - CONFIG.box.cat.scratchDamage);
+    run(g, 1.2, FWD, { x: 0, z: -0.4, jumpPressed: false });
+    expect(g.box.leakRate).toBe(0);
+    expect(g.box.integrity).toBeCloseTo(100 - CONFIG.box.cat.scratchDamage);
   });
 
   it('no araña si caminan juntos, pero la rabia ya sube', () => {

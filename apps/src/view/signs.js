@@ -289,6 +289,66 @@ export function angerMarkCanvas() {
  * Tablones del piso en tonos claros (se tiñen con el color de la madera): 4 tablas atravesadas con juntas,
  * vetas y clavos. Pensada para repetirse (2 m por repetición).
  */
+/** Tierra del pueblo: tierra pisada para repetir (2 m). */
+export function dirtCanvas() {
+  const c = canvas(256, 256);
+  const g = c.getContext('2d');
+  let seed = 23;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#8a6238';
+  g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 80; i++) {
+    const t = 90 + Math.floor(rand() * 50);
+    g.fillStyle = `rgb(${t + 20}, ${t - 10}, ${t - 40})`;
+    g.beginPath();
+    g.ellipse(rand() * 256, rand() * 256, 10 + rand() * 22, 6 + rand() * 12, rand() * 3, 0, Math.PI * 2);
+    g.fill();
+  }
+  return c;
+}
+
+/** Pasto para el suelo del templo / risco. */
+export function grassCanvas() {
+  const c = canvas(256, 256);
+  const g = c.getContext('2d');
+  let seed = 19;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#5a8f3e';
+  g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 220; i++) {
+    const t = 70 + Math.floor(rand() * 50);
+    g.fillStyle = `rgb(${t - 10}, ${t + 40}, ${t - 20})`;
+    g.fillRect(rand() * 256, rand() * 256, 6 + rand() * 14, 4 + rand() * 8);
+  }
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = `rgba(90, 70, 40, ${0.15 + rand() * 0.2})`;
+    g.beginPath();
+    g.ellipse(rand() * 256, rand() * 256, 8 + rand() * 16, 5 + rand() * 8, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  return c;
+}
+
+/** Losa del templo: teselas grises para repetir (2 m). */
+export function stoneCanvas() {
+  const c = canvas(256, 256);
+  const g = c.getContext('2d');
+  let seed = 11;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#8d887c';
+  g.fillRect(0, 0, 256, 256);
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      const t = 145 + Math.floor(rand() * 38);
+      g.fillStyle = `rgb(${t}, ${t - 6}, ${t - 16})`;
+      g.fillRect(x * 32 + 1, y * 32 + 1, 30, 30);
+      g.fillStyle = 'rgba(255,255,255,0.08)';
+      g.fillRect(x * 32 + 2, y * 32 + 2, 12, 3);
+    }
+  }
+  return c;
+}
+
 export function plankCanvas() {
   const c = canvas(256, 256);
   const g = c.getContext('2d');

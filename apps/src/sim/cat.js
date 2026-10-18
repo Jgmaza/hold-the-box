@@ -68,7 +68,7 @@ export class Cat {
         game.events.emit('cat:goal', {});
       }
       this._hurt(game, C.goalDrainPerSec * dt);
-    } else if (this.rage >= C.damageRage) {
+    } else if (this.rage >= C.damageRage && C.chipPerSec > 0) {
       if (!this._toldShred) {
         this._toldShred = true;
         game.events.emit('cat:shred', {});
@@ -123,6 +123,7 @@ export class Cat {
     dz /= len;
     victim.knock(dx * C.knock, C.knockUp, dz * C.knock);
     victim.knockTimer = C.controlTime;
+    b.damage(C.scratchDamage, 'cat');
     const sign = this.side === 1 ? -1 : 1;
     b.kick(sign * C.kick, C.kick * 0.35);
     this.phase = 'swipe';

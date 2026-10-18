@@ -117,20 +117,37 @@ export function rock(P, parent, pos, size = 1, rand = seeded(3)) {
  * Isla por capas, centrada en (x, z), con el mar en `seaY`: arrecife clarito, orilla de arena mojada,
  * arena irregular, colinas de pasto, y encima palmeras, arbustos y rocas en la orilla.
  */
-export function island(P, parent, { x, z, w, d, h, seaY, palms = 2, bushes = 3, rocks = 3, seed = 1 }) {
+export function island(P, parent, { x, z, w, d, h, seaY, palms = 2, bushes = 3, rocks = 3, seed = 1, look = 'beach' }) {
   const g = P.gfx;
   const rand = seeded(seed);
+  const jungle = look === 'jungle';
+  const village = look === 'village';
+  const ruins = look === 'ruins';
+  const canyon = look === 'canyon';
+  const wild = jungle || ruins || canyon || village;
   const root = P.group('isla', parent, [x, seaY, z]);
-  P.ball(root, g.solid('#7fdcec', { gloss: 0.8 }), [0, 0.02, 0], [w * 1.5, 0.04, d * 1.5], { shadows: false, name: 'arrecife' });
-  P.ball(root, g.solid('#a9ecf4', { gloss: 0.8 }), [0, 0.03, 0], [w * 1.18, 0.04, d * 1.18], { shadows: false, name: 'espuma' });
-  P.ball(root, g.solid('sand', { mul: 0.82 }), [0, 0, 0], [w * 1.05, h * 0.35, d * 1.05], { name: 'orilla' });
+  if (ruins) {
+    P.ball(root, g.solid('#8d887c', { gloss: 0.15 }), [0, 0.02, 0], [w * 1.3, 0.05, d * 1.3], { shadows: false, name: 'losa' });
+    P.ball(root, g.solid('#b8b3a8', { mul: 0.9 }), [0, 0, 0], [w * 1.05, h * 0.4, d * 1.05], { name: 'ruina' });
+  } else if (canyon) {
+    P.ball(root, g.solid('#6a5a48', { gloss: 0.12 }), [0, 0.02, 0], [w * 1.2, 0.05, d * 1.2], { shadows: false, name: 'risco' });
+    P.ball(root, g.solid('#8a7358', { mul: 0.85 }), [0, 0, 0], [w * 1.05, h * 0.55, d * 1.05], { name: 'peña' });
+  } else if (jungle || village) {
+    P.ball(root, g.solid('#3d6b4a', { gloss: 0.5 }), [0, 0.02, 0], [w * 1.45, 0.04, d * 1.45], { shadows: false, name: 'orilla-selva' });
+    P.ball(root, g.solid('#2a4a34', { mul: 0.9 }), [0, 0, 0], [w * 1.05, h * 0.35, d * 1.05], { name: 'barro' });
+  } else {
+    P.ball(root, g.solid('#7fdcec', { gloss: 0.8 }), [0, 0.02, 0], [w * 1.5, 0.04, d * 1.5], { shadows: false, name: 'arrecife' });
+    P.ball(root, g.solid('#a9ecf4', { gloss: 0.8 }), [0, 0.03, 0], [w * 1.18, 0.04, d * 1.18], { shadows: false, name: 'espuma' });
+    P.ball(root, g.solid('sand', { mul: 0.82 }), [0, 0, 0], [w * 1.05, h * 0.35, d * 1.05], { name: 'orilla' });
+  }
 
   // Arena: varias lomas encimadas para que el borde no sea un óvalo perfecto.
   for (let i = 0; i < 4; i++) {
     const ox = (rand() - 0.5) * w * 0.3;
     const oz = (rand() - 0.5) * d * 0.3;
     const s = 0.7 + rand() * 0.25;
-    P.ball(root, g.solid('sand', { mul: 0.95 + rand() * 0.1 }), [ox, -h * 0.15, oz], [w * s, h * (1.1 + rand() * 0.3), d * s], { name: 'arena' });
+    const hill = ruins ? '#9a9588' : canyon ? '#7a6550' : jungle || village ? 'leaf' : 'sand';
+    P.ball(root, g.solid(hill, { mul: wild ? 0.7 + rand() * 0.25 : 0.95 + rand() * 0.1 }), [ox, -h * 0.15, oz], [w * s, h * (1.1 + rand() * 0.3), d * s], { name: wild ? 'loma' : 'arena' });
   }
   // Pasto: colinas más chicas hacia el centro.
   const top = h * 0.5;
@@ -149,7 +166,9 @@ export function island(P, parent, { x, z, w, d, h, seaY, palms = 2, bushes = 3, 
   for (let i = 0; i < palms; i++) {
     const px = (i - (palms - 1) / 2) * w * 0.22 + (rand() - 0.5) * w * 0.05;
     const pz = (rand() - 0.6) * d * 0.15;
-    palm(P, root, [px, surface(px, pz) - 0.1, pz], { height: h * (1.5 + rand() * 0.6), lean: (px >= 0 ? 1 : -1) * (0.15 + rand() * 0.2), yaw: (rand() - 0.5) * 50, rand });
+    const py = surface(px, pz) - 0.1;
+    if (jungle || village) mangrove(P, root, [px, py, pz], { height: h * (2.2 + rand() * 0.6), rand });
+    else if (!ruins && !canyon) palm(P, root, [px, py, pz], { height: h * (1.5 + rand() * 0.6), lean: (px >= 0 ? 1 : -1) * (0.15 + rand() * 0.2), yaw: (rand() - 0.5) * 50, rand });
   }
   for (let i = 0; i < bushes; i++) {
     const a = rand() * Math.PI * 2;
@@ -161,5 +180,144 @@ export function island(P, parent, { x, z, w, d, h, seaY, palms = 2, bushes = 3, 
     const a = rand() * Math.PI * 2;
     rock(P, root, [Math.cos(a) * w * 0.48, 0, Math.sin(a) * d * 0.48], h * (0.25 + rand() * 0.2), rand);
   }
+  return root;
+}
+
+/** Mangle: raíces en zancos que se juntan y un copo de hojas arriba. */
+export function mangrove(P, parent, pos, { height = 5.2, rand = seeded(4) } = {}) {
+  const g = P.gfx;
+  const root = P.group('mangle', parent, pos);
+  const bark = [g.solid('trunk', { mul: 0.62 }), g.solid('trunk', { mul: 0.48 })];
+  const meet = [0, height * 0.42, 0];
+  const n = 5 + Math.floor(rand() * 3);
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + rand() * 0.25;
+    const r = 0.55 + rand() * 0.55;
+    P.limb(root, bark[i % 2], [Math.cos(a) * r, 0, Math.sin(a) * r], meet, 0.055 + rand() * 0.02, { name: 'raiz' });
+  }
+  P.limb(root, bark[0], meet, [0, height, 0], 0.09, { name: 'tronco' });
+  const leaf = [g.solid('leaf', { mul: 0.55 }), g.solid('leaf', { mul: 0.75 }), g.solid('leaf', { mul: 0.95 })];
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2 + rand();
+    const d = 0.7 + rand() * 1.1;
+    P.ball(root, leaf[i % 3], [Math.cos(a) * d, height + rand() * 0.45, Math.sin(a) * d], [1.5 + rand() * 0.4, 0.75, 1.5 + rand() * 0.4], { name: 'copa' });
+  }
+  return root;
+}
+
+/** Caimán bajo: cuerpo, hocico y cola. Se dibuja casi a ras del agua. */
+export function crocodile(P, parent, pos, { yaw = 0 } = {}) {
+  const g = P.gfx;
+  const root = P.group('caiman', parent, pos, [0, yaw, 0]);
+  const skin = g.solid('#4a6b3a', { gloss: 0.35 });
+  const dark = g.solid('#2f4a28');
+  P.ball(root, skin, [0, 0.1, 0], [0.42, 0.2, 1.55], { name: 'cuerpo' });
+  P.ball(root, skin, [0, 0.12, 0.82], [0.26, 0.14, 0.62], { name: 'hocico' });
+  P.ball(root, dark, [0, 0.08, -0.95], [0.18, 0.1, 0.7], { name: 'cola' });
+  const eye = g.solid('#1d1d1d');
+  P.ball(root, eye, [-0.1, 0.22, 0.52], [0.055, 0.055, 0.055], { shadows: false, name: 'ojo' });
+  P.ball(root, eye, [0.1, 0.22, 0.52], [0.055, 0.055, 0.055], { shadows: false, name: 'ojo' });
+  return root;
+}
+
+/** Mono colgado: el `pos` es el punto de la rama. */
+export function monkey(P, parent, pos, { hang = 1.15, yaw = 0 } = {}) {
+  const g = P.gfx;
+  const root = P.group('mono', parent, pos, [0, yaw, 0]);
+  const fur = g.solid('#6b3f24');
+  const face = g.solid('#d4a574');
+  P.limb(root, fur, [0, 0, 0], [0, -hang, 0], 0.035, { name: 'brazo' });
+  P.ball(root, fur, [0, -hang, 0], [0.26, 0.3, 0.2], { name: 'cuerpo' });
+  P.ball(root, fur, [0, -hang - 0.26, 0.02], [0.15, 0.15, 0.15], { name: 'cabeza' });
+  P.ball(root, face, [0, -hang - 0.27, 0.08], [0.1, 0.09, 0.06], { shadows: false, name: 'cara' });
+  P.limb(root, fur, [0, -hang - 0.08, -0.05], [0.22, -hang + 0.15, -0.25], 0.025, { name: 'cola' });
+  return root;
+}
+
+/** Cabeza de piedra tipo moái, al lado del camino. */
+export function stoneHead(P, parent, pos, { h = 3.4, yaw = 0 } = {}) {
+  const g = P.gfx;
+  const root = P.group('cabeza', parent, pos, [0, yaw, 0]);
+  const stone = g.solid('#b8b3a8', { mul: 0.95, gloss: 0.12 });
+  const dark = g.solid('#8d887c', { gloss: 0.1 });
+  g.prim('box', stone, { parent: root, pos: [0, h * 0.46, 0], scale: [1.35, h * 0.92, 1.05], name: 'bloque' });
+  g.prim('box', dark, { parent: root, pos: [0, h * 0.78, 0.42], scale: [1.15, 0.22, 0.28], name: 'ceja' });
+  g.prim('box', dark, { parent: root, pos: [0, h * 0.52, 0.52], scale: [0.28, 0.55, 0.22], name: 'nariz' });
+  g.prim('box', dark, { parent: root, pos: [0, h * 0.28, 0.48], scale: [0.7, 0.12, 0.18], name: 'boca' });
+  return root;
+}
+
+/** Pirámide escalonada (se lee de lejos). */
+export function pyramid(P, parent, pos, { size = 9, h = 7 } = {}) {
+  const g = P.gfx;
+  const root = P.group('piramide', parent, pos);
+  const stone = g.solid('#c4b8a4', { gloss: 0.08 });
+  const steps = 5;
+  for (let i = 0; i < steps; i++) {
+    const k = 1 - i / steps;
+    const y = (h / steps) * (i + 0.5);
+    g.prim('box', stone, { parent: root, pos: [0, y, 0], scale: [size * k, h / steps + 0.04, size * k], name: 'escalon' });
+  }
+  return root;
+}
+
+/** Cortina de agua bajo el puente: solo se ve, no choca. */
+export function waterfall(P, parent, pos, { h = 4.2, w = 2.4 } = {}) {
+  const g = P.gfx;
+  const root = P.group('catarata', parent, pos);
+  const sheet = g.solid('#8fd4e8', { opacity: 0.38, unlit: true });
+  const foam = g.solid('foam', { opacity: 0.7, unlit: true });
+  g.prim('box', sheet, { parent: root, pos: [0, h / 2, 0], scale: [w, h, 0.12], shadows: false, name: 'agua' });
+  g.prim('box', sheet, { parent: root, pos: [0.15, h / 2, 0.08], scale: [w * 0.7, h, 0.08], shadows: false, name: 'agua' });
+  P.ball(root, foam, [0, 0.08, 0.1], [w * 1.15, 0.18, 0.7], { shadows: false, name: 'espuma' });
+  P.ball(root, foam, [0, h - 0.1, 0], [w * 0.9, 0.12, 0.25], { shadows: false, name: 'borde' });
+  return root;
+}
+
+/** Mesa de ofrenda en la meta. */
+export function altar(P, parent, pos) {
+  const g = P.gfx;
+  const root = P.group('ofrenda', parent, pos);
+  const stone = g.solid('#b8b3a8', { gloss: 0.12 });
+  const gold = g.solid('ui', { gloss: 0.55 });
+  g.prim('box', stone, { parent: root, pos: [0, 0.45, 0], scale: [2.2, 0.9, 1.1], name: 'mesa' });
+  g.prim('box', stone, { parent: root, pos: [0, 0.95, 0], scale: [2.4, 0.1, 1.25], name: 'tapa' });
+  g.prim('cylinder', gold, { parent: root, pos: [0, 1.25, 0], scale: [0.28, 0.45, 0.28], name: 'idolo' });
+  P.ball(root, gold, [0, 1.58, 0], [0.22, 0.22, 0.22], { name: 'cabeza' });
+  return root;
+}
+
+/** Choza de palma al final del manglar. */
+export function hut(P, parent, pos) {
+  const g = P.gfx;
+  const root = P.group('choza', parent, pos);
+  g.prim('box', g.solid('wood', { mul: 0.7 }), { parent: root, pos: [0, 0.7, 0], scale: [2.2, 1.4, 1.8], name: 'pared' });
+  g.prim('box', g.solid('leaf', { mul: 0.7 }), { parent: root, pos: [0, 1.7, 0], rot: [0, 0, 18], scale: [2.8, 0.12, 2.2], name: 'techo' });
+  g.prim('box', g.solid('leaf', { mul: 0.55 }), { parent: root, pos: [0, 1.7, 0], rot: [0, 0, -18], scale: [2.8, 0.12, 2.2], name: 'techo' });
+  g.prim('box', g.solid('#3a2418'), { parent: root, pos: [0, 0.55, 0.88], scale: [0.7, 1.1, 0.08], name: 'puerta' });
+  return root;
+}
+
+/** Tótem de madera del pueblo. */
+export function totem(P, parent, pos, { h = 2.6 } = {}) {
+  const g = P.gfx;
+  const root = P.group('totem', parent, pos);
+  const wood = g.solid('trunk', { mul: 0.85 });
+  const face = g.solid('#e8c36a', { gloss: 0.2 });
+  g.prim('cylinder', wood, { parent: root, pos: [0, h / 2, 0], scale: [0.38, h, 0.38], name: 'palo' });
+  g.prim('box', face, { parent: root, pos: [0, h * 0.72, 0.16], scale: [0.42, 0.38, 0.12], name: 'cara' });
+  g.prim('box', g.solid('#2a2018'), { parent: root, pos: [-0.08, h * 0.76, 0.22], scale: [0.08, 0.08, 0.04], name: 'ojo' });
+  g.prim('box', g.solid('#2a2018'), { parent: root, pos: [0.08, h * 0.76, 0.22], scale: [0.08, 0.08, 0.04], name: 'ojo' });
+  g.prim('box', wood, { parent: root, pos: [0, h + 0.12, 0], scale: [0.7, 0.16, 0.7], name: 'sombrero' });
+  return root;
+}
+
+/** Pared de risco (solo se ve). */
+export function cliff(P, parent, pos, { h = 3.2, w = 2.2, d = 8 } = {}) {
+  const g = P.gfx;
+  const root = P.group('risco', parent, pos);
+  const stone = g.solid('#8a7358', { gloss: 0.1 });
+  g.prim('box', stone, { parent: root, pos: [0, h / 2, 0], scale: [w, h, d], name: 'pared' });
+  g.prim('box', g.solid('#6a5a48', { gloss: 0.08 }), { parent: root, pos: [0, h * 0.7, 0], scale: [w * 1.08, h * 0.35, d * 0.7], name: 'saliente' });
   return root;
 }

@@ -92,13 +92,14 @@ export class Water {
    * @param {number} [o.amp=0.08]         altura de las olas (m)
    * @param {[number, number]} [o.center] centro fijo (sin cámara que seguir, p. ej. el menú)
    */
-  constructor(gfx, { y, parent = null, shores = [], amp = 0.08, center = [0, -50] } = {}) {
+  constructor(gfx, { y, parent = null, shores = [], amp = 0.08, center = [0, -50], tint } = {}) {
     this.gfx = gfx;
     this.y = y;
     this.amp = amp;
     this.center = center;
     const device = gfx.device;
 
+    this.tint = tint;
     this.material = this._material(device);
     this._shoreMap(device, shores);
 
@@ -111,7 +112,8 @@ export class Water {
     this.mesh = mesh;
 
     // Más allá de la malla: plano hondo y quieto (debajo del valle más bajo de las olas).
-    this.far = gfx.prim('plane', gfx.solid('water', { gloss: 0.6, mul: 0.82 }), { parent, pos: [0, y - amp - 0.05, 0], scale: [1600, 1, 1600], shadows: false, name: 'agua-lejos' });
+    const far = tint === 'swamp' ? '#245044' : tint === 'pool' ? '#3a5048' : tint === 'gorge' ? '#1e3238' : 'water';
+    this.far = gfx.prim('plane', gfx.solid(far, { gloss: 0.6, mul: 0.82 }), { parent, pos: [0, y - amp - 0.05, 0], scale: [1600, 1, 1600], shadows: false, name: 'agua-lejos' });
     this._place(center[0], center[1]);
   }
 
@@ -137,9 +139,23 @@ export class Water {
       m.shaderChunksVersion = pc.CHUNKAPI_2_8;
     }
     const g = this.gfx;
-    m.setParameter('uWaterDeep', linear(g.color('water', 0.78)));
-    m.setParameter('uWaterShallow', linear(g.color('#5fd0e6')));
-    m.setParameter('uWaterFoam', linear(g.color('foam')));
+    if (this.tint === 'swamp') {
+      m.setParameter('uWaterDeep', linear(g.color('#1a3a32', 0.9)));
+      m.setParameter('uWaterShallow', linear(g.color('#4a7a62')));
+      m.setParameter('uWaterFoam', linear(g.color('#d5e8d8')));
+    } else if (this.tint === 'pool') {
+      m.setParameter('uWaterDeep', linear(g.color('#2a3a38', 0.9)));
+      m.setParameter('uWaterShallow', linear(g.color('#6a8a7a')));
+      m.setParameter('uWaterFoam', linear(g.color('#e4ebe4')));
+    } else if (this.tint === 'gorge') {
+      m.setParameter('uWaterDeep', linear(g.color('#1a2830', 0.95)));
+      m.setParameter('uWaterShallow', linear(g.color('#3d6a72')));
+      m.setParameter('uWaterFoam', linear(g.color('#e8f2f4')));
+    } else {
+      m.setParameter('uWaterDeep', linear(g.color('water', 0.78)));
+      m.setParameter('uWaterShallow', linear(g.color('#5fd0e6')));
+      m.setParameter('uWaterFoam', linear(g.color('foam')));
+    }
     m.setParameter('uWaterAmp', this.amp);
     m.update();
     this.gfx._owned.push(m);

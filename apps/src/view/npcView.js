@@ -18,10 +18,12 @@ const KID = { skin: '#f6c79a', cheek: '#ff9c8f', cap: '#2f80ed', shorts: '#3559b
 const DOG = { fur: '#c98a4b', furDark: '#8a5a2e', light: '#f3d6aa', nose: '#2b2018', tongue: '#ff7a8a', tag: '#ffd54a' };
 
 export class NpcViews {
-  constructor(gfx, service, particles) {
+  constructor(gfx, service, particles, { theme, biome } = {}) {
     this.gfx = gfx;
     this.service = service;
     this.particles = particles;
+    this.theme = theme;
+    this.biome = biome;
     this.parts = new Parts(gfx);
     this.root = gfx.group('npcs');
     this._sectors = new Map(); // fov (grados) → malla del cono de visión
@@ -46,7 +48,8 @@ export class NpcViews {
     const root = g.group(`npc-${npc.id}`, this.root);
     const body = g.group('body', root);
     const v = { npc, root, body, bob: 0, walk: 0, fov: null, legs: [], markY: npc.T.height + 0.5, particles: this.particles };
-    BUILDERS[npc.difficulty](this.parts, body, g.solid(ACCENT[npc.difficulty], { gloss: 0.5 }), v);
+    const pack = this.biome === 'village' ? VILLAGE : this.theme === 'jungle' ? JUNGLE : BUILDERS;
+    pack[npc.difficulty](this.parts, body, g.solid(ACCENT[npc.difficulty], { gloss: 0.5 }), v);
 
     v.calmMat = g.solid(ACCENT[npc.difficulty], { opacity: 0.16, unlit: true });
     v.visionMi = new pc.MeshInstance(this._sector(npc.T.visionFov), v.calmMat);
@@ -354,4 +357,162 @@ const BUILDERS = {
       }
     };
   },
+};
+
+const IGUANA = { hide: '#4a7a3a', dark: '#2f4a28', belly: '#c4d48a', dew: '#c8453c' };
+const APE = { fur: '#6b3f24', face: '#d4a574', fruit: '#6aa84f' };
+const CAT = { fur: '#d4a034', dark: '#3a2a18', belly: '#f0d8a0', spot: '#2a2018' };
+
+/** Misma conducta, otra pinta: iguana / mono / jaguar. */
+const JUNGLE = {
+  easy(P, body, _accent, v) {
+    const hide = P.mat(IGUANA.hide, { gloss: 0.4 });
+    const dark = P.mat(IGUANA.dark, { gloss: 0.35 });
+    P.limb(body, hide, [0, 0.16, -0.28], [0, 0.2, 0.28], 0.11, { name: 'cuerpo' });
+    P.ball(body, P.mat(IGUANA.belly), [0, 0.12, 0.02], [0.22, 0.1, 0.42], { name: 'panza' });
+    P.ball(body, hide, [0, 0.24, 0.34], [0.2, 0.16, 0.22], { name: 'cabeza' });
+    P.ball(body, P.mat(IGUANA.dew), [0, 0.12, 0.4], [0.04, 0.12, 0.08], { name: 'papada' });
+    P.eye(body, [-0.06, 0.3, 0.42], 0.055, 0.5);
+    P.eye(body, [0.06, 0.3, 0.42], 0.055, 0.5);
+    P.limb(body, dark, [0, 0.16, -0.3], [0, 0.1, -0.7], 0.04, { name: 'cola' });
+    for (const [x, z, phase] of [[-0.1, 0.18, 0], [0.1, 0.18, Math.PI], [-0.1, -0.16, Math.PI], [0.1, -0.16, 0]]) {
+      const hip = P.group('pata', body, [x, 0.16, z]);
+      P.limb(hip, hide, [0, 0, 0], [x * 0.8, -0.14, 0], 0.03);
+      v.legs.push({ g: hip, axis: 'x', amp: 24, phase });
+    }
+    v.markY = 0.7;
+    v.animate = (vv, _dt, time) => {
+      const wiggle = Math.sin(time * (vv.npc.state === 'attack' ? 18 : 4)) * 8;
+      vv.body.setLocalEulerAngles(0, wiggle, 0);
+    };
+  },
+
+  medium(P, body, shirt, v) {
+    const fur = P.mat(APE.fur, { gloss: 0.3 });
+    const face = P.mat(APE.face, { gloss: 0.25 });
+    [-1, 1].forEach((s) => {
+      const hip = P.group('pierna', body, [s * 0.1, 0.38, 0]);
+      P.limb(hip, fur, [0, 0, 0], [0, -0.3, 0.04], 0.055);
+      P.ball(hip, fur, [0, -0.32, 0.06], [0.1, 0.07, 0.12]);
+      v.legs.push({ g: hip, axis: 'x', amp: 28, phase: s > 0 ? Math.PI : 0 });
+    });
+    P.ball(body, fur, [0, 0.55, 0], [0.34, 0.4, 0.26], { name: 'torso' });
+    P.ball(body, shirt, [0, 0.58, 0.1], [0.16, 0.12, 0.06], { shadows: false, name: 'pecho' });
+    const head = P.group('cabeza', body, [0, 0.88, 0.02]);
+    v.head = head;
+    P.ball(head, fur, [0, 0.04, -0.02], [0.34, 0.32, 0.3]);
+    P.ball(head, face, [0, -0.02, 0.12], [0.2, 0.18, 0.14], { name: 'cara' });
+    P.eye(head, [-0.06, 0.04, 0.16], 0.07, 0.5);
+    P.eye(head, [0.06, 0.04, 0.16], 0.07, 0.5);
+    P.limb(body, fur, [0, 0.48, -0.12], [0.22, 0.7, -0.28], 0.03, { name: 'cola' });
+    const fruit = P.group('coco', body, [0.12, 0.52, 0.22]);
+    P.ball(fruit, P.mat(APE.fruit, { gloss: 0.5 }), [0, 0, 0], [0.14, 0.14, 0.14], { name: 'fruta' });
+    v.pump = fruit;
+    for (const s of [-1, 1]) P.limb(body, fur, [s * 0.16, 0.68, 0], [0.1, 0.52, 0.18], 0.04);
+    v.markY = 1.4;
+    v.animate = (vv, _dt, time) => {
+      const n = vv.npc;
+      vv.pump.setLocalPosition(0.12, 0.52 + Math.abs(Math.sin(time * 16)) * 0.08 * n.windup, 0.22);
+      vv.head.setLocalEulerAngles(n.windup > 0 ? -8 : Math.sin(time * 2) * 6, n.state === 'idle' ? Math.sin(time * 1.2) * 18 : 0, 0);
+    };
+  },
+
+  hard(P, body, collar, v) {
+    const fur = P.mat(CAT.fur, { gloss: 0.45 });
+    const dark = P.mat(CAT.dark, { gloss: 0.35 });
+    const belly = P.mat(CAT.belly, { gloss: 0.3 });
+    for (const [x, z, phase] of [[-0.12, 0.22, 0], [0.12, 0.22, Math.PI], [-0.12, -0.28, Math.PI], [0.12, -0.28, 0]]) {
+      const hip = P.group('pata', body, [x, 0.4, z]);
+      P.limb(hip, fur, [0, 0, 0], [0, -0.3, 0.02], 0.06);
+      P.ball(hip, dark, [0, -0.34, 0.04], [0.12, 0.07, 0.14]);
+      v.legs.push({ g: hip, axis: 'x', amp: 30, phase });
+    }
+    P.limb(body, fur, [0, 0.48, -0.3], [0, 0.5, 0.22], 0.2, { name: 'cuerpo' });
+    P.ball(body, belly, [0, 0.4, 0], [0.28, 0.16, 0.5], { name: 'panza' });
+    for (const [x, z] of [[-0.08, 0.1], [0.1, -0.05], [-0.05, -0.2], [0.08, 0.22]]) {
+      P.ball(body, P.mat(CAT.spot), [x, 0.62, z], [0.08, 0.04, 0.08], { shadows: false, name: 'pinta' });
+    }
+    P.ring(body, collar, [0, 0.62, 0.28], 0.13, 0.025, { rot: [40, 0, 0], name: 'collar' });
+    const head = P.group('cabeza', body, [0, 0.72, 0.4]);
+    v.head = head;
+    P.ball(head, fur, [0, 0, 0], [0.32, 0.28, 0.3]);
+    P.ball(head, belly, [0, -0.04, 0.14], [0.16, 0.12, 0.16], { name: 'hocico' });
+    P.ball(head, dark, [0, -0.01, 0.24], [0.07, 0.05, 0.05], { name: 'nariz' });
+    P.eye(head, [-0.07, 0.05, 0.12], 0.07, 0.55);
+    P.eye(head, [0.07, 0.05, 0.12], 0.07, 0.55);
+    v.ears = [-1, 1].map((s) => {
+      const e = P.group('oreja', head, [s * 0.12, 0.14, -0.02]);
+      P.ball(e, dark, [0, 0.06, 0], [0.07, 0.12, 0.05]);
+      return { g: e, s };
+    });
+    v.tail = P.group('cola', body, [0, 0.52, -0.48]);
+    P.limb(v.tail, fur, [0, 0, 0], [0, 0.12, -0.28], 0.04);
+    v.markY = 1.25;
+    v.animate = (vv, _dt, time) => {
+      const n = vv.npc;
+      const angry = n.state === 'alert' || n.state === 'attack';
+      vv.tail.setLocalEulerAngles(0, Math.sin(time * (angry ? 20 : 8)) * 28, 0);
+      vv.ears.forEach(({ g, s }) => g.setLocalEulerAngles(angry ? -12 : 0, 0, s * (angry ? 8 : 0)));
+      vv.head.setLocalEulerAngles(n.windup > 0 ? 10 * n.windup : Math.sin(time * 2) * 3, 0, 0);
+    };
+  },
+};
+
+const VILL = { skin: '#e0a070', cloth: '#c45c2a', hat: '#c9a24a', hair: '#3a2418' };
+
+/** Gente del pueblo: niño bajo (se salta) y aldeano con calabaza de agua. */
+const VILLAGE = {
+  easy(P, body, shirt, v) {
+    const skin = P.mat(VILL.skin, { gloss: 0.25 });
+    [-1, 1].forEach((s) => {
+      const hip = P.group('pierna', body, [s * 0.07, 0.2, 0]);
+      P.limb(hip, skin, [0, 0, 0], [0, -0.16, 0], 0.04);
+      P.ball(hip, P.mat(VILL.cloth), [0, -0.18, 0.03], [0.09, 0.06, 0.12]);
+      v.legs.push({ g: hip, axis: 'x', amp: 26, phase: s > 0 ? Math.PI : 0 });
+    });
+    P.ball(body, P.mat(VILL.cloth, { gloss: 0.3 }), [0, 0.28, 0], [0.26, 0.22, 0.2], { name: 'tunic' });
+    P.ball(body, shirt, [0, 0.3, 0.08], [0.1, 0.08, 0.04], { shadows: false });
+    const head = P.group('cabeza', body, [0, 0.48, 0]);
+    v.head = head;
+    P.ball(head, skin, [0, 0, 0], [0.28, 0.26, 0.26]);
+    P.ball(head, P.mat(VILL.hair), [0, 0.06, -0.04], [0.28, 0.14, 0.22]);
+    P.eye(head, [-0.06, 0.02, 0.11], 0.06, 0.5);
+    P.eye(head, [0.06, 0.02, 0.11], 0.06, 0.5);
+    P.ball(head, P.mat(VILL.hat, { gloss: 0.2 }), [0, 0.12, 0], [0.34, 0.08, 0.34], { name: 'sombrero' });
+    v.markY = 0.75;
+    v.animate = (vv, _dt, time) => {
+      vv.head.setLocalEulerAngles(Math.sin(time * 2) * 6, vv.npc.state === 'idle' ? Math.sin(time * 1.4) * 16 : 0, 0);
+    };
+  },
+
+  medium(P, body, shirt, v) {
+    const skin = P.mat(VILL.skin, { gloss: 0.25 });
+    [-1, 1].forEach((s) => {
+      const hip = P.group('pierna', body, [s * 0.09, 0.36, 0]);
+      P.limb(hip, skin, [0, 0, 0], [0, -0.28, 0], 0.05);
+      P.ball(hip, P.mat('#5a3a18'), [0, -0.3, 0.04], [0.11, 0.07, 0.14]);
+      v.legs.push({ g: hip, axis: 'x', amp: 30, phase: s > 0 ? Math.PI : 0 });
+    });
+    P.ball(body, P.mat(VILL.cloth, { gloss: 0.3 }), [0, 0.52, 0], [0.32, 0.36, 0.24], { name: 'tunic' });
+    P.ball(body, shirt, [0, 0.58, 0.1], [0.12, 0.1, 0.05], { shadows: false });
+    const head = P.group('cabeza', body, [0, 0.86, 0]);
+    v.head = head;
+    P.ball(head, skin, [0, 0, 0], [0.34, 0.32, 0.32]);
+    P.ball(head, P.mat(VILL.hair), [0, 0.04, -0.06], [0.34, 0.16, 0.26]);
+    P.eye(head, [-0.07, 0.02, 0.14], 0.07, 0.5);
+    P.eye(head, [0.07, 0.02, 0.14], 0.07, 0.5);
+    P.ball(head, P.mat(VILL.hat), [0, 0.14, 0], [0.4, 0.08, 0.4]);
+    const gourd = P.group('calabaza', body, [0.14, 0.5, 0.22]);
+    P.ball(gourd, P.mat('#6aa84f', { gloss: 0.45 }), [0, 0, 0], [0.16, 0.16, 0.16]);
+    v.pump = gourd;
+    for (const s of [-1, 1]) P.limb(body, skin, [s * 0.16, 0.66, 0], [0.1, 0.5, 0.18], 0.04);
+    v.markY = 1.35;
+    v.animate = (vv, _dt, time) => {
+      const n = vv.npc;
+      vv.pump.setLocalPosition(0.14, 0.5 + Math.abs(Math.sin(time * 16)) * 0.08 * n.windup, 0.22);
+      vv.head.setLocalEulerAngles(n.windup > 0 ? -8 : Math.sin(time * 1.8) * 5, n.state === 'idle' ? Math.sin(time * 1.2) * 18 : 0, 0);
+    };
+  },
+
+  hard: JUNGLE.hard,
 };

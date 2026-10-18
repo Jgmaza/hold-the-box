@@ -3,6 +3,7 @@
 import { CONFIG } from '../config.js';
 import { submitWin } from '../leaderboard/api.js';
 import { computeScore, isCampaignLevel } from '../leaderboard/score.js';
+import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import './theme.css';
 import './ui.css';
 
@@ -51,13 +52,24 @@ const NPC_HIT = {
   medium: ['¡Chorro! Se moja la caja', 'wet'],
   hard: ['¡Embestida! Contenido y agua', 'bad'],
 };
+const NPC_HIT_JUNGLE = {
+  easy: ['¡La iguana mordió! Se botó contenido', 'bad'],
+  medium: ['¡El mono tiró agua!', 'wet'],
+  hard: ['¡El jaguar! Contenido y agua', 'bad'],
+};
+const NPC_HIT_VILLAGE = {
+  easy: ['¡El niño del pueblo! Se botó contenido', 'bad'],
+  medium: ['¡El aldeano tiró agua!', 'wet'],
+  hard: ['¡El jaguar! Contenido y agua', 'bad'],
+};
 
 export class UI {
-  /** @param {{ onMenu?: () => void }} opts  `onMenu`: botón "Menú" de pausa / victoria / derrota */
-  constructor(root, game, palette, { onMenu = () => {} } = {}) {
+  /** @param {{ onMenu?: () => void, audio?: import('../view/audio.js').GameAudio }} opts */
+  constructor(root, game, palette, { onMenu = () => {}, audio = null } = {}) {
     this.root = root;
     this.game = game;
     this.onMenu = onMenu;
+    this.audio = audio;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box']) root.style.setProperty(`--${k}`, palette[k]);
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
@@ -68,9 +80,14 @@ export class UI {
     this._lastJump = { 1: -10, 2: -10 };
     this._timers = new Set();
     this.bombMode = CONFIG.box.bomb.enabled;
+    this.catMode = CONFIG.box.cat.enabled;
+    this.jungle = game.world?.level?.theme === 'jungle';
+    this.village = game.world?.level?.biome === 'village';
     if (this.bombMode) this._setupBombHud();
+    else if (this.catMode) this._setupCatHud();
     this._bind(game.events);
     this._bindButtons();
+    bindVolumeSliders(this.root, () => this.audio?.applyMix());
     this.show(game.state);
   }
 
@@ -107,11 +124,21 @@ export class UI {
     this._lastDesyncToast = -10;
   }
 
+  /** Caja del gato: la primera barra es el % que queda (¡Miau!); sin cronómetro ni número de rabia. */
+  _setupCatHud() {
+    this.$('.hud').classList.add('cat');
+    const life = this.meters.integrity;
+    life.el.dataset.k = 'cat';
+    life.el.querySelector('span').textContent = '¡Miau!';
+    this.$('.timer').style.display = 'none';
+    this.$('.box-name').style.display = 'none';
+    this.$('.win .integrity').previousSibling.textContent = '¡Miau!';
+  }
+
   _paintBoxName() {
     const id = CONFIG.box.profile;
     const name = this.$('.box-name');
     let label = 'VIP';
-    if (CONFIG.box.cat.enabled) label = `GATO ${Math.round(this.game.cat.rage)}`;
     if (this.bombMode) label = 'BOMBA';
     if (name.textContent !== label) name.textContent = label;
     name.dataset.box = id;
@@ -138,6 +165,7 @@ export class UI {
   show(state) {
     for (const s of this.root.querySelectorAll('.screen')) s.classList.toggle('on', s.dataset.screen === state);
     this.$('.hud').classList.toggle('hidden', state === 'title');
+    this.$('.spk')?.classList.toggle('hidden', state === 'title');
   }
 
   toast(text, kind = '') {
@@ -169,7 +197,10 @@ export class UI {
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
     ev.on('hazard:hit', () => !this.bombMode && this.toast('¡Rodillo! La caja se sacude', 'bad'));
     ev.on('cat:warn', (e) => this.toast(`El gato asoma la pata hacia P${e.player}`, 'bad'));
-    ev.on('cat:scratch', (e) => this.toast(`¡El gato arañó a P${e.player}!`, 'bad'));
+    ev.on('cat:scratch', (e) => {
+      this.toast(`¡Zarpazo a P${e.player}! −${Math.round(CONFIG.box.cat.scratchDamage)}%`, 'bad');
+      this.flash('integrity');
+    });
     ev.on('cat:shred', () => this.toast('¡El gato está rompiendo la caja!', 'bad'));
     ev.on('cat:goal', () => this.toast('¡Quietos en la meta! El gato vacía la caja', 'bad'));
     ev.on('bomb:warn', () => this.toast('¡La bomba está por explotar!', 'bad'));
@@ -183,12 +214,15 @@ export class UI {
       this.toast(`${BOMB_HIT[e.cause] ?? '¡Golpe!'} −${Math.round(e.amount)}% de bomba`, 'bad');
       this.flash('integrity');
     });
-    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : '¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : this.jungle ? '¡Vapor! Se moja la caja!' : '¡Se moja la caja!', 'wet'));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
-      if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
+      if (e.inside && phase !== 'calm') {
+        const toast = this.village && e.type === 'rain' ? '¡A salvo en la choza! Esperen que pare' : this.jungle && e.type === 'rain' ? '¡A salvo bajo las raíces! Esperen que pare' : (WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!');
+        this.toast(toast, 'good');
+      }
     });
     ev.on('box:impact', (e) => {
       if (e.cause === 'cat' || this.bombMode) return;
@@ -219,7 +253,10 @@ export class UI {
     });
     ev.on('game:fail', (r) => {
       this.$('.fail h2').textContent = r.label;
-      this.$('.fail .tip').textContent = TIPS[r.reason] ?? '';
+      this.$('.fail .tip').textContent =
+        this.catMode && r.reason === 'empty'
+          ? 'Tip: cada zarpazo rompe la caja. Enderecen al momento; si lo ignoran, se vacía.'
+          : (TIPS[r.reason] ?? '');
       this.$('.fail .cp').textContent = this.game.checkpointIndex >= 0 ? 'desde el último checkpoint' : 'desde la salida';
       this.show('failed');
     });
@@ -236,14 +273,15 @@ export class UI {
     } else {
       this._meter('integrity', b.integrity, b.integrity < 35);
       this._meter('wetness', b.wetness, b.wetness > 65);
-      this.$('.timer').textContent = fmtTime(g.runTime);
+      if (!this.catMode) this.$('.timer').textContent = fmtTime(g.runTime);
     }
     this._meter('sync', b.sync * 100, b.sync < 0.4);
 
     const zone = g.weather.current;
     const chip = this.$('.weather');
     const safe = !!zone?.boxShelter;
-    const label = !zone ? '' : safe ? WEATHER_SAFE[zone.type] : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
+    const safeLabel = this.village && zone?.type === 'rain' ? '☂ A SALVO EN LA CHOZA' : this.jungle && zone?.type === 'rain' ? '☂ A SALVO BAJO LAS RAÍCES' : WEATHER_SAFE[zone?.type];
+    const label = !zone ? '' : safe ? safeLabel : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
     if (chip.textContent !== label) chip.textContent = label;
     chip.dataset.type = zone?.type ?? '';
     chip.dataset.phase = safe ? 'safe' : (zone?.phase ?? '');
@@ -315,6 +353,7 @@ const TEMPLATE = /* html */ `
   <section class="screen" data-screen="paused">
     <div class="card">
       <h2>PAUSA</h2>
+      ${VOLUME_SLIDERS_HTML}
       <div class="actions">
         <button type="button" class="btn big go" data-act="resume">Continuar</button>
         <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
