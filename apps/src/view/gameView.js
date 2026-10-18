@@ -31,8 +31,8 @@ export class GameView {
     this.particles.waterLevel = game.world.waterLevel;
     this.players = ['p1', 'p2'].map((slot) => new PlayerView(this.gfx, game[slot], { charId: chars[slot], alt: usesAlt(chars, slot) }));
     this.box = new BoxView(this.gfx, game.box, this.particles, game.cat, game.bomb);
-    this.npcs = new NpcViews(this.gfx, game.npcs, this.particles);
-    this.weather = new WeatherViews(this.gfx, game.weather, { particles: this.particles, scene: app.scene, sun: this.sun });
+    this.npcs = new NpcViews(this.gfx, game.npcs, this.particles, { theme: game.world.level.theme, biome: game.world.level.biome });
+    this.weather = new WeatherViews(this.gfx, game.weather, { particles: this.particles, scene: app.scene, sun: this.sun, theme: game.world.level.theme });
     this._bind(game.events);
     this.camera.snap(game);
   }
@@ -40,11 +40,13 @@ export class GameView {
   _setupScene() {
     const app = this.app;
     const g = this.gfx;
-    app.scene.ambientLight = new pc.Color(0.5, 0.55, 0.62);
+    const biome = this.game.world.level.biome;
+    const fog = biome === 'mangrove' || biome === 'village' ? '#9bb89a' : biome === 'temple' ? '#c4b8a4' : biome === 'canyon' ? '#a8b8bc' : 'sky';
+    app.scene.ambientLight = biome === 'mangrove' || biome === 'village' ? new pc.Color(0.42, 0.5, 0.42) : biome === 'temple' ? new pc.Color(0.52, 0.5, 0.46) : biome === 'canyon' ? new pc.Color(0.46, 0.5, 0.54) : new pc.Color(0.5, 0.55, 0.62);
     app.scene.fog.type = pc.FOG_LINEAR;
-    app.scene.fog.color = g.color('sky');
-    app.scene.fog.start = 45;
-    app.scene.fog.end = 140;
+    app.scene.fog.color = g.color(fog);
+    app.scene.fog.start = biome === 'village' || biome === 'temple' || biome === 'canyon' ? 62 : biome ? 32 : 45;
+    app.scene.fog.end = biome === 'village' || biome === 'temple' || biome === 'canyon' ? 175 : biome ? 115 : 140;
 
     const sun = new pc.Entity('sol');
     sun.addComponent('light', {
@@ -59,6 +61,15 @@ export class GameView {
       shadowIntensity: 0.75,
     });
     sun.setLocalEulerAngles(50, 25, 0);
+    if (biome === 'village') {
+      app.scene.ambientLight = new pc.Color(0.52, 0.48, 0.42);
+      app.scene.fog.color = g.color('#d7e4d6');
+      app.scene.fog.start = 62;
+      app.scene.fog.end = 175;
+      sun.light.color = new pc.Color(1, 0.9, 0.74);
+      sun.light.intensity = 1.32;
+      sun.setLocalEulerAngles(36, 52, 0);
+    }
     this.root.addChild(sun);
     this.sun = sun;
   }
@@ -96,6 +107,12 @@ export class GameView {
     });
     events.on('npc:splash', (e) => this.particles.burst(e.x, e.y + 0.05, e.z, 8, { color: 'foam', speed: 2, up: 3, life: 0.5, size: 0.08 }));
     events.on('box:drop', () => (this.camera.shake = 1));
+    events.on('glass:break', (e) => {
+      this.level.shatter(e.id);
+      this.particles.burst(e.x, e.y, e.z, 14, { color: 'foam', speed: 3, up: 2.4, life: 0.65, size: 0.07 });
+      this.camera.shake = Math.max(this.camera.shake, 0.35);
+    });
+    events.on('glass:restore', () => this.level.restoreGlass());
     events.on('game:checkpoint', () => {
       const c = this.game.box.center;
       this.particles.burst(c.x, c.y + 0.5, c.z, 24, { color: 'goal', speed: 3, up: 6, life: 1, size: 0.12 });

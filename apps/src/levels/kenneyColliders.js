@@ -9,6 +9,11 @@ import { makeAABB } from '../sim/collision.js';
 import { KENNEY_BOUNDS } from './kenneyBounds.js';
 
 const RULES = [
+  [/^nature\/tree_/, 'trunk'],
+  [/^town\/tree$/, 'trunk'],
+  [/^(nature|town)\/(grass|flower_|plant_|mushroom_|crops_|hanging_|banner|lantern|campfire_)/, null],
+  [/^town\/watermill$/, null],
+  [/^(nature|town)\//, 'box'],
   [/^(palm-)/, 'trunk'],
   [/^flag-/, 'pole'],
   [/^(ship-|boat-)/, null],

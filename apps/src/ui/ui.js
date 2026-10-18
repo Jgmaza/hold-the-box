@@ -52,6 +52,16 @@ const NPC_HIT = {
   medium: ['¡Chorro! Se moja la caja', 'wet'],
   hard: ['¡Embestida! Contenido y agua', 'bad'],
 };
+const NPC_HIT_JUNGLE = {
+  easy: ['¡La iguana mordió! Se botó contenido', 'bad'],
+  medium: ['¡El mono tiró agua!', 'wet'],
+  hard: ['¡El jaguar! Contenido y agua', 'bad'],
+};
+const NPC_HIT_VILLAGE = {
+  easy: ['¡El niño del pueblo! Se botó contenido', 'bad'],
+  medium: ['¡El aldeano tiró agua!', 'wet'],
+  hard: ['¡El jaguar! Contenido y agua', 'bad'],
+};
 
 export class UI {
   /** @param {{ onMenu?: () => void, audio?: import('../view/audio.js').GameAudio }} opts */
@@ -71,6 +81,8 @@ export class UI {
     this._timers = new Set();
     this.bombMode = CONFIG.box.bomb.enabled;
     this.catMode = CONFIG.box.cat.enabled;
+    this.jungle = game.world?.level?.theme === 'jungle';
+    this.village = game.world?.level?.biome === 'village';
     if (this.bombMode) this._setupBombHud();
     else if (this.catMode) this._setupCatHud();
     this._bind(game.events);
@@ -202,12 +214,15 @@ export class UI {
       this.toast(`${BOMB_HIT[e.cause] ?? '¡Golpe!'} −${Math.round(e.amount)}% de bomba`, 'bad');
       this.flash('integrity');
     });
-    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : '¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...NPC_HIT[e.difficulty]));
+    ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : this.jungle ? '¡Vapor! Se moja la caja!' : '¡Se moja la caja!', 'wet'));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
-      if (e.inside && phase !== 'calm') this.toast(WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!', 'good');
+      if (e.inside && phase !== 'calm') {
+        const toast = this.village && e.type === 'rain' ? '¡A salvo en la choza! Esperen que pare' : this.jungle && e.type === 'rain' ? '¡A salvo bajo las raíces! Esperen que pare' : (WEATHER_SAFE_TOAST[e.type] ?? '¡A salvo!');
+        this.toast(toast, 'good');
+      }
     });
     ev.on('box:impact', (e) => {
       if (e.cause === 'cat' || this.bombMode) return;
@@ -265,7 +280,8 @@ export class UI {
     const zone = g.weather.current;
     const chip = this.$('.weather');
     const safe = !!zone?.boxShelter;
-    const label = !zone ? '' : safe ? WEATHER_SAFE[zone.type] : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
+    const safeLabel = this.village && zone?.type === 'rain' ? '☂ A SALVO EN LA CHOZA' : this.jungle && zone?.type === 'rain' ? '☂ A SALVO BAJO LAS RAÍCES' : WEATHER_SAFE[zone?.type];
+    const label = !zone ? '' : safe ? safeLabel : WEATHER_CHIP[zone.type][zone.phase](zone.dir);
     if (chip.textContent !== label) chip.textContent = label;
     chip.dataset.type = zone?.type ?? '';
     chip.dataset.phase = safe ? 'safe' : (zone?.phase ?? '');

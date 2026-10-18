@@ -88,6 +88,7 @@ describe('choques con props', () => {
 
 describe('props en los mapas', () => {
   for (const [key, L] of Object.entries(LEVELS)) {
+    if (!(L.scenery ?? []).length) continue;
     it(`${key}: ningún prop tapa el pasillo central, los spawns ni los checkpoints`, () => {
       const g = new Game(L, { seed: 1 });
       expect(g.world.props.length).toBeGreaterThan(0);

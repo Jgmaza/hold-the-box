@@ -20,7 +20,7 @@ export class WeatherViews {
    * @param {WeatherService} service
    * @param {{particles, scene, sun}} env  partículas + escena y sol para oscurecer / relámpagos
    */
-  constructor(gfx, service, { particles, scene, sun }) {
+  constructor(gfx, service, { particles, scene, sun, theme } = {}) {
     this.gfx = gfx;
     this.service = service;
     this.scene = scene;
@@ -28,7 +28,7 @@ export class WeatherViews {
     this.parts = new Parts(gfx);
     this.root = gfx.group('clima');
     const VIEWS = { rain: RainView, wind: WindView, waves: WavesView };
-    this.views = service.zones.map((z) => new VIEWS[z.type](this.parts, z, particles, this.root));
+    this.views = service.zones.map((z) => (z.type === 'rain' ? new RainView(this.parts, z, particles, this.root, theme) : new VIEWS[z.type](this.parts, z, particles, this.root)));
     this.storm = 0; // 0..1 qué tan "bajo la tormenta" se ve la escena
     this.flash = 0; // relámpago
     this._base = {
@@ -82,10 +82,11 @@ export class WeatherViews {
 // -------------------------------------------------------------------- lluvia
 
 class RainView {
-  constructor(P, zone, particles, parent) {
+  constructor(P, zone, particles, parent, theme) {
     this.P = P;
     this.zone = zone;
     this.particles = particles;
+    this.theme = theme;
     this.flash = 0;
     this._wasPhase = zone.phase;
     const a = zone.area;
@@ -140,12 +141,26 @@ class RainView {
     this._rng = rng;
   }
 
-  /** Carpa de lona a rayas sobre 4 postes + piso seco debajo. Se vuelve transparente si cubre la caja. */
+  /** Carpa de lona a rayas, o copa de hojas en la selva. Se vuelve transparente si cubre la caja. */
   _shelter(s) {
     const P = this.P;
     const g = P.group('carpa', this.root, [s.x, this.floor, s.z]);
     const post = P.mat('#8b5a2b', { gloss: 0.2 });
     const h = 2.3;
+    if (this.theme === 'jungle') {
+      P.gfx.prim('box', P.gfx.solid('wood', { mul: 1.18 }), { parent: g, pos: [0, 0.008, 0], scale: [s.w, 0.012, s.d], shadows: false, name: 'piso-seco' });
+      for (const [px, pz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+        P.limb(g, post, [(px * s.w) / 2 * 0.9, 0, (pz * s.d) / 2 * 0.9], [(px * s.w) / 2 * 0.35, h, (pz * s.d) / 2 * 0.35], 0.07);
+      }
+      const solid = { red: P.mat('#3d7a3a', { gloss: 0.2 }), white: P.mat('#5a9a4a', { gloss: 0.2 }) };
+      const ghost = { red: P.mat('#3d7a3a', { gloss: 0.2, opacity: 0.28 }), white: P.mat('#5a9a4a', { gloss: 0.2, opacity: 0.28 }) };
+      const cloth = [];
+      cloth.push({ key: 'red', e: P.ball(g, solid.red, [0, h + 0.15, 0], [s.w * 0.95, 0.7, s.d * 0.95], { name: 'copa' }) });
+      cloth.push({ key: 'white', e: P.ball(g, solid.white, [-s.w * 0.22, h + 0.05, s.d * 0.15], [s.w * 0.55, 0.5, s.d * 0.5], { name: 'copa' }) });
+      cloth.push({ key: 'red', e: P.ball(g, solid.red, [s.w * 0.2, h + 0.08, -s.d * 0.12], [s.w * 0.5, 0.45, s.d * 0.5], { name: 'copa' }) });
+      this.shelterViews.push({ s, cloth, solid, ghost, see: false });
+      return;
+    }
     // Piso seco (más claro) para que se lea dónde cubre.
     P.gfx.prim('box', P.gfx.solid('wood', { mul: 1.18 }), { parent: g, pos: [0, 0.008, 0], scale: [s.w, 0.012, s.d], shadows: false, name: 'piso-seco' });
     for (const [px, pz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {

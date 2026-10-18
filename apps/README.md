@@ -20,8 +20,8 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Servidor local con recarga automática (también al subir archivos a `deliveries/`) |
-| `npm run dev` → `/?level=muelle\|bahia\|tormenta` | Niveles 1–3 (salta el menú) |
-| `npm run dev` → `/?level=bahia` | Entra directo a un mapa (`muelle` / `bahia` / `tormenta`). `&seed=N` repite el mismo azar |
+| `npm run dev` → `/?level=muelle\|bahia\|tormenta` | Campaña pirata (salta el menú) |
+| `npm run dev` → `/?level=aldea\|templo\|puente` | Pista de selva (3 mapas) |
 | `npm test` | Tests de la simulación (sin navegador) |
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve `dist/` para probar el build |
@@ -40,7 +40,7 @@ npm run dev        # → http://localhost:5173  (?debug abre el panel de ajustes
 **Menú:** Inicio → **Mapa + caja** → **Personajes** → cuenta 3-2-1 → partida. En Personajes cada uno cambia con sus flechas (`A`/`D` · `←`/`→`) y marca LISTO con su salto. Los dos pueden escoger el mismo personaje: P2 sale con color alterno. `Esc` = atrás. También se maneja con mouse.
 En partida: `P` / `Esc` pausa · `R` reinicia · `M` menú (en pausa, victoria o derrota) · `F2` o `` ` `` panel de debug.
 Tras una derrota: saltar = reintentar desde el último checkpoint, `Esc` = reiniciar el nivel.
-`?level=muelle` / `bahia` / `tormenta` salta el menú y entra directo (desarrollo).
+`?level=muelle` / `bahia` / `tormenta` / `aldea` / `templo` / `puente` salta el menú y entra directo (desarrollo).
 
 > Algunos teclados no registran muchas teclas a la vez (ghosting). Si a uno "se le traba" una tecla, prueben otro teclado.
 
@@ -103,6 +103,9 @@ apps/
     levels/level1.js    Nivel 1 "El Muelle"
     levels/level2.js    Nivel 2 "La Bahía"
     levels/level3.js    Nivel 3 "La Tormenta"
+    levels/aldea.js     Selva 1 "La Aldea"
+    levels/templo.js    Selva 2 "El Templo"
+    levels/puente.js    Selva 3 "El Puente"
     levels/sections.js  rainIsland / windIsland / waveIsland / railsPair / dressLevel
     levels/kenneyBounds.js   tamaños medidos de los GLB Kenney (generado: scripts/measure-kenney.mjs)
     levels/kenneyColliders.js qué props Kenney chocan y con qué forma

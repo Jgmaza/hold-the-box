@@ -454,7 +454,7 @@
   transition: background 0.2s;
 }
 .m-maps {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   margin-top: 2vh;
 }
 .m-boxes {
