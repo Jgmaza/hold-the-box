@@ -244,13 +244,18 @@ export class LevelView {
     const g = this.gfx;
     const e = g.group(m.def.id ?? 'movil', this.root);
     g.prim('box', g.solid('plank', { mul: 0.9 }), { parent: e, pos: [0, -m.h / 2, 0], scale: [m.w, m.h, m.d] });
-    // Borde amarillo: "esto se mueve".
+    // Borde amarillo: "esto se mueve". Un poco más grande que el tablón y sin piezas que se pisen en las esquinas:
+    // si sus caras quedan en el mismo plano que las del tablón, parpadean (z-fighting) cuando la plataforma se mueve.
     const edge = g.solid('ui');
     const t = 0.12;
-    g.prim('box', edge, { parent: e, pos: [0, -0.04, m.d / 2 - t / 2], scale: [m.w, 0.1, t] });
-    g.prim('box', edge, { parent: e, pos: [0, -0.04, -m.d / 2 + t / 2], scale: [m.w, 0.1, t] });
-    g.prim('box', edge, { parent: e, pos: [m.w / 2 - t / 2, -0.04, 0], scale: [t, 0.1, m.d] });
-    g.prim('box', edge, { parent: e, pos: [-m.w / 2 + t / 2, -0.04, 0], scale: [t, 0.1, m.d] });
+    const o = 0.02; // cuánto sobresale del tablón
+    const W = m.w + 2 * o;
+    const D = m.d + 2 * o;
+    const y = -0.035; // tope a +0.015, por encima del piso del tablón
+    g.prim('box', edge, { parent: e, pos: [0, y, D / 2 - t / 2], scale: [W, 0.1, t] });
+    g.prim('box', edge, { parent: e, pos: [0, y, -D / 2 + t / 2], scale: [W, 0.1, t] });
+    g.prim('box', edge, { parent: e, pos: [W / 2 - t / 2, y, 0], scale: [t, 0.1, D - 2 * t] });
+    g.prim('box', edge, { parent: e, pos: [-W / 2 + t / 2, y, 0], scale: [t, 0.1, D - 2 * t] });
     this._applyArt(e, 'matias/prop-plataforma.png', [0, 0.01, 0], [m.w * 0.9, m.d * 0.9], true);
     return e;
   }
