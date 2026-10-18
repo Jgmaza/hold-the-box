@@ -4,7 +4,7 @@
 // con otro largo (sin rodillo ni elevador):
 //   inicio → isla NPC medium → aguacero de 5 carpas → rieles de 36 m → ferry → viento alternado
 //   → isla cangrejos (medium + easy) → rieles cortos de 24 m → segundo ferry → chorros (4) → oleaje con rompeolas → META.
-// Como en el Muelle, las cuatro estaciones de recuperación están a los lados del spawn.
+// Estaciones: abanicos al salir de la lluvia, galletas al entrar al viento, fuente en la isla de los cangrejos, taller antes de la meta.
 
 import { dressLevel, rainIsland, railsPair, recovery, waveIsland, windIsland } from './sections.js';
 
@@ -26,7 +26,7 @@ const level = {
     { id: 'isla-npc', x: 0, z: -17, w: 10, d: 12, top: 1 }, //                   z  -11 .. -23
     { id: 'puente-lluvia', x: 0, z: -24.5, w: 4, d: 3, top: 1 }, //              z  -23 .. -26
     rainIsland({ id: 'isla-lluvia', from: -26, length: 24, shelters: 5 }), //    z  -26 .. -50
-    { id: 'puente-rieles', x: 0, z: -51.5, w: 4, d: 3, top: 1 }, //              z  -50 .. -53
+    { id: 'puente-rieles', x: 0, z: -51.5, w: 10, d: 3, top: 1 }, //            z  -50 .. -53  (ancho: los abanicos al salir de la lluvia)
     ...railsPair({ id: 'rieles', from: -53, length: 36 }), //                    z  -53 .. -89
     { id: 'tras-rieles', x: 0, z: -92, w: 8, d: 6, top: 1 }, //                  z  -89 .. -95  (ferry en el agua)
     { id: 'muelle-medio', x: 0, z: -108, w: 8, d: 6, top: 1 }, //                z -105 .. -111
@@ -54,12 +54,12 @@ const level = {
     { difficulty: 'easy', platform: 'isla-cangrejos', x: 1.5, z: -140 },
   ],
 
-  // Cuatro aparatos a los lados del spawn, como en el Muelle. El pasillo del centro queda libre.
+  // Cada aparato después de lo que arregla, en el borde. El pasillo del centro queda libre.
   recovery: [
-    recovery({ id: 'rec-cerveza', kind: 'refill', x: -5.4, z: -1.2, top: 1 }),
-    recovery({ id: 'rec-galletas', kind: 'cat', x: -5.4, z: -5.6, top: 1 }),
-    recovery({ id: 'rec-taller', kind: 'bomb', x: 5.4, z: -1.2, top: 1 }),
-    recovery({ id: 'rec-abanicos', kind: 'dry', x: 5.4, z: -5.6, top: 1 }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: 3.8, z: -115.5, top: 1 }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: -3.6, z: -51.5, top: 1 }),
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: 3.6, z: -148.8, top: 1 }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: -3.6, z: -235.5, top: 1 }),
   ],
 
   geysers: [
@@ -75,7 +75,7 @@ const level = {
 
   signs: [
     { x: 3.6, z: -2, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
-    { x: -3.4, z: -3.4, top: 1, w: 3.0, h: 1.3, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
+    { x: -3.6, z: -113, top: 1, w: 3.0, h: 1.3, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
     { x: -3.8, z: -12, top: 1, w: 3, h: 1.4, text: 'NPC MEDIUM\n¡MUÉVANSE JUNTOS!', style: 'warn' },
     { x: -3.8, z: -21.8, top: 1, w: 3.4, h: 1.4, text: 'AGUACERO LARGO\nDE CARPA EN CARPA', style: 'info' },
     { x: 3.8, z: -49.2, top: 1, w: 3.4, h: 1.3, text: 'RIELES LARGOS\nCADA UNO EL SUYO', style: 'warn' },

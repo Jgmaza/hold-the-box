@@ -56,6 +56,8 @@ export class Cat {
     } else {
       this.phase = 'calm';
       this.anim = this.rage / Math.max(C.warnRage, 0.01);
+      // Las galletas bajan la rabia: la próxima vez que asome la pata, vuelve a avisar.
+      if (this.rage < C.warnRage) this._warned = false;
     }
 
     if (this.rage >= C.scratchRage && this.cooldown <= 0 && this.swipeLeft <= 0) {

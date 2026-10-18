@@ -1,7 +1,7 @@
 // Selva 1 — "La Aldea". Pueblo en tierra: camino de tierra, chozas, tótems, gente del pueblo.
-//   plaza → niño → aldeano con agua → checkpoint + estaciones sueltas → dos puentes de vidrio → plaza + META.
+//   plaza → niño → aldeano con agua → dos puentes de vidrio → plaza + META.
 
-import { dressBanks, glassBridge, pathTrim, recovery, totems, unclipScenery, villageHouses } from './sections.js';
+import { dressBanks, glassBridge, pathTrim, totems, unclipScenery, villageHouses } from './sections.js';
 
 const GROUND = 0.88;
 const GLASS_FROM = 1;
@@ -77,30 +77,15 @@ const level = {
 
   checkpoints: [cp('cp-medium', 17.5), cp('cp-vidrio', 2.5, { w: 6, d: 3 }), dirt({ ...cp('cp-meta', -19.2, { w: 5, d: 3 }) })],
 
-  // Checkpoint del medio: cuatro aparatos a los lados del pasillo. El jugador prueba cuál le sirve.
-  recovery: [
-    recovery({ id: 'rec-cerveza', kind: 'refill', x: -4.2, z: 3.5, top: 1 }),
-    recovery({ id: 'rec-galletas', kind: 'cat', x: -4.2, z: 1.5, top: 1 }),
-    recovery({ id: 'rec-taller', kind: 'bomb', x: 4.2, z: 3.5, top: 1 }),
-    recovery({ id: 'rec-abanicos', kind: 'dry', x: 4.2, z: 1.5, top: 1 }),
-  ],
-
   goal: { x: 0, z: -33, w: 8, d: 5, top: 1 },
 
+  // Un cartel por tramo, antes del problema y lejos del anterior. Sin estaciones, no hay aviso de la caja.
   signs: [
-    { x: 4.0, z: 36, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
-    { x: -4.2, z: 30, top: 1, w: 3.2, h: 1.4, text: 'NIÑO DEL PUEBLO\n¡SÁLTENLO JUNTOS!', style: 'info' },
-    { x: 4.2, z: 16, top: 1, w: 3.2, h: 1.4, text: '¡EL ALDEANO\nTIRA AGUA!', style: 'warn' },
-    { x: -3.6, z: 5.2, top: 1, w: 2.6, h: 1.2, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
-    { x: -4.2, z: 6.4, top: 1, w: 3.4, h: 1.5, text: 'DOS PUENTES\n¡SALTE JUNTOS!', style: 'info' },
-    { x: 4.2, z: 6.4, top: 1, w: 3.4, h: 1.5, text: 'UN VIDRIO AGUANTA\nEL OTRO SE ROMPE', style: 'warn' },
-    { x: -4.6, z: -33.5, top: 1, w: 3.2, h: 1.3, text: 'PLAZA DEL\nPUEBLO', style: 'bar' },
-  ],
-
-  props: [
-    { type: 'flag', x: 3.2, z: 16.2, top: 1, checkpoint: 0 },
-    { type: 'flag', x: 2.1, z: 3.4, top: 1, checkpoint: 1 },
-    { type: 'flag', x: 3.2, z: -20.6, top: 1, checkpoint: 2 },
+    { x: 3.6, z: 40.2, top: 1, w: 3.3, h: 1.45, post: 1.45, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
+    { x: -4.5, z: 32.4, top: GROUND, w: 3.3, h: 1.45, post: 1.45, text: 'NIÑO DEL PUEBLO\n¡SÁLTENLO JUNTOS!', style: 'info' },
+    { x: -4.2, z: 15, top: 1, w: 3.3, h: 1.45, post: 1.45, text: 'ALDEANO CON AGUA\n¡MUÉVANSE JUNTOS!', style: 'warn' },
+    { x: 4.6, z: 3.3, top: 1, w: 3.3, h: 1.45, post: 1.45, text: 'UN VIDRIO AGUANTA\nEL OTRO SE ROMPE', style: 'warn' },
+    { x: 4.5, z: -29, top: 1, w: 3.3, h: 1.45, post: 1.45, text: 'PLAZA DEL\nPUEBLO', style: 'bar' },
   ],
 };
 
@@ -126,8 +111,6 @@ const market = [
   { art: 'town/cart', x: 4.05, z: 23.3, top: 1, yaw: 18, s: 1.55 },
   { art: 'town/stall', x: -3.65, z: 11.4, top: 1, yaw: 90, s: 1.8 },
   { art: 'town/fountain-round', x: -3.55, z: -26.2, top: 1, yaw: 0, s: 1.12 },
-  { art: 'town/banner-green', x: -3.5, z: 36.4, top: 1, yaw: 18, s: 1.75, motion: 'sway' },
-  { art: 'town/banner-red', x: 3.6, z: -29.4, top: 1, yaw: -16, s: 1.75, motion: 'sway' },
   { art: 'nature/campfire_stones', x: 3.35, z: 26.2, top: GROUND, yaw: 12, s: 3.3, motion: 'fire' },
   { art: 'nature/stump_round', x: 4.45, z: 25.35, top: GROUND, yaw: 12, s: 2.5 },
   { art: 'nature/log', x: 4.55, z: 27.15, top: GROUND, yaw: 38, s: 2.05 },
