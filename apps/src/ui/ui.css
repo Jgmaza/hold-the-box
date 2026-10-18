@@ -345,9 +345,18 @@
 }
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   width: 100%;
+}
+.stats .score:not([hidden]) {
+  grid-column: 1 / -1;
+}
+.lb-note {
+  margin: 0;
+  font-weight: 800;
+  font-size: 14px;
+  opacity: 0.85;
 }
 .stats div {
   padding: 10px;

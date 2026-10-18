@@ -30,7 +30,11 @@ jobs:
           cache-dependency-path: apps/package-lock.json
       - run: npm ci
       - run: npm test
-      - run: npm run build
+      - name: Build
+        env:
+          VITE_LEADERBOARD_URL: ${{ vars.VITE_LEADERBOARD_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
