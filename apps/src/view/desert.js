@@ -1,13 +1,13 @@
 // Cañón del desierto: arena con ondas, tinajas de arenisca, cactus y el vacío al lado del camino.
 // El fondo (rocas, plantas, cantos, huesos) lo arma desertScenery.js. Aquí: el piso, el vacío del cañón y lo que se
-// mueve cada frame (polvo, cardo, vagoneta). No chocan.
+// mueve cada frame (polvo, cardo). No chocan.
 import { buildDesertScenery } from './desertScenery.js';
 import { seeded } from './nature.js';
 
 /**
  * @returns {{ update: (time: number) => void }}
  */
-export function buildCanyon(g, P, parent, { minZ, maxZ, groundY, seed, gap = null, cart = false, carpet = true, avoid = [] }) {
+export function buildCanyon(g, P, parent, { minZ, maxZ, groundY, seed, gap = null, carpet = true, avoid = [] }) {
   const z0 = minZ - 24;
   const z1 = maxZ + 28;
   const cz = (z0 + z1) / 2;
@@ -73,20 +73,6 @@ export function buildCanyon(g, P, parent, { minZ, maxZ, groundY, seed, gap = nul
     g.prim('sphere', twig, { parent: weed, pos: [0, 0, 0], rot, scale: [0.7, 0.16, 0.7], name: 'rama' });
   }
 
-  let wagon = null;
-  let wheels = [];
-  if (cart) {
-    wagon = g.group('vagoneta', parent);
-    const wood = g.solid('#8a5a32', { mul: 0.9 });
-    const iron = g.solid('#5c534c', { gloss: 0.45 });
-    g.prim('box', wood, { parent: wagon, pos: [0, 0.35, 0], scale: [1.1, 0.55, 1.5], name: 'caja' });
-    g.prim('box', iron, { parent: wagon, pos: [0, 0.12, 0], scale: [0.16, 0.06, 1.7], name: 'riel' });
-    wheels = [-0.4, 0.4].map((z) => {
-      const e = g.prim('cylinder', iron, { parent: wagon, pos: [0, 0.16, z], rot: [0, 0, 90], scale: [0.28, 0.12, 0.28], name: 'rueda' });
-      return e;
-    });
-  }
-
   const span = z1 - z0;
   return {
     destroy() {
@@ -101,11 +87,6 @@ export function buildCanyon(g, P, parent, { minZ, maxZ, groundY, seed, gap = nul
       const u = (time * 2.4) % span;
       weed.setPosition(9.1, groundY + 0.32 + Math.abs(Math.sin(time * 6)) * 0.05, z1 - u);
       weed.setLocalEulerAngles(time * 40, time * 90, time * 70);
-      if (wagon) {
-        const czz = z1 - ((time * 3.2) % span);
-        wagon.setPosition(-9.4, groundY + 0.05, czz);
-        for (const w of wheels) w.setLocalEulerAngles(time * 140, 0, 90);
-      }
     },
   };
 }

@@ -112,7 +112,7 @@ export class Water {
     this.mesh = mesh;
 
     // Más allá de la malla: plano hondo y quieto (debajo del valle más bajo de las olas).
-    const far = tint === 'swamp' ? '#245044' : tint === 'pool' ? '#3a5048' : tint === 'gorge' ? '#1e3238' : 'water';
+    const far = tint === 'swamp' ? '#245044' : 'water';
     this.far = gfx.prim('plane', gfx.solid(far, { gloss: 0.6, mul: 0.82 }), { parent, pos: [0, y - amp - 0.05, 0], scale: [1600, 1, 1600], shadows: false, name: 'agua-lejos' });
     this._place(center[0], center[1]);
   }
@@ -143,14 +143,6 @@ export class Water {
       m.setParameter('uWaterDeep', linear(g.color('#1a3a32', 0.9)));
       m.setParameter('uWaterShallow', linear(g.color('#4a7a62')));
       m.setParameter('uWaterFoam', linear(g.color('#d5e8d8')));
-    } else if (this.tint === 'pool') {
-      m.setParameter('uWaterDeep', linear(g.color('#2a3a38', 0.9)));
-      m.setParameter('uWaterShallow', linear(g.color('#6a8a7a')));
-      m.setParameter('uWaterFoam', linear(g.color('#e4ebe4')));
-    } else if (this.tint === 'gorge') {
-      m.setParameter('uWaterDeep', linear(g.color('#1a2830', 0.95)));
-      m.setParameter('uWaterShallow', linear(g.color('#3d6a72')));
-      m.setParameter('uWaterFoam', linear(g.color('#e8f2f4')));
     } else {
       m.setParameter('uWaterDeep', linear(g.color('water', 0.78)));
       m.setParameter('uWaterShallow', linear(g.color('#5fd0e6')));

@@ -68,7 +68,7 @@ export async function saveArcade(name, role) {
 
 /**
  * @param {number} [limit]
- * @param {'general'|'muelle'|'bahia'|'tormenta'} [scope]
+ * @param {'general'|'muelle'|'bahia'|'aldea'|'campamento'} [scope]
  * @returns {Promise<{ scope: string, board: object[] } | null>}
  */
 export async function fetchBoard(limit = 10, scope = 'general') {

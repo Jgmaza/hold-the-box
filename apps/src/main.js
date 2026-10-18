@@ -1,7 +1,7 @@
 // Arranque: PlayCanvas + menú + partida (simulación + vista + UI) + audio.
 //   Menú (ui/menu.js + view/menuStage.js) → startRun(selección) → partida → backToMenu() borra la partida.
 // Orden de cada frame en partida: teclas globales → input de jugadores → simulación (paso fijo) → vista → UI
-// ?level=<clave> salta el menú y entra directo (muelle / bahia / tormenta / aldea / templo / puente / campamento / mina / canon).
+// ?level=<clave> salta el menú y entra directo (muelle / bahia / aldea / campamento).
 import * as pc from 'playcanvas';
 import { CONFIG, selectBox } from './config.js';
 import { Input } from './input.js';

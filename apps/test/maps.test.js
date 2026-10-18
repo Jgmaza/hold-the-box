@@ -1,10 +1,10 @@
-// Mapas 1-3 (Muelle, Bahía, Tormenta): cargan, se pueden ganar, la dificultad sube y la escenografía no estorba.
+// Mapas de mar (Muelle, Bahía): cargan, se pueden ganar, la dificultad sube y la escenografía no estorba.
 import { describe, expect, it } from 'vitest';
 import { LEVELS, MAPS } from '../src/levels/index.js';
 import { dressIsland, SCENERY_SETS } from '../src/levels/sections.js';
 import { BACK, FWD, Game, IDLE, RIGHT, jump, run } from './helpers.js';
 
-const CAMPAIGN = ['muelle', 'bahia', 'tormenta'];
+const SEA = ['muelle', 'bahia'];
 
 const start = (level) => {
   const g = new Game(level, { seed: 1 });
@@ -41,13 +41,13 @@ describe('tope de inicio', () => {
   }
 });
 
-describe('mapas 1-3', () => {
-  it('el selector los muestra en orden con 1, 2 y 3 estrellas', () => {
-    expect(MAPS.slice(0, 3).map((m) => m.key)).toEqual(CAMPAIGN);
-    expect(MAPS.slice(0, 3).map((m) => m.difficulty)).toEqual([1, 2, 3]);
+describe('mapas de mar', () => {
+  it('el selector los muestra primero, con 1 y 2 estrellas', () => {
+    expect(MAPS.slice(0, 2).map((m) => m.key)).toEqual(SEA);
+    expect(MAPS.slice(0, 2).map((m) => m.difficulty)).toEqual([1, 2]);
   });
 
-  for (const key of CAMPAIGN) {
+  for (const key of SEA) {
     describe(key, () => {
       const L = LEVELS[key];
 
@@ -91,15 +91,15 @@ describe('mapas 1-3', () => {
   }
 });
 
-const JUNGLE = ['aldea', 'templo', 'puente'];
-const DESERT = ['campamento', 'mina', 'canon'];
+const JUNGLE = ['aldea'];
+const DESERT = ['campamento'];
 
 describe('selva', () => {
-  it('tres mapas después de la campaña, 1-2-3 estrellas, sin romper el orden pirata', () => {
-    expect(MAPS.map((m) => m.key)).toEqual([...CAMPAIGN, ...JUNGLE, ...DESERT]);
-    expect(MAPS.slice(3, 6).map((m) => m.difficulty)).toEqual([1, 2, 3]);
-    expect(JUNGLE.map((k) => LEVELS[k].theme)).toEqual(['jungle', 'jungle', 'jungle']);
-    expect(JUNGLE.map((k) => LEVELS[k].biome)).toEqual(['village', 'temple', 'canyon']);
+  it('la aldea va después del mar, con 1 estrella', () => {
+    expect(MAPS.map((m) => m.key)).toEqual([...SEA, ...JUNGLE, ...DESERT]);
+    expect(MAPS[2].difficulty).toBe(1);
+    expect(LEVELS.aldea.theme).toBe('jungle');
+    expect(LEVELS.aldea.biome).toBe('village');
   });
 
   for (const key of JUNGLE) {
@@ -117,30 +117,21 @@ describe('selva', () => {
     });
   }
 
-  it('cada mapa se ve y se juega distinto', () => {
+  it('la aldea es tierra firme: camino de tierra, sin chorros ni rodillos', () => {
     const a = LEVELS.aldea;
-    const b = LEVELS.templo;
-    const c = LEVELS.puente;
     expect(a.platforms.some((p) => p.skin === 'dirt')).toBe(true);
     expect(a.platforms.some((p) => p.kind === 'ground')).toBe(true);
     expect(a.geysers ?? []).toHaveLength(0);
     expect(a.sweepers ?? []).toHaveLength(0);
-    expect(b.platforms.some((p) => p.skin === 'stone')).toBe(true);
-    expect(b.platforms.some((p) => p.kind === 'ground')).toBe(true);
-    expect(b.sweepers.length).toBeGreaterThan(0);
-    expect(b.geysers ?? []).toHaveLength(0);
-    expect(c.platforms.some((p) => p.kind === 'glass')).toBe(true);
-    expect(c.platforms.some((p) => p.weather?.type === 'wind')).toBe(true);
-    expect(c.spawn.p1.y).toBeGreaterThan(2);
   });
 });
 
 describe('desierto', () => {
-  it('tres mapas después de la selva, 1-2-3 estrellas, fuera de la campaña', () => {
-    expect(MAPS.map((m) => m.key)).toEqual([...CAMPAIGN, ...JUNGLE, ...DESERT]);
-    expect(MAPS.slice(6).map((m) => m.difficulty)).toEqual([1, 2, 3]);
-    expect(DESERT.map((k) => LEVELS[k].theme)).toEqual(['desert', 'desert', 'desert']);
-    expect(DESERT.map((k) => LEVELS[k].biome)).toEqual(['camp', 'mine', 'chasm']);
+  it('el campamento va al final, con 1 estrella', () => {
+    expect(MAPS.at(-1).key).toBe('campamento');
+    expect(MAPS.at(-1).difficulty).toBe(1);
+    expect(LEVELS.campamento.theme).toBe('desert');
+    expect(LEVELS.campamento.biome).toBe('camp');
   });
 
   for (const key of DESERT) {
@@ -158,20 +149,13 @@ describe('desierto', () => {
     });
   }
 
-  it('cada mapa se juega distinto', () => {
+  it('el campamento es un laberinto de arena con cactus hostiles', () => {
     const a = LEVELS.campamento;
-    const b = LEVELS.mina;
-    const c = LEVELS.canon;
     expect(a.platforms.some((p) => p.skin === 'sand')).toBe(true);
     expect(a.cacti.filter((c) => c.hostile).length).toBeGreaterThan(3);
     expect(a.platforms.some((p) => p.id === 'carril-izq')).toBe(true);
     expect(a.platforms.some((p) => p.id === 'carril-der')).toBe(true);
     expect(a.sweepers ?? []).toHaveLength(0);
-    expect(b.sweepers.length).toBeGreaterThan(0);
-    expect(b.platforms.some((p) => p.kind === 'rock' || p.kind === 'bump')).toBe(true);
-    expect(c.platforms.some((p) => p.weather?.type === 'wind')).toBe(true);
-    expect(c.moving.length).toBeGreaterThan(1);
-    expect(c.spawn.p1.y).toBeGreaterThan(2);
   });
 
   it('el cactus hostil pincha y baja Contenido', () => {
@@ -252,26 +236,6 @@ describe('puentes de vidrio', () => {
     expect(LEVELS.aldea.platforms.some((p) => p.weather)).toBe(false);
   });
 
-  it('el puente de cuerdas ahora es el mismo vidrio, sobre el vacío', () => {
-    const glass = LEVELS.puente.platforms.filter((p) => p.kind === 'glass');
-    const rows = new Map();
-    for (const p of glass) {
-      const row = rows.get(p.z) ?? [];
-      row.push(p);
-      rows.set(p.z, row);
-    }
-    expect(rows.size).toBe(8);
-    for (const row of rows.values()) {
-      expect(row).toHaveLength(2);
-      expect(row.filter((p) => p.tempered)).toHaveLength(1);
-      expect(row[0].top).toBeGreaterThan(2);
-    }
-    const g = new Game(LEVELS.puente, { seed: 1 });
-    const panel = g.world.statics.find((s) => s.def.kind === 'glass' && !s.def.tempered);
-    expect(g.world.breakGlass(panel)).toBe(true);
-    expect(g.world.floorBelow(panel.def.x, panel.def.z, panel.def.top - 0.02)).toBeLessThan(1);
-  });
-
   it('el vidrio normal se rompe al pisarlo y el templado aguanta', () => {
     const arena = (tempered) => ({
       id: 'vidrio',
@@ -303,16 +267,13 @@ describe('puentes de vidrio', () => {
   });
 });
 
-describe('mapas 1-3 — ritmo', () => {
-  it('la dificultad crece del 1 al 3: más largo, más peligros, checkpoints más separados', () => {
-    const [a, b, c] = CAMPAIGN.map((k) => LEVELS[k]);
+describe('mapas de mar — ritmo', () => {
+  it('la dificultad crece del Muelle a la Bahía: más largo, más peligros, checkpoints más separados', () => {
+    const [a, b] = SEA.map((k) => LEVELS[k]);
     expect(length(a)).toBeLessThan(length(b));
-    expect(length(b)).toBeLessThan(length(c));
     expect(hazards(a)).toBeLessThan(hazards(b));
-    expect(hazards(b)).toBeLessThan(hazards(c));
     const spacing = (L) => length(L) / L.checkpoints.length;
     expect(spacing(a)).toBeLessThan(spacing(b));
-    expect(spacing(b)).toBeLessThan(spacing(c));
   });
 });
 
