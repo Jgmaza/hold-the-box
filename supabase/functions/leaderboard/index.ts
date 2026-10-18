@@ -1,12 +1,15 @@
 // Leaderboard arcade por IP (sin cuentas). verify_jwt = false; identidad = hash de la IP.
-// GET  ?action=board&limit=10
+// GET  ?action=board&scope=general|muelle|bahia|tormenta&limit=10
 // POST { action: "score", level, score, time, integrity, wetness }
-// POST { action: "save", name, role }
+// POST { action: "save", name, role }  — una sola vez, al inicio (no exige 3 mapas)
+// POST { action: "me" }
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const LEVELS = ["muelle", "bahia", "tormenta"] as const;
 type Level = (typeof LEVELS)[number];
+const SCOPES = ["general", ...LEVELS] as const;
+type Scope = (typeof SCOPES)[number];
 const ROLES = new Set(["CARGADOR", "CAPITAN", "GRUMETE", "PIRATA"]);
 const SCORE_COL: Record<Level, string> = {
   muelle: "score_muelle",
@@ -66,7 +69,6 @@ function statusOf(row: Record<string, unknown> | null | undefined) {
   return {
     bests: b,
     total: Number(row?.total ?? b.muelle + b.bahia + b.tormenta),
-    canSave: LEVELS.every((l) => b[l] > 0),
     saved: !!row?.name,
     name: (row?.name as string) ?? null,
     role: (row?.role as string) ?? null,
@@ -85,23 +87,52 @@ Deno.serve(async (req) => {
     const action = req.method === "GET" ? (url.searchParams.get("action") ?? "board") : String(body.action ?? "");
 
     if (action === "board") {
+      const scopeRaw = String(url.searchParams.get("scope") ?? body.scope ?? "general");
+      const scope = (SCOPES.includes(scopeRaw as Scope) ? scopeRaw : "general") as Scope;
       const limit = Math.min(50, Math.max(1, Number(url.searchParams.get("limit") ?? body.limit ?? 10)));
-      const { data, error } = await db()
+      const supabase = db();
+
+      if (scope === "general") {
+        const { data, error } = await supabase
+          .from("arcade_records")
+          .select("name, role, score_muelle, score_bahia, score_tormenta, total")
+          .not("name", "is", null)
+          .gt("total", 0)
+          .order("total", { ascending: false })
+          .limit(limit);
+        if (error) throw error;
+        return json({
+          scope,
+          board: (data ?? []).map((r, i) => ({
+            rank: i + 1,
+            name: r.name,
+            role: r.role,
+            muelle: r.score_muelle,
+            bahia: r.score_bahia,
+            tormenta: r.score_tormenta,
+            total: r.total,
+          })),
+        });
+      }
+
+      const col = SCORE_COL[scope];
+      const tcol = TIME_COL[scope];
+      const { data, error } = await supabase
         .from("arcade_records")
-        .select("name, role, score_muelle, score_bahia, score_tormenta, total")
+        .select(`name, role, ${col}, ${tcol}`)
         .not("name", "is", null)
-        .order("total", { ascending: false })
+        .gt(col, 0)
+        .order(col, { ascending: false })
         .limit(limit);
       if (error) throw error;
       return json({
+        scope,
         board: (data ?? []).map((r, i) => ({
           rank: i + 1,
           name: r.name,
           role: r.role,
-          muelle: r.score_muelle,
-          bahia: r.score_bahia,
-          tormenta: r.score_tormenta,
-          total: r.total,
+          score: Number(r[col] ?? 0),
+          time: r[tcol] ?? null,
         })),
       });
     }
@@ -127,7 +158,6 @@ Deno.serve(async (req) => {
       const prev = Number(existing?.[col] ?? 0);
       if (score <= prev && existing) return json({ improved: false, ...statusOf(existing) });
 
-      // Merge completo para no pisar los otros mapas en el upsert.
       const patch: Record<string, unknown> = {
         ip_hash: ipHash,
         score_muelle: Number(existing?.score_muelle ?? 0),
@@ -149,9 +179,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === "save") {
-      if (!existing) return json({ error: "no_scores" }, 400);
-      const st = statusOf(existing);
-      if (!st.canSave) return json({ error: "incomplete" }, 400);
+      // Nombre una sola vez: si ya hay, no se cambia.
+      if (existing?.name) return json({ saved: true, already: true, ...statusOf(existing) });
+
       const name = String(body.name ?? "")
         .toUpperCase()
         .replace(/[^A-Z0-9]/g, "")
@@ -160,12 +190,20 @@ Deno.serve(async (req) => {
       if (name.length < 3 || name.length > 8) return json({ error: "bad_name" }, 400);
       if (!ROLES.has(role)) return json({ error: "bad_role" }, 400);
 
-      const { data, error } = await supabase
-        .from("arcade_records")
-        .update({ name, role, updated_at: new Date().toISOString() })
-        .eq("ip_hash", ipHash)
-        .select("*")
-        .single();
+      const patch: Record<string, unknown> = {
+        ip_hash: ipHash,
+        name,
+        role,
+        score_muelle: Number(existing?.score_muelle ?? 0),
+        score_bahia: Number(existing?.score_bahia ?? 0),
+        score_tormenta: Number(existing?.score_tormenta ?? 0),
+        time_muelle: existing?.time_muelle ?? null,
+        time_bahia: existing?.time_bahia ?? null,
+        time_tormenta: existing?.time_tormenta ?? null,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase.from("arcade_records").upsert(patch, { onConflict: "ip_hash" }).select("*").single();
       if (error) throw error;
       return json({ saved: true, ...statusOf(data) });
     }
