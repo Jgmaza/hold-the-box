@@ -3,7 +3,7 @@
 import { CONFIG } from '../config.js';
 import { submitWin } from '../leaderboard/api.js';
 import { computeScore, isCampaignLevel } from '../leaderboard/score.js';
-import { SPEAKER_HTML, VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
+import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import './theme.css';
 import './ui.css';
 
@@ -394,5 +394,4 @@ const TEMPLATE = /* html */ `
       <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span> · <kbd>Esc</kbd> reiniciar · <kbd>M</kbd> menú</p>
     </div>
   </section>
-  ${SPEAKER_HTML}
 `;

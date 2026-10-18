@@ -3,7 +3,7 @@
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
 import { CHARACTERS, character } from '../view/characters.js';
-import { SPEAKER_HTML, VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
+import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import { ArcadeOverlay } from './arcade.js';
 import { MenuState } from './menuState.js';
 import './theme.css';
@@ -96,6 +96,7 @@ export class Menu {
       const el = e.target.closest('button');
       if (!el || el.disabled) return;
       if (el.dataset.act) return this._act(el.dataset.act);
+      if (el.dataset.scroll) return this._scrollMaps(Number(el.dataset.scroll));
       if (el.dataset.level) return this._setLevel(el.dataset.level);
       if (el.dataset.box) return this._setBox(el.dataset.box);
       if (el.dataset.dir) return this._stepChar(el.dataset.slot, Number(el.dataset.dir));
@@ -130,6 +131,12 @@ export class Menu {
       else document.documentElement.requestFullscreen?.().catch(() => {});
     }
     this._syncStage();
+  }
+
+  /** Desplaza la fila de mapas casi una pantalla hacia un lado. */
+  _scrollMaps(dir) {
+    const row = this.$('.m-maps');
+    row.scrollBy({ left: dir * row.clientWidth * 0.8, behavior: 'smooth' });
   }
 
   _setLevel(key) {
@@ -190,7 +197,11 @@ export class Menu {
     this.$('.m-overlay').classList.toggle('on', this.overlay && s.screen === 'home');
     HOME_ACTS.forEach((act, i) => this.$(`[data-act="${act}"]`).classList.toggle('focus', !this.overlay && i === this.homeFocus));
 
-    for (const el of this.root.querySelectorAll('.m-map')) el.classList.toggle('on', el.dataset.level === s.level);
+    for (const el of this.root.querySelectorAll('.m-map')) {
+      const on = el.dataset.level === s.level;
+      el.classList.toggle('on', on);
+      if (on && this.visible && s.screen === 'map') el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    }
     for (const el of this.root.querySelectorAll('.m-box')) el.classList.toggle('on', el.dataset.box === s.box);
     this.$('.m-maps').classList.toggle('focus', this.mapRow === 0);
     this.$('.m-boxes').classList.toggle('focus', this.mapRow === 1);
@@ -384,7 +395,11 @@ const TEMPLATE = /* html */ `
       <button type="button" class="btn icon light" data-act="back" aria-label="Atrás">◀</button>
       <h2>Elige el mapa</h2>
     </header>
-    <div class="m-maps"></div>
+    <div class="m-maps-wrap">
+      <button type="button" class="btn icon light m-arrow" data-scroll="-1" aria-label="Mapas anteriores">◀</button>
+      <div class="m-maps"></div>
+      <button type="button" class="btn icon light m-arrow" data-scroll="1" aria-label="Mapas siguientes">▶</button>
+    </div>
     <h3 class="m-sub">¿Qué caja llevan?</h3>
     <div class="m-boxes"></div>
     <footer class="m-foot">
@@ -403,5 +418,4 @@ const TEMPLATE = /* html */ `
     <div class="m-count"></div>
     <p class="m-hint m-chars-hint">Los dos en LISTO para arrancar</p>
   </section>
-  ${SPEAKER_HTML}
 `;

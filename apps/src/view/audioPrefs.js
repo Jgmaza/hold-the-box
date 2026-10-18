@@ -10,15 +10,6 @@ export const VOLUME_SLIDERS_HTML = /* html */ `
     <label class="vol-row"><span>Sonidos</span><input type="range" min="0" max="100" step="1" data-vol="sfx" /></label>
   </div>`;
 
-export const SPEAKER_HTML = /* html */ `
-  <div class="spk">
-    <button type="button" class="btn icon light spk-btn" data-act="audio" aria-label="Audio" title="Música y sonidos">🔊</button>
-    <div class="spk-pop">
-      <b>Audio</b>
-      ${VOLUME_SLIDERS_HTML}
-    </div>
-  </div>`;
-
 export function speakerIcon(audio = CONFIG.audio) {
   if (audio.music <= 0 && audio.sfx <= 0) return '🔇';
   if (audio.music <= 0) return '🔈';
