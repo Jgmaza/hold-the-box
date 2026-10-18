@@ -32,7 +32,7 @@ export const PALETTE_MD = Object.values(palette)[0] ?? '';
 export const EXPECTED = {
   juanes: ['caja-normal.png', 'caja-inclinada.png', 'caja-huequito.png', 'caja-mojada.png', 'p1-frente.png', 'p1-cargar.png', 'p2-frente.png', 'p2-cargar.png'],
   matias: ['banner-meta.png', 'senal-cuidado-caja.png', 'senal-trabajo-equipo.png', 'cartel-ron.png', 'prop-rodillo.png', 'prop-plataforma.png', 'prop-palmera.png'],
-  luis: ['musica-loop', 'musica-selva', 'sfx-salto', 'sfx-inclinacion', 'sfx-mojado', 'sfx-splash', 'sfx-golpe', 'sfx-maullido', 'sfx-aranyo', 'sfx-meta', 'musica-victoria', 'musica-derrota', 'sfx-lluvia', 'sfx-viento', 'sfx-trueno', 'sfx-olas', 'sfx-ola', 'sfx-mecha', 'sfx-explosion'],
+  luis: ['musica-loop', 'musica-selva', 'musica-desierto', 'sfx-salto', 'sfx-inclinacion', 'sfx-mojado', 'sfx-splash', 'sfx-golpe', 'sfx-maullido', 'sfx-aranyo', 'sfx-meta', 'musica-victoria', 'musica-derrota', 'sfx-lluvia', 'sfx-viento', 'sfx-trueno', 'sfx-olas', 'sfx-ola', 'sfx-mecha', 'sfx-explosion'],
 };
 
 /** URL de una imagen o null (el resumen de lo que falta lo imprime reportDeliveries()). */

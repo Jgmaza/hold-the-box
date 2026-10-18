@@ -124,6 +124,27 @@ describe('selva', () => {
     expect(a.geysers ?? []).toHaveLength(0);
     expect(a.sweepers ?? []).toHaveLength(0);
   });
+
+  it('los carteles de la aldea avisan cada tramo y quedan separados', () => {
+    const a = LEVELS.aldea;
+    const signs = a.signs;
+    const texts = signs.map((s) => s.text);
+    expect(new Set(texts).size).toBe(texts.length);
+    const niño = signs.find((s) => s.text.includes('NIÑO'));
+    const agua = signs.find((s) => s.text.includes('AGUA'));
+    const vidrio = signs.find((s) => s.text.includes('VIDRIO'));
+    const easy = a.npcs.find((n) => n.difficulty === 'easy');
+    const medium = a.npcs.find((n) => n.difficulty === 'medium');
+    const glassNorth = Math.max(...a.platforms.filter((p) => p.kind === 'glass').map((p) => p.z + p.d / 2));
+    expect(niño.z).toBeGreaterThan(easy.z);
+    expect(agua.z).toBeGreaterThan(medium.z);
+    expect(vidrio.z).toBeGreaterThan(glassNorth);
+    for (let i = 0; i < signs.length; i++) {
+      for (let j = i + 1; j < signs.length; j++) {
+        expect(Math.hypot(signs[i].x - signs[j].x, signs[i].z - signs[j].z)).toBeGreaterThan(8);
+      }
+    }
+  });
 });
 
 describe('desierto', () => {
@@ -281,6 +302,7 @@ describe('piezas del Muelle en todos los mapas', () => {
   const KINDS = ['bomb', 'cat', 'dry', 'refill'];
 
   for (const [key, L] of Object.entries(LEVELS)) {
+    if (!L.recovery?.length) continue;
     it(`${key}: las cuatro estaciones, sobre piso y fuera del pasillo`, () => {
       const rec = L.recovery ?? [];
       expect(rec.map((r) => r.kind).sort()).toEqual(KINDS);
@@ -291,12 +313,72 @@ describe('piezas del Muelle en todos los mapas', () => {
     });
   }
 
-  for (const key of ['muelle', 'bahia', 'campamento']) {
-    it(`${key}: las estaciones se ven al arrancar (al lado del spawn)`, () => {
-      const L = LEVELS[key];
-      for (const r of L.recovery) expect(Math.abs(r.z - L.spawn.p1.z), r.id).toBeLessThan(5);
-    });
-  }
+  it('en el muelle cada estación queda después del problema que arregla', () => {
+    const L = LEVELS.muelle;
+    const at = (kind) => L.recovery.find((r) => r.kind === kind);
+    const on = (kind, id) => {
+      const p = L.platforms.find((q) => q.id === id);
+      const r = at(kind);
+      return Math.abs(r.x - p.x) <= p.w / 2 && Math.abs(r.z - p.z) <= p.d / 2;
+    };
+    const dog = L.npcs.find((n) => n.difficulty === 'hard');
+    const rain = L.platforms.find((p) => p.id === 'isla-lluvia');
+    const wind = L.platforms.find((p) => p.id === 'isla-viento');
+    const railsEnd = Math.min(...L.platforms.filter((p) => p.id.startsWith('rieles')).map((p) => p.z - p.d / 2));
+    for (const r of L.recovery) expect(Math.abs(r.z - L.spawn.p1.z), r.id).toBeGreaterThan(8);
+    expect(on('refill', 'isla-hard')).toBe(true);
+    expect(at('refill').z).toBeLessThan(dog.z);
+    expect(on('cat', 'salida')).toBe(true);
+    expect(at('cat').z).toBeLessThan(wind.z - wind.d / 2);
+    expect(on('dry', 'isla-viento')).toBe(true);
+    expect(at('dry').z).toBeLessThan(rain.z - rain.d / 2);
+    expect(at('dry').z).toBeGreaterThan(wind.z);
+    expect(on('bomb', 'terraza')).toBe(true);
+    expect(at('bomb').z).toBeLessThan(railsEnd);
+    expect(at('bomb').z).toBeGreaterThan(L.goal.z);
+  });
+
+  it('en la bahía cada estación queda después del problema que arregla', () => {
+    const L = LEVELS.bahia;
+    const at = (kind) => L.recovery.find((r) => r.kind === kind);
+    const on = (kind, id) => {
+      const p = L.platforms.find((q) => q.id === id);
+      const r = at(kind);
+      return Math.abs(r.x - p.x) <= p.w / 2 && Math.abs(r.z - p.z) <= p.d / 2;
+    };
+    const railsEnd = Math.min(...L.platforms.filter((p) => p.id.startsWith('rieles-') && !p.id.includes('cortos')).map((p) => p.z - p.d / 2));
+    const shortEnd = Math.min(...L.platforms.filter((p) => p.id.startsWith('rieles-cortos')).map((p) => p.z - p.d / 2));
+    const rain = L.platforms.find((p) => p.id === 'isla-lluvia');
+    const crab = L.npcs.find((n) => n.difficulty === 'easy');
+    for (const r of L.recovery) expect(Math.abs(r.z - L.spawn.p1.z), r.id).toBeGreaterThan(8);
+    expect(on('cat', 'isla-viento')).toBe(true);
+    expect(at('cat').z).toBeLessThan(railsEnd);
+    expect(on('dry', 'puente-rieles')).toBe(true);
+    expect(at('dry').z).toBeLessThan(rain.z - rain.d / 2);
+    expect(on('refill', 'isla-cangrejos')).toBe(true);
+    expect(at('refill').z).toBeLessThan(crab.z);
+    expect(on('bomb', 'isla-meta')).toBe(true);
+    expect(at('bomb').z).toBeLessThan(shortEnd);
+    expect(at('bomb').z).toBeGreaterThan(L.goal.z);
+  });
+
+  it('en el campamento cada estación queda después del problema que arregla', () => {
+    const L = LEVELS.campamento;
+    const at = (kind) => L.recovery.find((r) => r.kind === kind);
+    const cruce = L.platforms.find((p) => p.id === 'cruce');
+    const boca3 = L.platforms.find((p) => p.id === 'boca-3');
+    const plaza = L.platforms.find((p) => p.id === 'plaza-meta');
+    const agua = L.npcs.find((n) => n.difficulty === 'medium');
+    const coyote = L.npcs.find((n) => n.difficulty === 'hard');
+    for (const r of L.recovery) expect(Math.abs(r.z - L.spawn.p1.z), r.id).toBeGreaterThan(8);
+    expect(onPlatform(L, at('refill').x, at('refill').z) && Math.abs(at('refill').z - cruce.z) < cruce.d / 2).toBe(true);
+    expect(at('cat').z).toBeGreaterThan(agua.z);
+    expect(at('cat').z).toBeLessThan(at('refill').z);
+    expect(Math.abs(at('dry').z - boca3.z)).toBeLessThan(boca3.d / 2);
+    expect(at('dry').z).toBeLessThan(agua.z);
+    expect(Math.abs(at('bomb').z - plaza.z) < plaza.d / 2).toBe(true);
+    expect(at('bomb').z).toBeGreaterThan(coyote.z);
+  });
 
   it('cada estación se alcanza desde el spawn y hace su trabajo', () => {
     const g = new Game(LEVELS.campamento, { seed: 1 });

@@ -3,12 +3,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { rainIsland, windHoles, windIsland } from '../src/levels/sections.js';
 import { WEATHER_TYPES } from '../src/sim/weather/weatherService.js';
+import { selectBox } from '../src/config.js';
 import { CONFIG, Game, IDLE, LEFT, RIGHT, jump, level1, run } from './helpers.js';
 
 const W = CONFIG.weather;
 
 afterEach(() => {
   W.enabled = true;
+  selectBox('vip');
 });
 
 /** Isla con clima (z -6..6) + isla seca separada (z 14..26). La pareja arranca en la isla con clima. */
@@ -102,6 +104,27 @@ describe('lluvia', () => {
     run(g, 7, IDLE, IDLE);
     expect(g.state).toBe('failed');
     expect(g.failReason).toBe('soaked');
+  });
+
+  it('la caja del gato se moja con el aguacero y el huequito no gotea', () => {
+    selectBox('gato');
+    const { g, zone } = island('rain');
+    hold(zone, 'active');
+    run(g, 2, IDLE, IDLE);
+    expect(g.box.wetness).toBeGreaterThan(W.rain.wetRate * 2 * 0.8);
+    expect(g.box.leakRate).toBe(0);
+    expect(g.box.integrity).toBe(100);
+  });
+
+  it('el viento seca al gato sin vaciar la caja', () => {
+    selectBox('gato');
+    const { g, zone } = island({ type: 'wind', dir: 0 });
+    hold(zone, 'active');
+    g.box.wetness = 60;
+    run(g, 1, IDLE, IDLE);
+    expect(g.box.wetness).toBeLessThan(54);
+    expect(g.box.integrity).toBe(100);
+    expect(g.box.leakRate).toBe(0);
   });
 
   it('bajo una carpa no se moja', () => {

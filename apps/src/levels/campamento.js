@@ -3,7 +3,9 @@
 // Después se parte. Entre los dos carriles queda una raja de ~2.5 m: el cuerpo no la
 // puentea y, si la cruzan, caen. El carril ancho es trampa y se corta. El bueno es
 // más estrecho y hay que escorarse juntos para no rozar los cactus. Nadie dice cuál es cuál.
-// Como en el Muelle: cuatro estaciones a los lados del spawn y un NPC por tramo (minero → minero con agua → coyote).
+// Como en el Muelle hay cuatro estaciones, pero aquí cada una está después del problema
+// que arregla: fuente en el primer cruce, galletas antes del minero del agua,
+// ventiladores al salir de ese tramo y taller en la entrada de la plaza del coyote.
 import { dressPathRim, recovery } from './sections.js';
 
 const TOP = 1;
@@ -34,7 +36,7 @@ const level = {
   },
 
   platforms: [
-    sand({ id: 'base', x: 0, z: 54, w: 14, d: 12, top: TOP }), //  z 60 .. 48: campamento con las estaciones
+    sand({ id: 'base', x: 0, z: 54, w: 14, d: 12, top: TOP }), //  z 60 .. 48: campamento de salida
     sand({ id: 'calle', x: 0, z: 42, w: 8, d: 12, top: TOP }), //  z 48 .. 36
     sand({ id: 'boca', x: 0, z: 33, w: 12, d: 8, top: TOP }),
     sand({ id: 'carril-izq', x: -3.5, z: 21.3, w: 4.4, d: 16.6, top: TOP }),
@@ -87,12 +89,12 @@ const level = {
     { difficulty: 'hard', platform: 'plaza-meta', x: 0, z: -39 },
   ],
 
-  // Cuatro aparatos a los lados del spawn: se ven al arrancar. El pasillo del centro queda libre.
+  // Cada aparato en el descanso ancho que sigue a su problema. El centro (±1.9 m) queda libre.
   recovery: [
-    recovery({ id: 'rec-cerveza', kind: 'refill', x: -5.4, z: 54.2, top: TOP }),
-    recovery({ id: 'rec-galletas', kind: 'cat', x: -5.4, z: 49.8, top: TOP }),
-    recovery({ id: 'rec-taller', kind: 'bomb', x: 5.4, z: 54.2, top: TOP }),
-    recovery({ id: 'rec-abanicos', kind: 'dry', x: 5.4, z: 49.8, top: TOP }),
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: 4.5, z: 12.2, top: TOP }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: -4.5, z: 7.2, top: TOP }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: -3.8, z: -14, top: TOP }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: 4.4, z: -33.2, top: TOP }),
   ],
 
   // El del coyote queda en la calle fina, antes de su plaza: si los tumba, no reaparecen al lado de él.
@@ -102,7 +104,7 @@ const level = {
 
   signs: [
     { x: 3.2, z: 46, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
-    { x: -3.4, z: 48.4, top: TOP, w: 3.0, h: 1.3, post: 1.45, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
+    { x: -4.2, z: 13.3, top: TOP, w: 3.0, h: 1.3, post: 1.45, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
     { x: -3.3, z: 38.6, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'MINERO PERDIDO\n¡SÁLTENLO JUNTOS!', style: 'info' },
     { x: -4.6, z: 11.8, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'MINERO CON AGUA\n¡MUÉVANSE JUNTOS!', style: 'warn' },
     { x: -4.6, z: -33.4, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: '¡EL COYOTE!\nESQUIVEN Y PASEN', style: 'warn' },

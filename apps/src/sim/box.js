@@ -223,22 +223,20 @@ export class Box {
     }
 
     if (this.catMode) {
-      // Sin huequito: el % solo baja por golpes y por el zarpazo (como la bomba).
+      // Sin huequito: el % solo baja por golpes y por el zarpazo. La lluvia, los chorros y las olas sí mojan.
       this.leakRate = 0;
-      if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
-      return;
+    } else {
+      // --- Huequito: fuga proporcional a la inclinación + lo que se lleva el viento (external.drain).
+      let leak = ext.drain;
+      if (mag > L.thresholdDeg) {
+        const severity = clamp((mag - L.thresholdDeg) / (T.criticalDeg - L.thresholdDeg), 0, L.maxSeverity);
+        leak += L.ratePerSec * severity;
+      }
+      this.leakRate = this.invuln > 0 ? 0 : leak;
+      this.integrity = clamp(this.integrity - this.leakRate * dt, 0, 100);
     }
 
-    // --- Huequito: fuga proporcional a la inclinación + lo que se lleva el viento (external.drain).
-    let leak = ext.drain;
-    if (mag > L.thresholdDeg) {
-      const severity = clamp((mag - L.thresholdDeg) / (T.criticalDeg - L.thresholdDeg), 0, L.maxSeverity);
-      leak += L.ratePerSec * severity;
-    }
-    this.leakRate = this.invuln > 0 ? 0 : leak;
-    this.integrity = clamp(this.integrity - this.leakRate * dt, 0, 100);
-
-    // --- Mojado: entra por chorros y lluvia (wetRate lo fija el mundo cada paso) o se seca (sola, y más con viento).
+    // --- Mojado: VIP y gato. Entra por chorros y lluvia (wetRate) o se seca (sola, y más con viento).
     if (this.wetRate > 0) {
       this.wetness = clamp(this.wetness + this.wetRate * dt, 0, 100);
     } else if (this.wetness < 100) {
