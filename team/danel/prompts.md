@@ -4,14 +4,14 @@
 
 1. En Cursor, modelo: **Claude Opus 5.5** (Opus 5.5 / `claude-opus-5-5`).
 2. Abre el workspace del repo; trabaja solo en `apps/`.
-3. Menciona el skill del proyecto: *usa `no-sueltes-playcanvas`*.
+3. Menciona el skill del proyecto: *usa `hold-the-box-playcanvas`*.
 4. Pega **un** bloque de abajo por sesión (no mezcles 5 mecánicas a la vez).
 
 ### Prefijo universal (anteponer a cada prompt)
 ```
 Model: Claude Opus 5.5.
-Skill: no-sueltes-playcanvas.
-Eres lead implementer de No Sueltes La Caja. Owner de apps/. Jam speed, código modular.
+Skill: hold-the-box-playcanvas.
+Eres lead implementer de Hold the Box. Owner de apps/. Jam speed, código modular.
 Lee MVP_SCOPE.md + docs/mechanics.md + este pedido. No inventes multiplayer online,
 inventario, powerups ni ranking. Placeholders OK si falta arte en deliveries/.
 Al final: resumen de archivos tocados + cómo probar en 3 pasos.
@@ -113,4 +113,4 @@ Bug:
 - Reescribir todo `apps/` si solo falla un umbral de tilt
 
 ## Skills útiles
-Ver `team/SKILLS.md` sección Danel: `no-sueltes-playcanvas`, `review-bugbot`, `split-to-prs`, `loop`.
+Ver `team/SKILLS.md` sección Danel: `hold-the-box-playcanvas`, `review-bugbot`, `split-to-prs`, `loop`.

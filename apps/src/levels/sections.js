@@ -11,7 +11,10 @@
 //
 // El nivel avanza hacia -Z: `from` es el borde de ENTRADA (z más alto) y la sección llega hasta `from - length`.
 
-import { propCollider } from './kenneyColliders.js';
+import { CONFIG } from '../config.js';
+import { makeRng } from '../sim/math.js';
+import { collideKind, propCollider } from './kenneyColliders.js';
+import { KENNEY_BOUNDS } from './kenneyBounds.js';
 
 const SHELTER = { w: 3.6, d: 3 }; // tamaño de carpa en el que entra la pareja con la caja
 const EDGE = 0.8; // distancia mínima de la carpa al borde de la isla
@@ -67,15 +70,58 @@ export function rainIsland({ id, from, length, shelters, firstSide = 'left', wid
  * @param {number} [o.x=0]
  * @param {number} [o.top=1]
  * @param {number} [o.strength]  multiplicador del viento en esta isla (CONFIG.weather.wind)
+ * @param {number|false} [o.holes]  cantidad de huecos, alternando izquierda / derecha cerca del centro (por defecto se reparten solos según `length`; false = sin huecos)
  */
-export function windIsland({ id, from, length, dir = 'alternate', width = 10, x = 0, top = 1, strength } = {}) {
+export function windIsland({ id, from, length, dir = 'alternate', width = 10, x = 0, top = 1, strength, holes } = {}) {
   check(id, from, length, 'windIsland');
   const weather = { type: 'wind', dir };
+  const list = holes === false ? [] : windHoles({ id, from, length, width, x, count: holes });
+  if (list.length) weather.holes = list;
   if (strength !== undefined) weather.strength = strength;
   return { id, x, z: round(from - length / 2), w: width, d: length, top, weather };
 }
 
 const round = (v) => Math.round(v * 100) / 100;
+
+const hashId = (s) => {
+  let h = 2166136261;
+  for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+
+/**
+ * Huecos circulares (sin piso: se cae al agua) de una isla de viento. Solo depende del largo: la isla se parte en
+ * tramos cortos (uno por hueco, `CONFIG.weather.wind.holeLayout.spacing`) y en cada uno cae un círculo CERCA DEL CENTRO,
+ * alternando izquierda / derecha. Cada hueco tapa la mitad por la que venían caminando: hay que esquivarlo por el otro
+ * lado y el siguiente obliga a volver (slalom). El radio, qué tan corrido del eje y la posición dentro del tramo salen
+ * del `id` y del largo: siempre es el mismo resultado (nada de Math.random).
+ * Entre un hueco y el siguiente quedan al menos `zGap` metros en Z para girar, del lado contrario siempre queda paso
+ * para la pareja con la caja, y se deja `margin` libre al entrar y al salir.
+ *
+ * @returns {{x:number, z:number, r:number}[]}  de adelante hacia atrás
+ */
+export function windHoles({ id, from, length, width = 10, x = 0, count } = {}) {
+  const L = CONFIG.weather.wind.holeLayout;
+  const usable = length - 2 * L.margin;
+  const n = count ?? Math.max(0, Math.floor(usable / L.spacing));
+  if (n < 1 || usable <= 0) return [];
+  const rng = makeRng((hashId(id) ^ Math.imul(Math.round(length * 100), 2654435761)) >>> 0);
+  const strip = usable / n;
+  const room = strip / 2 - L.zGap / 2; // medio tramo menos la mitad del respiro entre huecos
+  const rMax = Math.max(0.3, Math.min(L.radiusMax, room));
+  const rMin = Math.min(L.radiusMin, rMax);
+  const first = rng.chance(0.5) ? 1 : -1;
+  const list = [];
+  for (let i = 0; i < n; i++) {
+    const side = i % 2 === 0 ? first : -first;
+    const r = rng.range(rMin, rMax);
+    const zMid = from - L.margin - strip * (i + 0.5);
+    const dz = rng.range(-1, 1) * Math.max(0, room - r);
+    const off = Math.min(rng.range(L.center.min, L.center.max), width / 2 - r - 0.2);
+    list.push({ x: round(x + side * off), z: round(zMid + dz), r: round(r) });
+  }
+  return list;
+}
 
 const BREAKWATER = { w: 1, d: 3, h: 0.8, edge: 0.3 }; // rompeolas: bloque de roca en el borde de la isla
 
@@ -262,6 +308,26 @@ export const SCENERY_SETS = {
   beach: ['palm-straight', 'palm-bend', 'palm-detailed-straight', 'palm-detailed-bend', 'grass-patch', 'grass-plant', 'rocks-sand-a', 'rocks-sand-b', 'rocks-sand-c', 'patch-sand-foliage', 'bottle', 'barrel', 'tool-paddle', 'crate'],
   pirate: ['barrel', 'crate', 'crate-bottles', 'chest', 'cannon', 'cannon-ball', 'flag-pirate', 'flag-pirate-high', 'bottle-large', 'tool-shovel', 'rocks-a', 'palm-bend', 'structure-fence'],
   fort: ['castle-wall', 'castle-window', 'castle-door', 'tower-base', 'tower-middle-windows', 'tower-watch', 'cannon', 'cannon-mobile', 'flag-high-pennant', 'flag-pirate-high-pennant', 'rocks-b', 'rocks-c', 'barrel'],
+  // Kits CC0 de Kenney (nature-kit y fantasy-town-kit) en public/kenney/nature y public/kenney/town.
+  // Escala propia: esos modelos miden ~1 m, el pirata se achica a 0.4.
+  village: [
+    'nature/tree_palm', 'nature/tree_palmTall', 'nature/tree_palmBend', 'nature/tree_palmDetailedTall', 'nature/tree_default', 'nature/tree_detailed', 'nature/tree_fat', 'nature/tree_tall', 'nature/tree_oak',
+    'nature/plant_bush', 'nature/plant_bushLarge', 'nature/plant_bushDetailed', 'nature/plant_bushSmall',
+    'nature/grass', 'nature/grass_leafs', 'nature/grass_large',
+    'nature/crops_bambooStageB',
+    'nature/rock_smallA', 'nature/stump_round', 'nature/log',
+  ],
+  temple: [
+    'nature/statue_head', 'nature/statue_column', 'nature/statue_columnDamaged', 'nature/statue_obelisk', 'nature/statue_block',
+    'nature/stone_tallA', 'nature/stone_tallB', 'nature/stone_largeA', 'nature/rock_tallA', 'nature/rock_largeA', 'nature/rock_largeB',
+    'nature/tree_palm', 'nature/tree_palmDetailedTall', 'nature/tree_palmTall',
+    'nature/plant_bushLarge', 'nature/plant_bushDetailed', 'nature/grass_leafs', 'nature/flower_purpleA',
+  ],
+  canyon: [
+    'nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_tallA', 'nature/rock_tallB', 'nature/stone_largeA', 'nature/stone_tallA', 'nature/stone_tallB',
+    'nature/tree_default', 'nature/tree_tall', 'nature/tree_oak', 'nature/tree_fat', 'nature/tree_detailed',
+    'nature/plant_bush', 'nature/plant_bushLarge', 'nature/log_large', 'nature/stump_round', 'nature/grass', 'nature/grass_large',
+  ],
 };
 const SCENERY_BIG = new Set(['castle-wall', 'castle-window', 'castle-door', 'castle-gate', 'tower-base', 'tower-middle-windows', 'tower-watch', 'tower-complete-small', 'tower-complete-large', 'structure']);
 const SHIPS = ['ship-large', 'ship-pirate-large', 'ship-medium', 'ship-pirate-medium', 'ship-small', 'ship-pirate-small', 'ship-ghost', 'ship-wreck'];
@@ -385,6 +451,274 @@ export function dressLevel(level, sets, { seed = 1, density = 1, ships = true } 
     const wide = Math.max(...level.platforms.map((p) => Math.abs(p.x) + p.w / 2));
     const water = keepOut.filter((b) => b.r !== undefined).concat((level.signs ?? []).filter((s) => s.top <= 0).map((s) => ({ x: s.x, z: s.z, r: s.w / 2 + 3 })));
     out.push(...shipsAlong({ from: Math.max(...zs), to: Math.min(...zs), seed: seed * 7 + 3, x: wide + 4, keepOut: water }));
+  }
+  return out;
+}
+
+/** Escala de un modelo del kit de selva/pueblo (unidades ~1 m, no las del kit pirata). */
+function jungleScale(art, r) {
+  if (art.startsWith('nature/tree_')) return 2.55 + r() * 1.15;
+  if (art.startsWith('nature/statue_head')) return 3.15 + r() * 0.45;
+  if (art.startsWith('nature/statue_')) return 2.7 + r() * 0.55;
+  if (/nature\/(rock_large|rock_tall|stone_tall|stone_large)/.test(art)) return 2.3 + r() * 0.9;
+  if (art.startsWith('nature/plant_bush')) return 2.35 + r() * 0.9;
+  if (/nature\/(grass|flower_|mushroom_|crops_)/.test(art)) return 1.65 + r() * 0.7;
+  if (/nature\/(log|stump_)/.test(art)) return 1.85 + r() * 0.45;
+  return 2;
+}
+
+/**
+ * Bosque y ruinas a los lados del camino, sin tapar el pasillo.
+ * En piso bajo, afuera del sendero (sobre el pasto). En una terraza alta, en el borde de la losa.
+ *
+ * @param {object} level
+ * @param {{ set?: string, seed?: number, ground?: number, keepOut?: Array<{x,z,r}|{x,z,w,d}> }} [o]
+ */
+export function dressBanks(level, { set = 'village', seed = 1, ground = 0.88, keepOut = [] } = {}) {
+  const arts = SCENERY_SETS[set];
+  if (!arts) throw new Error(`[dressBanks] set "${set}" no existe`);
+  const r = rng(seed);
+  const zones = [...keepOut];
+  for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.7 });
+  for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: p.type === 'pyramid' ? (p.size ?? 8) / 2 : 1.5 });
+  for (const n of level.npcs ?? []) zones.push({ x: n.x, z: n.z, r: 1.8 });
+  for (const g of level.geysers ?? []) zones.push({ x: g.x, z: g.z, r: (g.radius ?? 1) + 0.8 });
+  for (const s of level.sweepers ?? []) zones.push({ x: s.x, z: s.z, r: (s.length ?? 2) + 0.6 });
+  for (const p of level.platforms) for (const s of p.weather?.shelters ?? []) zones.push({ x: s.x, z: s.z, w: s.w + 1.2, d: s.d + 1.2 });
+  if (level.goal) zones.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 1.4, d: level.goal.d + 1.4 });
+
+  const out = [];
+  const crowded = (x, z, rad) => blockedBy(zones, x, z) || out.some((o) => (o.x - x) ** 2 + (o.z - z) ** 2 < (rad + 0.7) ** 2);
+
+  for (const p of level.platforms) {
+    if (p.kind || p.w < 4) continue;
+    const high = Math.abs(p.top - ground) >= 0.55;
+    const zMax = p.z + p.d / 2 - 0.35;
+    const zMin = p.z - p.d / 2 + 0.35;
+    const step = high ? 3.1 : 2.2;
+    for (const side of [-1, 1]) {
+      for (let z = zMax - r() * step * 0.4; z > zMin; z -= step * (0.7 + r() * 0.55)) {
+        const art = arts[Math.floor(r() * arts.length)];
+        const s = jungleScale(art, r);
+        const b = KENNEY_BOUNDS[art];
+        const half = b ? (Math.max(b.max[0] - b.min[0], b.max[2] - b.min[2]) * s) / 2 : 0.4;
+        const solid = collideKind(art) != null;
+        let x;
+        let top;
+        if (!high) {
+          const gap = solid ? Math.max(p.w / 2 + 0.9, 2.25 + half) : p.w / 2 + 0.12;
+          const spread = art.includes('tree') ? 4.8 : solid ? 2.2 : 1.15;
+          x = p.x + side * (gap + r() * spread);
+          top = ground;
+        } else {
+          const inner = 2.25 + (solid ? half : 0.25);
+          const outer = p.w / 2 - 0.4;
+          if (outer - inner < 0.25) continue;
+          x = p.x + side * (inner + r() * (outer - inner));
+          top = p.top;
+        }
+        const rad = solid ? Math.max(half, 0.55) : 0.4;
+        if (crowded(x, z, rad)) continue;
+        const motion = /grass|flower_|mushroom_/.test(art) ? 'sway' : undefined;
+        out.push({ art, x: round(x), z: round(z), top, yaw: Math.round(r() * 360), s: round(s), ...(motion ? { motion } : {}) });
+      }
+    }
+  }
+  return out;
+}
+
+const HUT = 2.4;
+
+/** Dirección de la puerta (yaw 0 mira a +X), igual que el giro de la vista. */
+function doorDir(yaw) {
+  const a = (yaw * Math.PI) / 180;
+  return { x: Math.cos(a), z: -Math.sin(a) };
+}
+
+/**
+ * Dos filas de paneles de vidrio. En cada fila exactamente uno es templado
+ * (aguanta el peso) y el otro se rompe al pisarlo. `from` es el borde de entrada.
+ * @returns {{ panels: object[], endZ: number }}
+ */
+export function glassBridge({ from, rows = 5, gap = 0.85, panelD = 2.6, panelW = 3, lane = 2.05, top = 1, seed = 1 } = {}) {
+  check('vidrio', from, rows, 'glassBridge');
+  const r = rng(seed);
+  const step = panelD + gap;
+  const panels = [];
+  for (let i = 0; i < rows; i++) {
+    const z = round(from - gap - panelD / 2 - i * step);
+    const leftHolds = r() < 0.5;
+    const base = { z, w: panelW, d: panelD, top, h: 0.16, kind: 'glass' };
+    panels.push({ ...base, id: `vidrio-i${i}`, x: -lane, tempered: leftHolds });
+    panels.push({ ...base, id: `vidrio-d${i}`, x: lane, tempered: !leftHolds });
+  }
+  return { panels, endZ: round(from - rows * step) };
+}
+
+/** Mitad del ancho del modelo en el piso, para saber si se mete dentro de una choza. */
+function propReach(item) {
+  const b = KENNEY_BOUNDS[item.art];
+  const s = item.s ?? 1;
+  if (!b) return 0.4;
+  return Math.max(b.max[0] - b.min[0], b.max[2] - b.min[2]) * s * 0.5;
+}
+
+/**
+ * Separa la escenografía que se cruza con una choza. Los muros no se mueven;
+ * el resto sale hacia afuera del camino, para que la roca no atraviese la pared.
+ */
+export function unclipScenery(scenery) {
+  const houses = [];
+  for (const s of scenery) {
+    if (s.art !== 'town/wall-wood-door') continue;
+    houses.push({ x: s.x, z: s.z, r: (s.s ?? 2.4) * 0.58 });
+  }
+  const fixed = (s) => s.art.startsWith('town/wall') || s.art === 'town/roof-point' || s.art === 'town/chimney';
+  for (let n = 0; n < 5; n++) {
+    for (const s of scenery) {
+      if (fixed(s)) continue;
+      const reach = propReach(s);
+      for (const h of houses) {
+        let dx = s.x - h.x;
+        let dz = s.z - h.z;
+        let dist = Math.hypot(dx, dz);
+        const need = h.r + reach + 0.15;
+        if (dist >= need) continue;
+        if (dist < 0.05) {
+          dx = Math.sign(h.x) || 1;
+          dz = 0;
+          dist = 1;
+        }
+        let x = h.x + (dx / dist) * need;
+        let z = h.z + (dz / dist) * need;
+        if (Math.abs(x) < 2.4) {
+          x = h.x + (Math.sign(h.x) || 1) * need;
+          z = h.z + (dz || 0.6);
+        }
+        s.x = round(x);
+        s.z = round(z);
+      }
+    }
+  }
+}
+
+/**
+ * Choza armada con piezas del fantasy-town-kit: cuatro muros, techo, chimenea con humo y un farol.
+ * La puerta mira al camino (x = 0).
+ * @param {Array<{x:number, z:number, top:number}>} spots
+ */
+export function villageHouses(spots) {
+  const out = [];
+  for (const h of spots) {
+    const yawDoor = h.x >= 0 ? 180 : 0;
+    const s = h.s ?? HUT;
+    const door = doorDir(yawDoor);
+    for (const yaw of [0, 90, 180, 270]) {
+      out.push({ art: yaw === yawDoor ? 'town/wall-wood-door' : 'town/wall-wood', x: h.x, z: h.z, top: h.top, yaw, s });
+    }
+    out.push({ art: 'town/roof-point', x: h.x, z: h.z, top: round(h.top + s * 0.98), yaw: yawDoor, s });
+    const chimS = round(s * 0.55);
+    out.push({
+      art: 'town/chimney',
+      x: round(h.x - door.x * s * 0.2 - 0.32 * chimS),
+      z: round(h.z - door.z * s * 0.2),
+      top: round(h.top + s * 1.12),
+      yaw: 0,
+      s: chimS,
+      motion: 'smoke',
+    });
+    const side = h.x >= 0 ? -1 : 1;
+    out.push({
+      art: 'town/lantern',
+      x: round(h.x + door.x * s * 0.64),
+      z: round(h.z + door.z * s * 0.64 + side * 0.42),
+      top: h.top,
+      yaw: yawDoor,
+      s: 1.05,
+      motion: 'sway',
+    });
+    out.push({
+      art: 'nature/pot_large',
+      x: round(h.x + door.x * s * 0.64),
+      z: round(h.z + door.z * s * 0.64 - side * 0.5),
+      top: h.top,
+      yaw: 25,
+      s: 1.7,
+    });
+    // Patio: cerca atrás, huerta y leña. Quedan fuera del pasillo.
+    const back = -1;
+    out.push({ art: 'nature/fence_simple', x: round(h.x + door.x * back * s * 0.72), z: round(h.z - 0.95), top: h.top, yaw: 90, s: 2.15 });
+    out.push({ art: 'nature/fence_simple', x: round(h.x + door.x * back * s * 0.72), z: round(h.z + 0.95), top: h.top, yaw: 90, s: 2.15 });
+    out.push({
+      art: 'nature/crops_bambooStageB',
+      x: round(h.x + door.x * back * s * 0.98),
+      z: round(h.z + side * 0.15),
+      top: h.top,
+      yaw: side * 12,
+      s: 2.15,
+      motion: 'sway',
+    });
+    out.push({
+      art: 'nature/log_stack',
+      x: round(h.x + door.x * back * 0.35 + side * s * 0.62),
+      z: round(h.z - side * 0.15),
+      top: h.top,
+      yaw: 18,
+      s: 2.15,
+    });
+    out.push({
+      art: 'nature/pot_small',
+      x: round(h.x + door.x * s * 0.78),
+      z: round(h.z - side * 0.2),
+      top: h.top,
+      yaw: 8,
+      s: 1.7,
+    });
+  }
+  return out;
+}
+
+/** Flores y pasto pegados al borde del camino, sin chocar. */
+export function pathTrim(level, { seed = 3, ground = 0.88 } = {}) {
+  const arts = ['nature/grass', 'nature/grass_leafs', 'nature/grass_large'];
+  const r = rng(seed);
+  const zones = [];
+  for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.45 });
+  for (const n of level.npcs ?? []) zones.push({ x: n.x, z: n.z, r: 1.3 });
+  for (const p of level.platforms) for (const s of p.weather?.shelters ?? []) zones.push({ x: s.x, z: s.z, w: s.w + 0.4, d: s.d + 0.4 });
+  if (level.goal) zones.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 0.6, d: level.goal.d + 0.6 });
+  const out = [];
+  for (const p of level.platforms) {
+    if (p.kind || p.w < 4.5) continue;
+    const zMax = p.z + p.d / 2 - 0.3;
+    const zMin = p.z - p.d / 2 + 0.3;
+    for (const side of [-1, 1]) {
+      for (let z = zMax; z > zMin; z -= 1.05 + r() * 0.45) {
+        const art = arts[Math.floor(r() * arts.length)];
+        const x = p.x + side * (p.w / 2 + 0.28 + r() * 0.55);
+        if (blockedBy(zones, x, z)) continue;
+        out.push({
+          art,
+          x: round(x),
+          z: round(z),
+          top: Math.abs(p.top - ground) < 0.4 ? ground : p.top,
+          yaw: Math.round(r() * 360),
+          s: round(1.7 + r() * 0.9),
+          motion: 'sway',
+        });
+      }
+    }
+  }
+  return out;
+}
+
+/** Tótem: columna de piedra con una cabeza encima. */
+export function totems(spots) {
+  const out = [];
+  for (const t of spots) {
+    const s = t.s ?? 2.7;
+    out.push({ art: 'nature/statue_column', x: t.x, z: t.z, top: t.top, yaw: t.yaw ?? 0, s });
+    out.push({ art: 'nature/statue_head', x: t.x, z: t.z, top: round(t.top + s * 0.9), yaw: (t.yaw ?? 0) + 12, s: round(s * 0.82) });
   }
   return out;
 }

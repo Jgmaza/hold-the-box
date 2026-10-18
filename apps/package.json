@@ -1,9 +1,9 @@
 {
-  "name": "no-sueltes-la-caja",
+  "name": "hold-the-box",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "No Sueltes La Caja — coop local 2P (PlayCanvas). Game Jam 2026 · Better Together.",
+  "description": "Hold the Box — coop local 2P (PlayCanvas). Game Jam 2026 · Better Together.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

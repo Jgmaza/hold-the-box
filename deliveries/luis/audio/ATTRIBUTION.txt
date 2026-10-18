@@ -1,0 +1,29 @@
+Todos los sonidos son CC0 (dominio público). OpenGameArt.org.
+
+musica-loop.ogg          Pirate Ship Theme Loop — beardalaxy
+                         https://opengameart.org/content/pirate-ship-theme-loop
+musica-victoria.ogg      Tropoix — Tozan
+                         https://opengameart.org/content/tropoix
+musica-derrota.wav       Oldschool win and die — sauer2
+sfx-meta.wav             https://opengameart.org/content/oldschool-win-and-die-jump-and-run-sounds
+sfx-salto.wav            8-BIT Jump #1 (SFX_Jump_09) — jalastram / Jesús Lastra
+                         https://opengameart.org/content/8-bit-jump-1
+sfx-inclinacion.ogg      100 CC0 SFX #2 (wood) — rubberduck
+sfx-golpe.ogg            100 CC0 SFX #2 (wood hit) — rubberduck
+sfx-trueno.ogg           100 CC0 SFX #2 (thunder) — rubberduck
+sfx-mecha.ogg            100 CC0 SFX #2 (switch) — rubberduck
+                         https://opengameart.org/content/100-cc0-sfx-2
+sfx-mojado.ogg           40 CC0 water / splash / slime (splash) — rubberduck
+sfx-splash.ogg           idem
+sfx-lluvia.ogg           idem (loop_rain)
+sfx-olas.ogg             idem (loop_water)
+sfx-ola.ogg              idem (splash)
+                         https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+sfx-maullido.ogg         Meow — IgnasD
+                         https://opengameart.org/content/meow
+sfx-aranyo.mp3           Various Paper Sound Effects (paper ripped) — Luckius
+                         https://opengameart.org/content/various-paper-sound-effects
+sfx-viento.ogg           wind whoosh loop — SketchMan3
+                         https://opengameart.org/content/wind-whoosh-loop
+sfx-explosion.wav        Explosion — TinyWorlds
+                         https://opengameart.org/content/explosion-0

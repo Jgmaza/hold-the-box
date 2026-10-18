@@ -2,6 +2,7 @@
 
 const EPS = 1e-4;
 const STEP_UP = 0.12; // bordes más bajos que esto se suben solos (uniones, plataformas al ras)
+const HOLE_INSET = 0.5; // fracción del radio del cuerpo: cae cuando su centro está a menos de (r - esto) del centro del hueco
 
 export function makeAABB(minX, minY, minZ, maxX, maxY, maxZ) {
   return { min: { x: minX, y: minY, z: minZ }, max: { x: maxX, y: maxY, z: maxZ } };
@@ -30,6 +31,48 @@ export function containsPoint(box, p) {
     p.y >= box.min.y && p.y <= box.max.y &&
     p.z >= box.min.z && p.z <= box.max.z
   );
+}
+
+/**
+ * Pozo circular del collider (`holes: [{x, z, r}]`) que ocupa al cuerpo, o null. Ahí no hay piso: cae.
+ * Sobre el piso, el cuerpo cae cuando más o menos la mitad de su ancho ya está sobre el vacío; ya por debajo del piso
+ * sigue "dentro" del pozo mientras lo toque (ver `constrainShafts`).
+ */
+export function inHole(c, body) {
+  const holes = c.holes;
+  if (!holes) return null;
+  const { pos, radius } = body;
+  const below = pos.y < c.aabb.max.y - STEP_UP;
+  const reach = below ? radius : -radius * HOLE_INSET;
+  return holes.find((h) => Math.hypot(pos.x - h.x, pos.z - h.z) <= h.r + reach) ?? null;
+}
+
+/**
+ * Los pozos tienen paredes: quien ya cayó por debajo del piso no puede salir de costado (ni atravesar el borde).
+ * Se queda dentro del círculo hasta que llega al agua.
+ */
+function constrainShafts(body, colliders) {
+  for (const c of colliders) {
+    if (!c.holes || body.pos.y >= c.aabb.max.y - STEP_UP) continue;
+    const h = inHole(c, body);
+    if (!h) continue;
+    const limit = h.r - body.radius * HOLE_INSET;
+    const dx = body.pos.x - h.x;
+    const dz = body.pos.z - h.z;
+    const dist = Math.hypot(dx, dz);
+    if (dist <= limit || dist === 0) continue;
+    const k = limit / dist;
+    body.pos.x = h.x + dx * k;
+    body.pos.z = h.z + dz * k;
+    // Sin velocidad hacia la pared (si no, se quedaría "pegado" empujándola).
+    const nx = dx / dist;
+    const nz = dz / dist;
+    const out = body.vel.x * nx + body.vel.z * nz;
+    if (out > 0) {
+      body.vel.x -= out * nx;
+      body.vel.z -= out * nz;
+    }
+  }
 }
 
 /** AABB de un jugador con los pies en `pos`. Escribe en `out` para no crear basura. */
@@ -67,7 +110,7 @@ export function moveBody(body, dx, dy, dz, colliders, scratch) {
     body.pos.y += dy;
     bodyAABB(body.pos, body.radius, body.height, box);
     for (const c of colliders) {
-      if (!overlaps(box, c.aabb)) continue;
+      if (!overlaps(box, c.aabb) || inHole(c, body)) continue;
       if (dy < 0) {
         body.pos.y = c.aabb.max.y;
         result.hitGround = c;
@@ -79,6 +122,7 @@ export function moveBody(body, dx, dy, dz, colliders, scratch) {
     }
   }
 
+  constrainShafts(body, colliders);
   return result;
 }
 
@@ -87,7 +131,7 @@ function moveHorizontal(body, axis, delta, colliders, box) {
   body.pos[axis] += delta;
   bodyAABB(body.pos, body.radius, body.height, box);
   for (const c of colliders) {
-    if (!overlaps(box, c.aabb)) continue;
+    if (!overlaps(box, c.aabb) || inHole(c, body)) continue;
     // Borde bajito: subirlo en vez de chocar.
     const rise = c.aabb.max.y - body.pos.y;
     if (rise <= STEP_UP) {

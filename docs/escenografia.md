@@ -40,6 +40,11 @@ Sets:
 | `beach` | palmeras, hierba, arena, barriles |
 | `pirate` | cañones, cofres, banderas, cercas |
 | `fort` | murallas, torres, cañones |
+| `village` | palmeras, arbustos, flores y troncos del nature-kit (La Aldea) |
+| `temple` | cabezas, columnas y piedras del nature-kit (El Templo) |
+| `canyon` | rocas y árboles del nature-kit (El Puente) |
+
+La selva no usa el kit pirata. Los GLB viven en `apps/public/kenney/nature/` y `apps/public/kenney/town/` (CC0, Kenney). El nombre del modelo lleva la carpeta: `nature/tree_palm`, `town/wall-wood`. `dressBanks` los pone al lado del camino; `villageHouses` arma cada choza (muros, techo, chimenea con humo, farol). El nature-kit no trae textura y marca el material como metal: la vista lo deja mate al cargarlo.
 
 ## Vista
 

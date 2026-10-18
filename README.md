@@ -1,4 +1,4 @@
-# No Sueltes La Caja
+# Hold the Box
 
 Game Jam 2026 · Better Together · PlayCanvas · coop local 2P
 
@@ -20,11 +20,11 @@ Vertical slice **ya shipped**. Fase: tunear cajas, vestir, desplegar (Pages + it
 | Visual señales/props | Matias · [@matiasaguilar633](https://github.com/matiasaguilar633) | `team/matias/` |
 
 ```bash
-git clone https://github.com/Jgmaza/no-sueltes-la-caja.git
-cd no-sueltes-la-caja
+git clone https://github.com/Jgmaza/hold-the-box.git
+cd hold-the-box
 git checkout work/<tu-nombre> && git pull
 # jugar integración:
 git checkout dev && git pull && cd apps && npm install && npm run dev
 ```
 
-Prod: https://jgmaza.github.io/no-sueltes-la-caja/ · Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)
+Prod: https://jgmaza.github.io/hold-the-box/ · Ramas: [`docs/BRANCHES.md`](./docs/BRANCHES.md)

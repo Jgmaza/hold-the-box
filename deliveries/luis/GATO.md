@@ -4,10 +4,10 @@ Perfil aceptado para trabajar en `work/luis`. La caída sigue siendo la del moto
 
 ## Qué hace
 
-- La caja lleva un gato. Orejas, cola y cara se agitan más conforme sube la rabia (0–100, se ve en el letrero `GATO`).
+- La caja lleva un gato. Orejas, cola y cara se agitan más conforme sube la rabia (0–100). En el HUD no se ve el número: la barra **¡Miau!** es el % que queda.
 - La rabia sube **siempre**. Caminar juntos la frena (`calmMul`) pero no la borra. Separarse la acelera (`desyncMul`).
-- Al llegar a `warnRage` asoma la pata. A `scratchRage` araña a un lado y repite cada `cooldown` segundos. La rabia no se reinicia.
-- Desde `damageRage` también baja el contenido, despacio (`chipPerSec`).
+- Al llegar a `warnRage` asoma la pata. A `scratchRage` araña a un lado: empuja, ladea la caja y quita `scratchDamage` % (12). Se repite cada `cooldown` segundos. Si no enderezan, se cae; si ignoran los zarpazos, se vacía.
+- **Sin huequito.** El % solo baja por golpes y por el zarpazo, como la bomba.
 - En la terraza de la meta (`goalLead` metros antes), si no avanzan hacia ella (`hurrySpeed`), el gato vacía la caja en unos 5 s (`goalDrainPerSec`). Si cruzan corriendo, ese vaciado no corre.
 - Integridad 0 sigue siendo la derrota de siempre: «se vació».
 - En el título se elige una de dos: **Caja VIP** (la de siempre, sin gato) o **Caja del gato** (orejas, cara, cola y garras). Teclas `1` y `2`, o clic.
@@ -27,15 +27,7 @@ Eventos para PlayCanvas: `cat:warn { player }` y `cat:scratch { player }`.
 
 ## Audio
 
-Hasta que haya archivos, el maullido y el arañazo son tonos generados en el navegador (sin copyright).
-
-Para reemplazarlos, soltar en `deliveries/luis/audio/` con estos nombres:
-
-- `sfx-maullido.ogg` (o `.mp3` / `.wav`)
-- `sfx-aranyo.ogg`
-- `musica-loop` para la música de fondo, igual que el resto de slots
-
-Licencias que sirven: CC0 (Kenney, Freesound filtrado por CC0, OpenGameArt) o CC-BY guardando autor y enlace (Kevin MacLeod). No usar rips ni bandas sonoras.
+Los archivos están en `deliveries/luis/audio/` (CC0, ver `ATTRIBUTION.txt`). Si falta uno, el maullido y el arañazo siguen siendo un tono del navegador.
 
 ## Qué mirar después en PlayCanvas
 

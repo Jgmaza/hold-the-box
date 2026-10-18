@@ -101,7 +101,14 @@
 .m-fullscreen {
   position: absolute;
   top: 20px;
+  right: 88px;
+}
+#menu > .spk {
+  top: 20px;
   right: 20px;
+}
+#menu > .spk .spk-pop {
+  top: calc(100% + 10px);
 }
 .m-credit {
   position: absolute;
@@ -152,7 +159,7 @@
   text-shadow: 0 8px 0 var(--ink);
   transform: rotate(-3deg);
 }
-/* "LA CAJA" como caja de cartón: cinta clara cruzada y sello de FRÁGIL. */
+/* "BOX" como caja de cartón: cinta clara cruzada y sello de FRÁGIL. */
 .m-logo .l2 {
   position: relative;
   margin-top: 10px;
@@ -446,9 +453,40 @@
   border-radius: 26px;
   transition: background 0.2s;
 }
-.m-maps {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+.m-maps-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 1100px;
   margin-top: 2vh;
+}
+.m-maps {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 18px 10px 24px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.m-maps::-webkit-scrollbar {
+  display: none;
+}
+.m-maps .m-map {
+  flex: 0 0 240px;
+  scroll-snap-align: center;
+}
+.m-arrow {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  font-size: 24px;
+  border-radius: 50%;
 }
 .m-boxes {
   grid-template-columns: repeat(3, 1fr);
@@ -698,7 +736,19 @@
     font-size: 13px;
   }
   .m-box span:last-child {
-    display: none;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  .m-box {
+    padding: 8px 10px 10px;
+    gap: 2px;
+  }
+  .m-box-icon {
+    font-size: 26px;
+  }
+  .m-maps {
+    padding-top: 10px;
+    padding-bottom: 14px;
   }
   .m-foot .btn.big {
     padding: 8px 40px;

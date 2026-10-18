@@ -178,7 +178,7 @@ for (const chunk of chunks) {
 }
 
 const gltf = {
-  asset: { version: '2.0', generator: 'no-sueltes-pata' },
+  asset: { version: '2.0', generator: 'hold-the-box-pata' },
   scene: 0,
   scenes: [{ nodes: [0] }],
   nodes: [{ mesh: 0, name: 'pata-gato' }],

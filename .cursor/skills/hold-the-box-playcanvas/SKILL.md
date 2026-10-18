@@ -1,13 +1,13 @@
 ---
-name: no-sueltes-playcanvas
+name: hold-the-box-playcanvas
 description: >-
-  Gameplay y arquitectura PlayCanvas para No Sueltes La Caja (coop local 2P,
+  Gameplay y arquitectura PlayCanvas para Hold the Box (coop local 2P,
   caja compartida con inclinación, huequito y mojada). Usar cuando se trabaje
   en apps/, mecánicas de caja, controles P1/P2, nivel jam o integración desde
   deliveries/.
 ---
 
-# No Sueltes La Caja — PlayCanvas
+# Hold the Box — PlayCanvas
 
 ## Contexto
 - Game jam, tema Better Together.

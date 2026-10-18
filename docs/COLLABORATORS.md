@@ -1,6 +1,6 @@
 # Invitar al equipo (Jose)
 
-Repo: https://github.com/Jgmaza/no-sueltes-la-caja
+Repo: https://github.com/Jgmaza/hold-the-box
 
 ## GitHub usernames
 
@@ -13,6 +13,6 @@ Repo: https://github.com/Jgmaza/no-sueltes-la-caja
 | Matias | [@matiasaguilar633](https://github.com/matiasaguilar633) | Write | Invitado |
 
 Deben aceptar la invitación por email o en:  
-https://github.com/Jgmaza/no-sueltes-la-caja/invitations
+https://github.com/Jgmaza/hold-the-box/invitations
 
 Cuando lleguen más `@`, se agregan igual (Write).

@@ -91,14 +91,15 @@ export const CONFIG = {
       desyncMul: 2.5, // separados o inclinados
       warnRage: 16, // asoma la pata (~9 s juntos, ~3 s separados)
       scratchRage: 22, // primer arañazo (~12 s juntos, ~4 s separados)
-      damageRage: 55, // a partir de aquí también baja la integridad
-      chipPerSec: 1.2, // % de contenido por segundo en esa etapa
+      scratchDamage: 12, // % que quita cada zarpazo (como un golpe de la bomba)
+      damageRage: 55, // si chipPerSec > 0, a partir de aquí también baja despacio
+      chipPerSec: 0, // el daño viene del zarpazo, no del reloj
       swipeHold: 0.7, // un zarpazo: sale, se queda y vuelve (la vista lee esto)
       cooldown: 6.5, // pausa entre arañazos; la rabia no se reinicia
-      knock: 3.4, // empujón horizontal al jugador arañado (m/s)
-      knockUp: 1.1,
-      controlTime: 0.45, // segundos con poco control tras el arañazo
-      kick: 240, // golpe angular a la caja hacia ese lado (grados/s)
+      knock: 4.2, // empujón horizontal al jugador arañado (m/s)
+      knockUp: 1.3,
+      controlTime: 0.6, // segundos con poco control tras el arañazo
+      kick: 380, // golpe angular a la caja hacia ese lado (grados/s)
       goalLead: 10, // metros antes de la meta (la terraza) donde aprieta
       hurrySpeed: 1.4, // m/s hacia la meta; por debajo cuenta como quedarse
       goalDrainPerSec: 20, // % de contenido por segundo si se quedan en ese tramo
@@ -241,7 +242,18 @@ export const CONFIG = {
       pushSpeed: 2.6, // m/s que empuja con intensidad 1 (se compensa caminando en contra)
       leanDeg: 16, // inclinación extra de la caja con intensidad 1
       drainRate: 4, // % de contenido por segundo con intensidad 1
+      dryRate: 6, // % de mojado que quita por segundo con intensidad 1 (brisa ≈ 0.7 %/s). Solo seca si nada la está mojando
       syncRelief: 0.8, // desincronizados pierden hasta (1 + esto)× más contenido
+      // Huecos: círculos SIN piso en la isla (windHoles() en levels/sections.js). Quien pisa uno cae al agua.
+      // Van cerca del centro alternando izquierda / derecha: hay que esquivarlos en slalom (y el viento empuja hacia ellos).
+      holeLayout: {
+        spacing: 3.5, // un hueco cada tantos metros de isla (solo hay que definir el largo)
+        radiusMin: 0.9,
+        radiusMax: 1.25,
+        margin: 2, // metros sin huecos al entrar y al salir de la isla
+        center: { min: 0.6, max: 1.7 }, // qué tan corrido del eje queda el centro de cada hueco (su borde siempre pisa la huella de la pareja)
+        zGap: 1, // metros mínimos en Z entre un hueco y el siguiente (para girar)
+      },
       period: 5.5,
       warnTime: 0.9,
       activeTime: 2.2,
@@ -289,13 +301,19 @@ export const CONFIG = {
   debug: {
     godMode: false, // sin derrotas (para probar el nivel)
   },
+
+  // Mezcla del jugador. 0 = silencio. Se guarda en el navegador (audioPrefs.js).
+  audio: {
+    music: 0.8,
+    sfx: 1,
+  },
 };
 
 /** Las cajas que se pueden elegir antes de empezar. */
 export const BOX_CHOICES = [
-  { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
-  { id: 'gato', name: 'Caja del gato', blurb: 'Se ve el gato. Si se separan, saca las garras.' },
-  { id: 'bomba', name: 'Caja bomba', blurb: 'Golpes, agua y desorden la dañan. En 0 %, explota.' },
+  { id: 'vip', name: 'Caja VIP', blurb: 'Cartón con aires de lujo. Muy fino, muy frágil.' },
+  { id: 'gato', name: 'Caja del gato', blurb: 'Trae gato de regalo. Si no lo atienden, araña la caja.' },
+  { id: 'bomba', name: 'Caja bomba', blurb: 'Tic, tac... Cuídenla o se va todo por los aires.' },
 ];
 
 /** Activa una caja. VIP no tiene gato ni mecha. */

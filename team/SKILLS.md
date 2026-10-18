@@ -3,7 +3,7 @@
 Índice del repo: [`../INDEX.md`](../INDEX.md)
 
 Skills instaladas en la máquina del Lead viven en `~/.cursor/skills-cursor/`.  
-En el repo también hay un skill de proyecto para gameplay: `.cursor/skills/no-sueltes-playcanvas/`.
+En el repo también hay un skill de proyecto para gameplay: `.cursor/skills/hold-the-box-playcanvas/`.
 
 > **Danel:** usa modelo **Claude Opus 5.5** en Cursor Agent para todo lo de `apps/`.
 
@@ -33,7 +33,7 @@ En el repo también hay un skill de proyecto para gameplay: `.cursor/skills/no-s
 
 | Skill | Para qué |
 |---|---|
-| **no-sueltes-playcanvas** (repo) | Contexto del juego + mecánicas de caja + convenciones `apps/` |
+| **hold-the-box-playcanvas** (repo) | Contexto del juego + mecánicas de caja + convenciones `apps/` |
 | **create-rule** | Rules solo para `apps/**` (PlayCanvas, modular, jam-speed) |
 | **shell** | Comandos literales cuando haga falta (`/shell`) |
 | **review-bugbot** | Autoreview antes de pedirle merge a Jose |
@@ -64,7 +64,7 @@ Producción: DAW / bancos / generadores; entrega en `deliveries/luis/`.
 
 | Skill | Para qué |
 |---|---|
-| **no-sueltes-playcanvas** (repo) | Entender mecánicas al cablear UI |
+| **hold-the-box-playcanvas** (repo) | Entender mecánicas al cablear UI |
 | **review-bugbot** | Pasar bug review a cambios de UI |
 | **create-rule** | Reglas de UI/textos en español |
 | **canvas** | Tablero de bugs / checklist QA visual |
@@ -92,5 +92,5 @@ Casi no necesitan skills de código. Flujo principal: **papel → Photopea** (`d
 ## Cómo activar un skill
 
 1. En Cursor Agent, menciona la skill o el flujo (`create-rule`, `review-bugbot`, etc.).
-2. Para el skill del repo, abre el proyecto y pide algo de gameplay en `apps/` — debe leer `.cursor/skills/no-sueltes-playcanvas/SKILL.md`.
+2. Para el skill del repo, abre el proyecto y pide algo de gameplay en `apps/` — debe leer `.cursor/skills/hold-the-box-playcanvas/SKILL.md`.
 3. Danel: **cambia el modelo a Opus 5.5** antes de pegar prompts de `team/danel/prompts.md`.

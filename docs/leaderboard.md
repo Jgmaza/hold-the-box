@@ -56,4 +56,4 @@ Roles: `CARGADOR` · `CAPITAN` · `GRUMETE` · `PIRATA`. Nombre: 3–8 chars `A-
 
 ## Issue
 
-[#14](https://github.com/Jgmaza/no-sueltes-la-caja/issues/14)
+[#14](https://github.com/Jgmaza/hold-the-box/issues/14)

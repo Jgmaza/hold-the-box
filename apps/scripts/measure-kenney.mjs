@@ -71,9 +71,21 @@ function measure(gltf) {
   return { min: min.map(r), max: max.map(r) };
 }
 
-const files = readdirSync(dir).filter((f) => f.endsWith('.glb')).sort();
+// También mide subcarpetas (nature/, town/): la clave queda "nature/tree_palm".
+function collect(folder, prefix = '') {
+  const found = [];
+  for (const ent of readdirSync(folder, { withFileTypes: true })) {
+    if (ent.isDirectory()) {
+      if (ent.name === 'Textures') continue;
+      found.push(...collect(join(folder, ent.name), `${prefix}${ent.name}/`));
+    } else if (ent.name.endsWith('.glb')) found.push(`${prefix}${ent.name.replace(/\.glb$/, '')}`);
+  }
+  return found;
+}
+
+const files = collect(dir).sort();
 const bounds = {};
-for (const f of files) bounds[f.replace(/\.glb$/, '')] = measure(readGltf(join(dir, f)));
+for (const f of files) bounds[f] = measure(readGltf(join(dir, `${f}.glb`)));
 
 const lines = Object.entries(bounds).map(([k, b]) => `  '${k}': { min: [${b.min.join(', ')}], max: [${b.max.join(', ')}] },`);
 writeFileSync(

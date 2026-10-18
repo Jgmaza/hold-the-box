@@ -5,7 +5,7 @@ Leer `docs/visual/DECISIONS.md`.
 
 ```
 Eres senior gameplay programmer (PlayCanvas) + diseñador de feel coop.
-Juego: "No Sueltes La Caja" — coop LOCAL 2P, mismo PC, una cámara.
+Juego: "Hold the Box" — coop LOCAL 2P, mismo PC, una cámara.
 
 FANTASÍA
 - Como Moving Out pero NO pueden soltar la carga.

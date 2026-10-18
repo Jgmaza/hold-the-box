@@ -16,6 +16,14 @@
 .hud.hidden {
   opacity: 0;
 }
+#ui > .spk {
+  top: auto;
+  right: 18px;
+  bottom: 18px;
+}
+#ui > .spk .spk-pop {
+  bottom: calc(100% + 10px);
+}
 
 /* Barras */
 .meters {
@@ -86,8 +94,13 @@
     transform: translateX(1px);
   }
 }
-.hud.bomb .box-name {
+.hud.bomb .box-name,
+.hud.cat .box-name {
   top: 16px;
+}
+.meter[data-k='cat'][data-level='low'] .bar i,
+.meter[data-k='cat'] .bar i {
+  transition: width 0.1s linear, background 0.3s;
 }
 .meter[data-k='bomb'] .bar i {
   transition: width 0.1s linear, background 0.3s;

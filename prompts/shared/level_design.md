@@ -3,7 +3,7 @@
 Usar con `docs/visual/DECISIONS.md` y refs de cámara/path.
 
 ```
-Eres level designer de game jam. Juego coop local 2P: "No Sueltes La Caja".
+Eres level designer de game jam. Juego coop local 2P: "Hold the Box".
 
 FANTASÍA DEL NIVEL
 - Moving Out sin poder soltar la carga: el path debe hacer que CUIDAR la caja

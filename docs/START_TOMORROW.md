@@ -20,7 +20,7 @@ Pitch jugable en ~30–60 segundos: se siente “Better Together”.
 
 ## Orden (Danel en `apps/`, Opus 5.5)
 
-Usar `team/danel/prompts.md` — **un bloque por chat**, skill `no-sueltes-playcanvas`.
+Usar `team/danel/prompts.md` — **un bloque por chat**, skill `hold-the-box-playcanvas`.
 
 | # | Bloque | Resultado |
 |---|---|---|
@@ -41,7 +41,7 @@ Después (no bloquea el demo de mañana):
 ### Danel (crítico)
 1. Clone / pull del repo.
 2. Cursor → modelo **Claude Opus 5.5**.
-3. Skill: `no-sueltes-playcanvas`.
+3. Skill: `hold-the-box-playcanvas`.
 4. Prompts **1 → 2 → 3** (y fail+meta en cuanto exista la caja).
 5. Rama `apps/danel-*`. Placeholders si no hay assets.
 
@@ -73,9 +73,9 @@ Después (no bloquea el demo de mañana):
 ```
 Mañana arrancamos el primer demo (vertical slice), no el MVP entero.
 
-1. Pull del repo no-sueltes-la-caja
+1. Pull del repo hold-the-box
 2. Cursor Agent → Claude Opus 5.5
-3. Skill: no-sueltes-playcanvas
+3. Skill: hold-the-box-playcanvas
 4. Sigue team/danel/prompts.md en orden: Bootstrap → Movimiento → Caja+inclinación
 5. Luego fail (agua) + meta. Placeholders OK.
 6. Criterio done del día: dos jugadores cargan la caja, se desbalancea si no coordinan, pueden ganar o perder.

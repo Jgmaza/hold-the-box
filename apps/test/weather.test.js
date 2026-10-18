@@ -1,7 +1,7 @@
 // Clima: zonas desde `platform.weather`, lluvia (mojado progresivo, techitos, piso resbaloso),
 // viento (empuje, inclinación, se lleva contenido), ritmo con semilla y el nivel 1 (sin navegador).
 import { afterEach, describe, expect, it } from 'vitest';
-import { rainIsland, windIsland } from '../src/levels/sections.js';
+import { rainIsland, windHoles, windIsland } from '../src/levels/sections.js';
 import { WEATHER_TYPES } from '../src/sim/weather/weatherService.js';
 import { CONFIG, Game, IDLE, LEFT, RIGHT, jump, level1, run } from './helpers.js';
 
@@ -177,6 +177,81 @@ describe('viento', () => {
     expect(g.box.wetness).toBe(0);
   });
 
+  it('el viento seca la caja mojada; sin viento seca más lento', () => {
+    const windy = island({ type: 'wind', dir: 0 });
+    hold(windy.zone, 'active');
+    windy.g.box.wetness = 60;
+    run(windy.g, 1, IDLE, IDLE);
+    const calm = island({ type: 'wind', dir: 0 });
+    hold(calm.zone, 'calm');
+    calm.g.box.wetness = 60;
+    run(calm.g, 1, IDLE, IDLE);
+    const dry = island(undefined, { on: 'seco' });
+    dry.g.box.wetness = 60;
+    run(dry.g, 1, IDLE, IDLE);
+    expect(windy.g.box.wetness).toBeLessThan(calm.g.box.wetness - 3);
+    expect(calm.g.box.wetness).toBeLessThan(dry.g.box.wetness);
+  });
+
+  it('el viento no seca mientras algo moja: la lluvia o un chorro siguen ganando', () => {
+    const { g, zone } = island({ type: 'wind', dir: 0 });
+    hold(zone, 'active');
+    g.box.wetness = 30;
+    g.box.wetRate = 0;
+    zone.update(0);
+    const fx = g.weather._clear();
+    zone.apply(0, g, fx);
+    expect(fx.dry).toBeCloseTo(W.wind.dryRate);
+    g.box.wetRate = 10;
+    g.box.update(1, g.p1, g.p2);
+    expect(g.box.wetness).toBeGreaterThan(30);
+  });
+
+  it('el hueco no tiene piso: quien lo pisa cae al agua, y un cuerpo al lado se sostiene', () => {
+    const hole = { x: 0, z: 0, r: 1.5 };
+    const { g, zone } = island({ type: 'wind', dir: 0, holes: [hole] });
+    hold(zone, 'calm');
+    expect(g.world.floorBelow(0, 0, 5)).toBe(-Infinity);
+    expect(g.world.floorBelow(3, 0, 5)).toBe(1);
+    expect(zone.holeAt({ x: 1, z: 0 })).toBe(hole);
+    expect(zone.holeAt({ x: 3, z: 0 })).toBeNull();
+    let splash = 0;
+    g.events.on('game:splash', () => splash++);
+    g.teleport({ p1: { x: -0.4, y: 1, z: 0 }, p2: { x: 0.4, y: 1, z: 0 } });
+    run(g, 2, IDLE, IDLE);
+    expect(splash).toBeGreaterThanOrEqual(1);
+  });
+
+  it('el pozo tiene paredes: quien cae no puede salir de costado ni atravesar el borde', () => {
+    const hole = { x: 0, z: 0, r: 1.5 };
+    for (const inputs of [[LEFT, RIGHT], [RIGHT, LEFT], [LEFT, LEFT], [RIGHT, RIGHT]]) {
+      const { g, zone } = island({ type: 'wind', dir: 0, holes: [hole] });
+      hold(zone, 'calm');
+      g.teleport({ p1: { x: -0.4, y: 1, z: 0 }, p2: { x: 0.4, y: 1, z: 0 } });
+      let fell = 0;
+      let worst = 0;
+      g.events.on('game:splash', () => fell++);
+      for (let i = 0; i < 150 && !fell; i++) {
+        g.setInputs(i === 0 ? inputs[0] : { ...inputs[0], jumpPressed: false }, i === 0 ? inputs[1] : { ...inputs[1], jumpPressed: false });
+        g.update(1 / 60);
+        for (const p of g.players) {
+          if (p.pos.y < 1 - 0.12) worst = Math.max(worst, Math.hypot(p.pos.x - hole.x, p.pos.z - hole.z));
+        }
+      }
+      expect(fell).toBeGreaterThan(0);
+      expect(worst).toBeLessThanOrEqual(hole.r + 1e-6);
+    }
+  });
+
+  it('en cambio, fuera del hueco la isla sostiene a la pareja', () => {
+    const { g, zone } = island({ type: 'wind', dir: 0, holes: [{ x: 4.5, z: 4.5, r: 1 }] });
+    hold(zone, 'calm');
+    let splash = 0;
+    g.events.on('game:splash', () => splash++);
+    run(g, 2, IDLE, IDLE);
+    expect(splash).toBe(0);
+  });
+
   it('en calma casi no hace nada', () => {
     const { g, zone } = island({ type: 'wind', dir: 0 });
     hold(zone, 'calm');
@@ -267,7 +342,7 @@ describe('ritmo y control', () => {
     expect(g.box.external.drain).toBeGreaterThan(0);
     g.teleport(-1);
     expect(g.p1.push).toEqual({ x: 0, z: 0 });
-    expect(g.box.external).toEqual({ roll: 0, pitch: 0, drain: 0 });
+    expect(g.box.external).toEqual({ roll: 0, pitch: 0, drain: 0, dry: 0 });
   });
 });
 
@@ -326,6 +401,54 @@ describe('secciones: rainIsland / windIsland', () => {
   it('windIsland arma una isla de viento', () => {
     expect(windIsland({ id: 'v', from: 23, length: 14 })).toMatchObject({ z: 16, d: 14, weather: { type: 'wind', dir: 'alternate' } });
     expect(windIsland({ id: 'v', from: 0, length: 5, dir: 90, strength: 2 }).weather).toEqual({ type: 'wind', dir: 90, strength: 2 });
+  });
+
+  it('windHoles reparte huecos según el largo, siempre iguales para el mismo id', () => {
+    const a = windHoles({ id: 'v', from: 23, length: 24 });
+    const { margin, spacing } = W.wind.holeLayout;
+    expect(a.length).toBe(Math.floor((24 - 2 * margin) / spacing));
+    expect(windHoles({ id: 'v', from: 23, length: 24 })).toEqual(a);
+    expect(windHoles({ id: 'otra', from: 23, length: 24 })).not.toEqual(a);
+    expect(windHoles({ id: 'v', from: 23, length: 40 }).length).toBeGreaterThan(a.length);
+    expect(windHoles({ id: 'v', from: 23, length: 4 })).toEqual([]);
+  });
+
+  it('los huecos van cerca del centro, alternando izquierda / derecha (slalom)', () => {
+    const { center } = W.wind.holeLayout;
+    for (const length of [12, 16, 22, 30, 45]) {
+      const holes = windHoles({ id: `isla-${length}`, from: 10, length, width: 10 });
+      for (const [i, h] of holes.entries()) {
+        expect(Math.abs(h.x)).toBeGreaterThanOrEqual(center.min - 1e-6);
+        expect(Math.abs(h.x)).toBeLessThanOrEqual(center.max + 1e-6);
+        expect(Math.abs(h.x) - h.r).toBeLessThanOrEqual(0.8 + 1e-6); // pisa la huella de la pareja que va por el centro: hay que esquivarlo
+        if (i > 0) expect(Math.sign(h.x)).toBe(-Math.sign(holes[i - 1].x));
+      }
+    }
+  });
+
+  it('siempre hay por dónde pasar: pasillo del otro lado y respiro entre huecos', () => {
+    const { margin, zGap } = W.wind.holeLayout;
+    for (const length of [12, 16, 22, 30, 45]) {
+      const from = 10;
+      const holes = windHoles({ id: `isla-${length}`, from, length, width: 10 });
+      for (const [i, h] of holes.entries()) {
+        expect(Math.abs(h.x) + h.r).toBeLessThanOrEqual(5);
+        expect(5 + Math.abs(h.x) - h.r).toBeGreaterThanOrEqual(3); // lado contrario libre para la pareja
+        expect(h.z + h.r).toBeLessThanOrEqual(from - margin + 1e-6);
+        expect(h.z - h.r).toBeGreaterThanOrEqual(from - length + margin - 1e-6);
+        if (i > 0) {
+          const prev = holes[i - 1];
+          expect(prev.z - prev.r - (h.z + h.r)).toBeGreaterThanOrEqual(zGap - 0.02);
+        }
+      }
+    }
+  });
+
+  it('windIsland lleva los huecos en weather.holes (holes: false los quita)', () => {
+    const w = windIsland({ id: 'v', from: 23, length: 24 });
+    expect(w.weather.holes).toEqual(windHoles({ id: 'v', from: 23, length: 24 }));
+    expect(windIsland({ id: 'v', from: 23, length: 24, holes: false }).weather.holes).toBeUndefined();
+    expect(windIsland({ id: 'v', from: 23, length: 24, holes: 1 }).weather.holes).toHaveLength(1);
   });
 
   it('la lluvia moja el doble: llovizna 8 %/s y aguacero 40 %/s', () => {
