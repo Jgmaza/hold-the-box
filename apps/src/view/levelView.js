@@ -73,7 +73,14 @@ export class LevelView {
     grass.update();
     if (desert) {
       const gap = world.level.pit ?? null;
-      this.desert = buildCanyon(g, P, this.root, { minZ, maxZ, groundY, seed, gap, cart: biome !== 'camp', carpet: !world.level.maze });
+      // El fondo no tapa el camino: se le pasan las plataformas y lo que el nivel ya pone (carteles, props, escenografía).
+      const L = world.level;
+      const spot = (o, r = 1.2) => ({ minX: o.x - r, maxX: o.x + r, minZ: o.z - r, maxZ: o.z + r, spot: true });
+      const avoid = [
+        ...world.statics.map(({ aabb: a }) => ({ minX: a.min.x, maxX: a.max.x, minZ: a.min.z, maxZ: a.max.z })),
+        ...[...(L.signs ?? []), ...(L.props ?? []), ...(L.scenery ?? [])].filter((o) => Number.isFinite(o.x) && Number.isFinite(o.z)).map((o) => spot(o)),
+      ];
+      this.desert = buildCanyon(g, P, this.root, { minZ, maxZ, groundY, seed, gap, cart: biome !== 'camp', carpet: !world.level.maze, avoid });
     } else if (valley) {
       const gap = world.level.pit ?? (biome === 'canyon' ? { z0: -43, z1: -11 } : null);
       this.valley = buildValley(g, P, this.root, { minZ, maxZ, groundY, seed, gap });
