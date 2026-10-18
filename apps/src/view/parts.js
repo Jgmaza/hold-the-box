@@ -1,6 +1,7 @@
 // Piezas suaves para modelos hechos en código (NPCs, clima): mallas de alta resolución cacheadas
 // (elipsoides, cápsulas, discos, anillos, sonrisas, ojos) en vez de las primitivas facetadas.
 import * as pc from 'playcanvas';
+import { facetSphere } from './lowpolyHead.js';
 
 const DEG = 180 / Math.PI;
 
@@ -42,6 +43,12 @@ export class Parts {
   /** Elipsoide: `size` = diámetros [x, y, z]. */
   ball(parent, material, pos, size, opts = {}) {
     const mesh = this._mesh('sphere', () => new pc.SphereGeometry({ radius: 0.5, latitudeBands: 28, longitudeBands: 36 }));
+    return this._entity(mesh, material, parent, { ...opts, pos, scale: size });
+  }
+
+  /** Elipsoide low-poly (caras planas, como las cabezas de los personajes): `size` = diámetros; `segs` = [meridianos, paralelos]. */
+  facet(parent, material, pos, size, { segs = [8, 6], ...opts } = {}) {
+    const mesh = this._mesh(`facet|${segs[0]}|${segs[1]}`, () => facetSphere(segs[0], segs[1]));
     return this._entity(mesh, material, parent, { ...opts, pos, scale: size });
   }
 

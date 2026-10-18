@@ -189,6 +189,7 @@ export class Menu {
       panel.classList.toggle('ready', c.ready);
       panel.classList.toggle('alt', s.alt(slot));
       panel.querySelector('.m-char-name').textContent = def.name;
+      panel.querySelectorAll('.m-dots i').forEach((dot, i) => dot.classList.toggle('on', CHARACTERS[i].id === def.id));
       panel.querySelector('.ready-btn').textContent = c.ready ? '✔ ¡LISTO!' : 'LISTO';
       for (const b of panel.querySelectorAll('[data-dir]')) b.disabled = c.ready;
     }
@@ -285,7 +286,11 @@ const slotPanel = (slot, keys) => /* html */ `
     <span class="m-badge">${slot.toUpperCase()}</span>
     <div class="m-picker">
       <button type="button" class="btn icon light" data-slot="${slot}" data-dir="-1" aria-label="Anterior">◀</button>
-      <div class="m-char"><b class="m-char-name"></b><span class="m-alt">color alterno</span></div>
+      <div class="m-char">
+        <b class="m-char-name"></b>
+        <span class="m-dots">${CHARACTERS.map(() => '<i></i>').join('')}</span>
+        <span class="m-alt">color alterno</span>
+      </div>
       <button type="button" class="btn icon light" data-slot="${slot}" data-dir="1" aria-label="Siguiente">▶</button>
     </div>
     <button type="button" class="btn ready-btn" data-ready="${slot}">LISTO</button>
