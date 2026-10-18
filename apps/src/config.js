@@ -300,9 +300,9 @@ export const CONFIG = {
 
 /** Las cajas que se pueden elegir antes de empezar. */
 export const BOX_CHOICES = [
-  { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
-  { id: 'gato', name: 'Caja del gato', blurb: 'Cada zarpazo rompe la caja. Si no atienden, se vacía.' },
-  { id: 'bomba', name: 'Caja bomba', blurb: 'Golpes, agua y desorden la dañan. En 0 %, explota.' },
+  { id: 'vip', name: 'Caja VIP', blurb: 'Cartón con aires de lujo. Muy fino, muy frágil.' },
+  { id: 'gato', name: 'Caja del gato', blurb: 'Trae gato de regalo. Si no lo atienden, araña la caja.' },
+  { id: 'bomba', name: 'Caja bomba', blurb: 'Tic, tac... Cuídenla o se va todo por los aires.' },
 ];
 
 /** Activa una caja. VIP no tiene gato ni mecha. */

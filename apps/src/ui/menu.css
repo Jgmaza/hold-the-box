@@ -736,7 +736,19 @@
     font-size: 13px;
   }
   .m-box span:last-child {
-    display: none;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  .m-box {
+    padding: 8px 10px 10px;
+    gap: 2px;
+  }
+  .m-box-icon {
+    font-size: 26px;
+  }
+  .m-maps {
+    padding-top: 10px;
+    padding-bottom: 14px;
   }
   .m-foot .btn.big {
     padding: 8px 40px;
