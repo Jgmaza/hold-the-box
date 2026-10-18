@@ -67,6 +67,7 @@ rainIsland({ id: 'lluvia-der', from: 0, length: 14, firstSide: 'right' })      /
 | `dir` | `'alternate'` | `'alternate'` (izquierda/derecha alternado), `'random'` (izquierda o derecha al azar), o grados (0 = hacia +X / derecha, 90 = hacia +Z) |
 | `width`, `x`, `top` | `10`, `0`, `1` | igual que en la lluvia |
 | `strength` | `1` | multiplicador del viento solo en esta isla |
+| `holes` | según `length` | cantidad de huecos; `false` = sin huecos. Se reparten con `windHoles()`: uno cada `holeLayout.spacing` (3.5 m), alternando lado, con radio, qué tan corrido del centro y posición pseudoaleatorios sacados del `id` y del largo (siempre igual), sin solaparse y con 2 m libres al entrar y al salir |
 
 ### `waveIsland(opciones)`: oleaje con rompeolas
 
@@ -122,6 +123,8 @@ Cada isla con clima tiene un ritmo que se repite: **calma → aviso → fuerte �
 - **Inclinan la caja**, hasta 16°, lo que activa la fuga del huequito.
 - **Se llevan contenido**: 4 %/s, y hasta ×1.8 si van desincronizados.
 - Caminar **contra** la ráfaga compensa el empuje.
+- **Seca la caja**: quita mojado (`dryRate` 6 %/s con la ráfaga, ≈ 0.7 %/s con brisa). Solo seca si nada la está mojando en ese momento (lluvia, chorro, ola), así que no cambia el balance de la lluvia.
+- **Huecos** (`holeLayout`): círculos **sin piso** (se ve el agua por debajo). Quien los pisa cae al agua, como un obstáculo más; el viento empuja hacia ellos. Se reparten solos según el largo de la isla: uno cada ≈ 3.5 m, **cerca del centro** y alternando izquierda / derecha, así que hay que esquivarlos en slalom. Del lado contrario siempre queda paso y entre un hueco y el siguiente hay ≥ 1 m para girar.
 - La **manga de viento** y las flechas del piso muestran hacia dónde va a soplar.
 
 ### Oleaje (`CONFIG.weather.waves`)

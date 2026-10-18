@@ -250,10 +250,11 @@ export class Game {
     let wetting = 0;
     for (const g of this.world.geysers) if (g.covers(c)) wetting++;
     this.box.wetRate = wetting * CONFIG.box.wet.geyserRate + fx.wetRate;
-    // Viento: inclina la caja y se lleva contenido.
+    // Viento: inclina la caja, se lleva contenido y la seca.
     this.box.external.roll = fx.tilt.roll;
     this.box.external.pitch = fx.tilt.pitch;
     this.box.external.drain = fx.drain;
+    this.box.external.dry = fx.dry;
     if (wetting && !this._wasWetting) this.events.emit('geyser:hit', {});
     this._wasWetting = wetting > 0;
 

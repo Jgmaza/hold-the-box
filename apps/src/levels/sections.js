@@ -11,6 +11,8 @@
 //
 // El nivel avanza hacia -Z: `from` es el borde de ENTRADA (z más alto) y la sección llega hasta `from - length`.
 
+import { CONFIG } from '../config.js';
+import { makeRng } from '../sim/math.js';
 import { collideKind, propCollider } from './kenneyColliders.js';
 import { KENNEY_BOUNDS } from './kenneyBounds.js';
 
@@ -68,15 +70,58 @@ export function rainIsland({ id, from, length, shelters, firstSide = 'left', wid
  * @param {number} [o.x=0]
  * @param {number} [o.top=1]
  * @param {number} [o.strength]  multiplicador del viento en esta isla (CONFIG.weather.wind)
+ * @param {number|false} [o.holes]  cantidad de huecos, alternando izquierda / derecha cerca del centro (por defecto se reparten solos según `length`; false = sin huecos)
  */
-export function windIsland({ id, from, length, dir = 'alternate', width = 10, x = 0, top = 1, strength } = {}) {
+export function windIsland({ id, from, length, dir = 'alternate', width = 10, x = 0, top = 1, strength, holes } = {}) {
   check(id, from, length, 'windIsland');
   const weather = { type: 'wind', dir };
+  const list = holes === false ? [] : windHoles({ id, from, length, width, x, count: holes });
+  if (list.length) weather.holes = list;
   if (strength !== undefined) weather.strength = strength;
   return { id, x, z: round(from - length / 2), w: width, d: length, top, weather };
 }
 
 const round = (v) => Math.round(v * 100) / 100;
+
+const hashId = (s) => {
+  let h = 2166136261;
+  for (const ch of String(s)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  return h >>> 0;
+};
+
+/**
+ * Huecos circulares (sin piso: se cae al agua) de una isla de viento. Solo depende del largo: la isla se parte en
+ * tramos cortos (uno por hueco, `CONFIG.weather.wind.holeLayout.spacing`) y en cada uno cae un círculo CERCA DEL CENTRO,
+ * alternando izquierda / derecha. Cada hueco tapa la mitad por la que venían caminando: hay que esquivarlo por el otro
+ * lado y el siguiente obliga a volver (slalom). El radio, qué tan corrido del eje y la posición dentro del tramo salen
+ * del `id` y del largo: siempre es el mismo resultado (nada de Math.random).
+ * Entre un hueco y el siguiente quedan al menos `zGap` metros en Z para girar, del lado contrario siempre queda paso
+ * para la pareja con la caja, y se deja `margin` libre al entrar y al salir.
+ *
+ * @returns {{x:number, z:number, r:number}[]}  de adelante hacia atrás
+ */
+export function windHoles({ id, from, length, width = 10, x = 0, count } = {}) {
+  const L = CONFIG.weather.wind.holeLayout;
+  const usable = length - 2 * L.margin;
+  const n = count ?? Math.max(0, Math.floor(usable / L.spacing));
+  if (n < 1 || usable <= 0) return [];
+  const rng = makeRng((hashId(id) ^ Math.imul(Math.round(length * 100), 2654435761)) >>> 0);
+  const strip = usable / n;
+  const room = strip / 2 - L.zGap / 2; // medio tramo menos la mitad del respiro entre huecos
+  const rMax = Math.max(0.3, Math.min(L.radiusMax, room));
+  const rMin = Math.min(L.radiusMin, rMax);
+  const first = rng.chance(0.5) ? 1 : -1;
+  const list = [];
+  for (let i = 0; i < n; i++) {
+    const side = i % 2 === 0 ? first : -first;
+    const r = rng.range(rMin, rMax);
+    const zMid = from - L.margin - strip * (i + 0.5);
+    const dz = rng.range(-1, 1) * Math.max(0, room - r);
+    const off = Math.min(rng.range(L.center.min, L.center.max), width / 2 - r - 0.2);
+    list.push({ x: round(x + side * off), z: round(zMid + dz), r: round(r) });
+  }
+  return list;
+}
 
 const BREAKWATER = { w: 1, d: 3, h: 0.8, edge: 0.3 }; // rompeolas: bloque de roca en el borde de la isla
 

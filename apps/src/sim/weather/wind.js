@@ -2,7 +2,9 @@
 // Caminar contra la ráfaga compensa el empuje; ir sincronizados pierde menos contenido (Better Together).
 //
 //   weather: 'wind'                                   ráfagas de lado, alternando izquierda / derecha
-//   weather: { type: 'wind', dir: 'alternate' | 'random' | <grados>, strength: 1.2 }
+//   weather: { type: 'wind', dir: 'alternate' | 'random' | <grados>, strength: 1.2, holes: [{ x, z, r }] }
+//     holes: círculos sin piso (se cae al agua). Los reparte windIsland() con windHoles(); la colisión está en sim/world.js.
+//   El viento también SECA la caja (dryRate): un chorro o la lluvia pueden seguir mojándola, pero entonces no seca.
 //     grados: hacia dónde sopla en el plano XZ (0 = hacia +X / derecha, 90 = hacia +Z / atrás)
 import { WeatherZone } from './weatherZone.js';
 
@@ -39,6 +41,15 @@ export class WindZone extends WeatherZone {
     this.dir.z = Math.sin(a);
   }
 
+  get holes() {
+    return this.opts.holes ?? [];
+  }
+
+  /** Hueco que contiene el punto (con `margin` de holgura) o null. */
+  holeAt(p, margin = 0) {
+    return this.holes.find((h) => Math.hypot(p.x - h.x, p.z - h.z) <= h.r + margin) ?? null;
+  }
+
   apply(dt, game, fx) {
     const C = this._c;
     const k = this.intensity * this.strength;
@@ -58,5 +69,6 @@ export class WindZone extends WeatherZone {
     fx.tilt.roll += C.leanDeg * k * along;
     fx.tilt.pitch += C.leanDeg * k * perp;
     fx.drain += C.drainRate * k * (1 + C.syncRelief * (1 - box.sync));
+    fx.dry += C.dryRate * k;
   }
 }

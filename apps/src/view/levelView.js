@@ -2,6 +2,7 @@
 import * as pc from 'playcanvas';
 import { KENNEY_BOUNDS } from '../levels/kenneyBounds.js';
 import { buildBackdrop } from './backdrop.js';
+import { deckGeometry } from './deck.js';
 import { imageUrl } from './deliveries.js';
 import { altar, bush, cliff, crocodile, hut, mangrove, monkey, palm, pyramid, rock, seeded, stoneHead, totem, waterfall } from './nature.js';
 import { Parts } from './parts.js';
@@ -140,6 +141,7 @@ export class LevelView {
     }
     if (def.kind === 'glass') return this._glass(def, a);
     if (def.kind === 'ground') return;
+    if (def.weather?.holes?.length) return this._deckWithHoles(def, a);
     const plank = def.kind === 'plank';
     const stone = def.skin === 'stone';
     const top = 0.14;
@@ -187,6 +189,54 @@ export class LevelView {
       for (let z = a.min.z + 0.6; z < a.max.z; z += 3) {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [cx, (a.min.y + this.waterY) / 2 - 0.2, z], scale: [0.18, a.min.y - this.waterY + 0.6, 0.18] });
       }
+    }
+  }
+
+  /**
+   * Isla con huecos circulares (viento): piso recortado de verdad, así que por los huecos se ve el agua.
+   * Debajo del piso no hay bloque macizo: solo vigas en el perímetro y los pilotes de las esquinas.
+   */
+  _deckWithHoles(def, a) {
+    const g = this.gfx;
+    const top = 0.14;
+    const cx = (a.max.x + a.min.x) / 2;
+    const cz = (a.max.z + a.min.z) / 2;
+    const geo = deckGeometry({ minX: a.min.x, maxX: a.max.x, minZ: a.min.z, maxZ: a.max.z, y: a.max.y }, def.weather.holes, {
+      wallDepth: a.max.y - this.waterY + 0.3, // el pozo baja hasta el agua
+    });
+    const addMesh = (m, material, name) => {
+      const mesh = new pc.Mesh(g.device);
+      mesh.setPositions(m.positions);
+      mesh.setNormals(m.normals);
+      mesh.setUvs(0, m.uvs);
+      mesh.setIndices(m.indices);
+      mesh.update();
+      const e = new pc.Entity(name);
+      e.addComponent('render', { meshInstances: [new pc.MeshInstance(mesh, material)], castShadows: true, receiveShadows: true });
+      this.root.addChild(e);
+    };
+    // Piso con la piel de la isla: losa de piedra (selva) o tablones (muelle).
+    const stone = def.skin === 'stone';
+    const tex = stone
+      ? (this._stoneTex ??= g.textureFromCanvas(stoneCanvas(), { repeat: true }))
+      : (this._plankTex ??= g.textureFromCanvas(plankCanvas(), { repeat: true }));
+    const body = stone ? '#8d887c' : 'wood';
+    addMesh(geo.top, g.textured(tex, { tint: g.color(stone ? '#c4b8a4' : 'wood', stone ? 1.05 : 1.12), twoSided: true }), `${def.id}-piso`);
+    addMesh(geo.walls, g.solid(body, { mul: 0.4 }), `${def.id}-pozos`);
+
+    // Vigas bajo el borde (el piso se ve de canto) y pilotes.
+    const wood = g.solid(body, { mul: stone ? 0.88 : 0.75 });
+    const beam = 0.35;
+    const h = a.max.y - a.min.y - top;
+    const y = a.min.y + h / 2;
+    const w = a.max.x - a.min.x;
+    const d = a.max.z - a.min.z;
+    g.prim('box', wood, { parent: this.root, pos: [a.min.x + beam / 2, y, cz], scale: [beam, h, d], name: `${def.id}-viga` });
+    g.prim('box', wood, { parent: this.root, pos: [a.max.x - beam / 2, y, cz], scale: [beam, h, d], name: `${def.id}-viga` });
+    g.prim('box', wood, { parent: this.root, pos: [cx, y, a.min.z + beam / 2], scale: [w, h, beam], name: `${def.id}-viga` });
+    g.prim('box', wood, { parent: this.root, pos: [cx, y, a.max.z - beam / 2], scale: [w, h, beam], name: `${def.id}-viga` });
+    for (const [px, pz] of [[a.min.x, a.min.z], [a.max.x, a.min.z], [a.min.x, a.max.z], [a.max.x, a.max.z]]) {
+      g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [px, a.max.y - 0.3, pz], scale: [0.3, 0.9, 0.3] });
     }
   }
 
