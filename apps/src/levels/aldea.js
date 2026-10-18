@@ -1,7 +1,7 @@
 // Selva 1 — "La Aldea". Pueblo en tierra: camino de tierra, chozas, tótems, gente del pueblo.
-//   plaza → niño → aldeano con agua → dos puentes de vidrio (salten juntos) → plaza + META.
+//   plaza → niño → aldeano con agua → checkpoint + estaciones sueltas → dos puentes de vidrio → plaza + META.
 
-import { dressBanks, glassBridge, pathTrim, totems, unclipScenery, villageHouses } from './sections.js';
+import { dressBanks, glassBridge, pathTrim, recovery, totems, unclipScenery, villageHouses } from './sections.js';
 
 const GROUND = 0.88;
 const GLASS_FROM = 1;
@@ -64,7 +64,7 @@ const level = {
     dirt({ id: 'plaza-easy', x: 0, z: 25, w: 10, d: 12, top: 1 }),
     dirt({ id: 'sendero-medium', x: 0, z: 17.5, w: 5, d: 3, top: 1 }),
     dirt({ id: 'plaza-medium', x: 0, z: 10, w: 10, d: 12, top: 1 }),
-    dirt({ id: 'sendero-vidrio', x: 0, z: 2.5, w: 5, d: 3, top: 1 }),
+    dirt({ id: 'plaza-recovery', x: 0, z: 2.5, w: 12, d: 4, top: 1 }),
     ...glass.panels,
     dirt({ id: 'llegada', x: 0, z: landZ, w: 8, d: LAND_D, top: 1 }),
     dirt({ id: 'plaza-meta', x: 0, z: -28, w: 12, d: 16, top: 1 }),
@@ -75,7 +75,15 @@ const level = {
     { difficulty: 'medium', platform: 'plaza-medium', x: 0, z: 8 },
   ],
 
-  checkpoints: [cp('cp-medium', 17.5), cp('cp-vidrio', 2.5), dirt({ ...cp('cp-meta', -19.2, { w: 5, d: 3 }) })],
+  checkpoints: [cp('cp-medium', 17.5), cp('cp-vidrio', 2.5, { w: 6, d: 3 }), dirt({ ...cp('cp-meta', -19.2, { w: 5, d: 3 }) })],
+
+  // Checkpoint del medio: cuatro aparatos a los lados del pasillo. El jugador prueba cuál le sirve.
+  recovery: [
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: -4.2, z: 3.5, top: 1 }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: -4.2, z: 1.5, top: 1 }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: 4.2, z: 3.5, top: 1 }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: 4.2, z: 1.5, top: 1 }),
+  ],
 
   goal: { x: 0, z: -33, w: 8, d: 5, top: 1 },
 
@@ -83,6 +91,7 @@ const level = {
     { x: 4.0, z: 36, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
     { x: -4.2, z: 30, top: 1, w: 3.2, h: 1.4, text: 'NIÑO DEL PUEBLO\n¡SÁLTENLO JUNTOS!', style: 'info' },
     { x: 4.2, z: 16, top: 1, w: 3.2, h: 1.4, text: '¡EL ALDEANO\nTIRA AGUA!', style: 'warn' },
+    { x: -3.6, z: 5.2, top: 1, w: 2.6, h: 1.2, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
     { x: -4.2, z: 6.4, top: 1, w: 3.4, h: 1.5, text: 'DOS PUENTES\n¡SALTE JUNTOS!', style: 'info' },
     { x: 4.2, z: 6.4, top: 1, w: 3.4, h: 1.5, text: 'UN VIDRIO AGUANTA\nEL OTRO SE ROMPE', style: 'warn' },
     { x: -4.6, z: -33.5, top: 1, w: 3.2, h: 1.3, text: 'PLAZA DEL\nPUEBLO', style: 'bar' },
@@ -145,6 +154,10 @@ level.scenery = [
       ...houses.filter((h) => h.art === 'town/wall-wood-door').map((h) => ({ x: h.x, z: h.z, r: 3.6 })),
       ...poles.map((h) => ({ x: h.x, z: h.z, r: 1.5 })),
       ...market.map((h) => ({ x: h.x, z: h.z, r: 1.9 })),
+      { x: -4.2, z: 3.5, r: 1.8 },
+      { x: -4.2, z: 1.5, r: 1.8 },
+      { x: 4.2, z: 3.5, r: 1.8 },
+      { x: 4.2, z: 1.5, r: 1.8 },
       { x: 0, z: pitZ, w: 28, d: pitD },
     ],
   }),
