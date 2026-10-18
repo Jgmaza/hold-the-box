@@ -20,14 +20,14 @@ describe('computeScore (fórmula A)', () => {
 });
 
 describe('campaña', () => {
-  it('solo muelle/bahia/tormenta cuentan', () => {
-    expect(CAMPAIGN_LEVELS).toEqual(['muelle', 'bahia', 'tormenta']);
+  it('solo muelle/bahia/aldea/campamento cuentan', () => {
+    expect(CAMPAIGN_LEVELS).toEqual(['muelle', 'bahia', 'aldea', 'campamento']);
     expect(isCampaignLevel('muelle')).toBe(true);
     expect(isCampaignLevel('npcs')).toBe(false);
   });
 
-  it('scopes de board: general + 3 mapas', () => {
-    expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'tormenta']);
+  it('scopes de board: general + 4 mapas', () => {
+    expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'aldea', 'campamento']);
     expect(LEVEL_LABEL.general).toBe('General');
     expect(LEVEL_LABEL.bahia).toBe('Bahía');
   });

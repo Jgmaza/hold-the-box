@@ -1,12 +1,12 @@
 // Leaderboard arcade por IP (sin cuentas). verify_jwt = false; identidad = hash de la IP.
-// GET  ?action=board&scope=general|muelle|bahia|tormenta&limit=10
+// GET  ?action=board&scope=general|muelle|bahia|aldea|campamento&limit=10
 // POST { action: "score", level, score, time, integrity, wetness }
-// POST { action: "save", name, role }  — una sola vez, al inicio (no exige 3 mapas)
+// POST { action: "save", name, role }  — una sola vez, al inicio (no exige los 4 mapas)
 // POST { action: "me" }
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const LEVELS = ["muelle", "bahia", "tormenta"] as const;
+const LEVELS = ["muelle", "bahia", "aldea", "campamento"] as const;
 type Level = (typeof LEVELS)[number];
 const SCOPES = ["general", ...LEVELS] as const;
 type Scope = (typeof SCOPES)[number];
@@ -14,12 +14,14 @@ const ROLES = new Set(["CARGADOR", "CAPITAN", "GRUMETE", "PIRATA"]);
 const SCORE_COL: Record<Level, string> = {
   muelle: "score_muelle",
   bahia: "score_bahia",
-  tormenta: "score_tormenta",
+  aldea: "score_aldea",
+  campamento: "score_campamento",
 };
 const TIME_COL: Record<Level, string> = {
   muelle: "time_muelle",
   bahia: "time_bahia",
-  tormenta: "time_tormenta",
+  aldea: "time_aldea",
+  campamento: "time_campamento",
 };
 
 const cors = {
@@ -60,7 +62,8 @@ function bests(row: Record<string, unknown> | null | undefined) {
   return {
     muelle: Number(row?.score_muelle ?? 0),
     bahia: Number(row?.score_bahia ?? 0),
-    tormenta: Number(row?.score_tormenta ?? 0),
+    aldea: Number(row?.score_aldea ?? 0),
+    campamento: Number(row?.score_campamento ?? 0),
   };
 }
 
@@ -68,7 +71,7 @@ function statusOf(row: Record<string, unknown> | null | undefined) {
   const b = bests(row);
   return {
     bests: b,
-    total: Number(row?.total ?? b.muelle + b.bahia + b.tormenta),
+    total: Number(row?.total ?? b.muelle + b.bahia + b.aldea + b.campamento),
     saved: !!row?.name,
     name: (row?.name as string) ?? null,
     role: (row?.role as string) ?? null,
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
       if (scope === "general") {
         const { data, error } = await supabase
           .from("arcade_records")
-          .select("name, role, score_muelle, score_bahia, score_tormenta, total")
+          .select("name, role, score_muelle, score_bahia, score_aldea, score_campamento, total")
           .not("name", "is", null)
           .gt("total", 0)
           .order("total", { ascending: false })
@@ -109,7 +112,8 @@ Deno.serve(async (req) => {
             role: r.role,
             muelle: r.score_muelle,
             bahia: r.score_bahia,
-            tormenta: r.score_tormenta,
+            aldea: r.score_aldea,
+            campamento: r.score_campamento,
             total: r.total,
           })),
         });
@@ -162,10 +166,12 @@ Deno.serve(async (req) => {
         ip_hash: ipHash,
         score_muelle: Number(existing?.score_muelle ?? 0),
         score_bahia: Number(existing?.score_bahia ?? 0),
-        score_tormenta: Number(existing?.score_tormenta ?? 0),
+        score_aldea: Number(existing?.score_aldea ?? 0),
+        score_campamento: Number(existing?.score_campamento ?? 0),
         time_muelle: existing?.time_muelle ?? null,
         time_bahia: existing?.time_bahia ?? null,
-        time_tormenta: existing?.time_tormenta ?? null,
+        time_aldea: existing?.time_aldea ?? null,
+        time_campamento: existing?.time_campamento ?? null,
         name: existing?.name ?? null,
         role: existing?.role ?? null,
         [col]: score,
@@ -196,10 +202,12 @@ Deno.serve(async (req) => {
         role,
         score_muelle: Number(existing?.score_muelle ?? 0),
         score_bahia: Number(existing?.score_bahia ?? 0),
-        score_tormenta: Number(existing?.score_tormenta ?? 0),
+        score_aldea: Number(existing?.score_aldea ?? 0),
+        score_campamento: Number(existing?.score_campamento ?? 0),
         time_muelle: existing?.time_muelle ?? null,
         time_bahia: existing?.time_bahia ?? null,
-        time_tormenta: existing?.time_tormenta ?? null,
+        time_aldea: existing?.time_aldea ?? null,
+        time_campamento: existing?.time_campamento ?? null,
         updated_at: new Date().toISOString(),
       };
 

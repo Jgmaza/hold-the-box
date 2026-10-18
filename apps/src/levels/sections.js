@@ -503,7 +503,7 @@ export function dressBanks(level, { set = 'village', seed = 1, ground = 0.88, ke
   const r = rng(seed);
   const zones = [...keepOut];
   for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.7 });
-  for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: p.type === 'pyramid' ? (p.size ?? 8) / 2 : 1.5 });
+  for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: 1.5 });
   for (const n of level.npcs ?? []) zones.push({ x: n.x, z: n.z, r: 1.8 });
   for (const g of level.geysers ?? []) zones.push({ x: g.x, z: g.z, r: (g.radius ?? 1) + 0.8 });
   for (const s of level.sweepers ?? []) zones.push({ x: s.x, z: s.z, r: (s.length ?? 2) + 0.6 });

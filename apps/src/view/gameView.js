@@ -43,13 +43,13 @@ export class GameView {
     const app = this.app;
     const g = this.gfx;
     const biome = this.game.world.level.biome;
-    const desert = biome === 'camp' || biome === 'mine' || biome === 'chasm';
-    const fog = desert ? '#f0c9a0' : biome === 'mangrove' || biome === 'village' ? '#9bb89a' : biome === 'temple' ? '#c4b8a4' : biome === 'canyon' ? '#a8b8bc' : 'sky';
-    app.scene.ambientLight = desert ? new pc.Color(0.62, 0.5, 0.38) : biome === 'mangrove' || biome === 'village' ? new pc.Color(0.42, 0.5, 0.42) : biome === 'temple' ? new pc.Color(0.52, 0.5, 0.46) : biome === 'canyon' ? new pc.Color(0.46, 0.5, 0.54) : new pc.Color(0.5, 0.55, 0.62);
+    const desert = biome === 'camp';
+    const fog = desert ? '#f0c9a0' : biome === 'mangrove' || biome === 'village' ? '#9bb89a' : 'sky';
+    app.scene.ambientLight = desert ? new pc.Color(0.62, 0.5, 0.38) : biome === 'mangrove' || biome === 'village' ? new pc.Color(0.42, 0.5, 0.42) : new pc.Color(0.5, 0.55, 0.62);
     app.scene.fog.type = pc.FOG_LINEAR;
     app.scene.fog.color = g.color(fog);
-    app.scene.fog.start = desert || biome === 'village' || biome === 'temple' || biome === 'canyon' ? 62 : biome ? 32 : 45;
-    app.scene.fog.end = desert || biome === 'village' || biome === 'temple' || biome === 'canyon' ? 175 : biome ? 115 : 140;
+    app.scene.fog.start = desert || biome === 'village' ? 62 : biome ? 32 : 45;
+    app.scene.fog.end = desert || biome === 'village' ? 175 : biome ? 115 : 140;
 
     const sun = new pc.Entity('sol');
     sun.addComponent('light', {

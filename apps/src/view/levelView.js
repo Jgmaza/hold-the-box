@@ -5,7 +5,7 @@ import { buildBackdrop } from './backdrop.js';
 import { deckGeometry } from './deck.js';
 import { imageUrl } from './deliveries.js';
 import { buildCanyon } from './desert.js';
-import { altar, bush, cactus, clayPot, cliff, crocodile, deadTree, hut, lampPost, mangrove, mineMouth, monkey, palm, pyramid, rock, seeded, stoneArch, stoneHead, totem, waterfall } from './nature.js';
+import { bush, cactus, clayPot, crocodile, deadTree, hut, lampPost, mangrove, palm, rock, seeded, stoneArch, stoneHead, totem } from './nature.js';
 import { Parts } from './parts.js';
 import { checkerCanvas, dirtCanvas, grassCanvas, plankCanvas, sandCanvas, signCanvas, stoneCanvas } from './signs.js';
 import { buildValley } from './valley.js';
@@ -22,11 +22,10 @@ export class LevelView {
     this.shards = []; // trozos que caen cuando un vidrio se rompe
     this.floating = []; // barcos / botes Kenney (suben y bajan con el mar)
     this.bobbing = []; // caimanes u otra utilería sobre el agua
-    this.swingers = []; // monos colgados
     this._assets = new Map();
     const L = world.level;
     this.theme = L.theme;
-    this.land = L.biome === 'temple' || L.biome === 'canyon' || L.biome === 'village' || L.biome === 'camp' || L.biome === 'mine' || L.biome === 'chasm';
+    this.land = L.biome === 'village' || L.biome === 'camp';
 
     this.waterY = world.waterLevel;
     for (const s of world.statics) this._platform(s.def, s.aabb);
@@ -46,7 +45,7 @@ export class LevelView {
 
   // ------------------------------------------------------------------ piezas
 
-  /** Tierra firme. Aldea, templo y puente llevan el mismo valle a los dos lados. */
+  /** Tierra firme: la aldea lleva el valle a los dos lados; el campamento, el desierto. */
   _land(world) {
     const g = this.gfx;
     const P = (this.parts ??= new Parts(g));
@@ -56,9 +55,9 @@ export class LevelView {
     const maxZ = Math.max(...zs);
     const seed = [...(world.level.id ?? 'nivel')].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
     const biome = world.level.biome;
-    const desert = biome === 'camp' || biome === 'mine' || biome === 'chasm';
-    const groundY = biome === 'canyon' || biome === 'chasm' ? 2.48 : 0.86;
-    const valley = biome === 'village' || biome === 'temple' || biome === 'canyon';
+    const desert = biome === 'camp';
+    const groundY = 0.86;
+    const valley = biome === 'village';
     const { sky } = buildBackdrop(P, this.root, {
       minZ, maxZ, seaY: groundY, seed, clear: 14, theme: this.theme, biome, land: true, islands: !valley && !desert,
     });
@@ -80,19 +79,10 @@ export class LevelView {
         ...world.statics.map(({ aabb: a }) => ({ minX: a.min.x, maxX: a.max.x, minZ: a.min.z, maxZ: a.max.z })),
         ...[...(L.signs ?? []), ...(L.props ?? []), ...(L.scenery ?? [])].filter((o) => Number.isFinite(o.x) && Number.isFinite(o.z)).map((o) => spot(o)),
       ];
-      this.desert = buildCanyon(g, P, this.root, { minZ, maxZ, groundY, seed, gap, cart: biome !== 'camp', carpet: !world.level.maze, avoid });
+      this.desert = buildCanyon(g, P, this.root, { minZ, maxZ, groundY, seed, gap, carpet: !world.level.maze, avoid });
     } else if (valley) {
-      const gap = world.level.pit ?? (biome === 'canyon' ? { z0: -43, z1: -11 } : null);
+      const gap = world.level.pit ?? null;
       this.valley = buildValley(g, P, this.root, { minZ, maxZ, groundY, seed, gap });
-      if (biome === 'temple') {
-        P.ball(this.root, g.solid('leaf', { mul: 0.72 }), [11, 2.0, -50], [14, 3.8, 14], { name: 'loma-piramide' });
-        P.ball(this.root, g.solid('leaf', { mul: 0.62 }), [-12, 1.5, -47], [10, 2.8, 11], { name: 'loma-piramide' });
-      }
-      if (biome === 'canyon') {
-        const river = g.solid('#3d6a72', { gloss: 0.7 });
-        g.prim('box', river, { parent: this.root, pos: [0, 0.04, -27], scale: [14, 0.08, 36], shadows: false, name: 'rio' });
-        g.prim('box', g.solid('foam', { opacity: 0.45, unlit: true }), { parent: this.root, pos: [0, 0.08, -27], scale: [10, 0.04, 34], shadows: false, name: 'espuma-rio' });
-      }
     } else {
       g.prim('box', grass, { parent: this.root, pos: [0, groundY - 0.05, (minZ + maxZ) / 2], scale: [160, 0.12, Math.max(80, maxZ - minZ + 40)], shadows: false, name: 'pasto' });
       const dirt = g.solid('#7a5a38', { mul: 0.9, gloss: 0.08 });
@@ -117,7 +107,7 @@ export class LevelView {
     const { sky, shores } = buildBackdrop(P, this.root, { minZ: Math.min(...zs), maxZ: Math.max(...zs), seaY: this.waterY, seed, clear, theme: this.theme, biome });
     this.sky = sky;
     const docks = plats.map((a) => ({ x: (a.min.x + a.max.x) / 2, z: (a.min.z + a.max.z) / 2, w: a.max.x - a.min.x, d: a.max.z - a.min.z }));
-    const tint = biome === 'mangrove' ? 'swamp' : biome === 'temple' ? 'pool' : biome === 'canyon' ? 'gorge' : undefined;
+    const tint = biome === 'mangrove' ? 'swamp' : undefined;
     this.water = new Water(this.gfx, { y: this.waterY, parent: this.root, shores: [...docks, ...shores], tint });
   }
 
@@ -538,13 +528,7 @@ export class LevelView {
       else if (p.type === 'crocodile') {
         const e = crocodile(P, this.root, [p.x, p.top, p.z], { yaw: p.yaw ?? (p.x > 0 ? -90 : 90) });
         this.bobbing.push({ e, x: p.x, y: p.top, z: p.z, phase: p.x * 0.4 + p.z * 0.15 });
-      }       else if (p.type === 'monkey') {
-        const e = monkey(P, this.root, [p.x, p.top, p.z], { hang: p.hang ?? 1.15, yaw: p.yaw ?? 0 });
-        this.swingers.push({ e, yaw: p.yaw ?? 0, phase: p.z * 0.2 });
       } else if (p.type === 'head') stoneHead(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 3.4, yaw: p.yaw ?? (p.x > 0 ? -20 : 20) });
-      else if (p.type === 'pyramid') pyramid(P, this.root, [p.x, p.top, p.z], { size: p.size ?? 9, h: p.height ?? 7 });
-      else if (p.type === 'waterfall') waterfall(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 4.2, w: p.w ?? 2.4 });
-      else if (p.type === 'altar') altar(P, this.root, [p.x, p.top, p.z]);
       else if (p.type === 'hut') hut(P, this.root, [p.x, p.top, p.z]);
       else if (p.type === 'totem') totem(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 2.6 });
       else if (p.type === 'bush') bush(P, this.root, [p.x, p.top, p.z], p.size ?? 0.8, rand);
@@ -558,8 +542,6 @@ export class LevelView {
         P.ball(this.root, g.solid('#c45a3a', { gloss: 0.08 }), [p.x, p.top + s * 0.35, p.z], [s * 1.4, s * 0.9, s], { name: 'roca' });
         P.ball(this.root, g.solid('#8d3d32'), [p.x + s * 0.4, p.top + s * 0.2, p.z + 0.2], [s * 0.8, s * 0.55, s * 0.7], { name: 'roca' });
       }
-      else if (p.type === 'mine') mineMouth(P, this.root, [p.x, p.top, p.z], { yaw: p.yaw ?? 180 });
-      else if (p.type === 'cliff') cliff(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 3.2, w: p.w ?? 2.2, d: p.d ?? 8 });
     }
   }
 
@@ -719,7 +701,6 @@ export class LevelView {
       });
     }
     for (const f of this.bobbing) f.e.setLocalPosition(f.x, f.y + Math.sin(time * 1.2 + f.phase) * 0.05, f.z);
-    for (const f of this.swingers) f.e.setLocalEulerAngles(Math.sin(time * 1.5 + f.phase) * 16, f.yaw, 0);
     const plants = game.cacti?.plants;
     if (plants && this.pokers) {
       for (let i = 0; i < this.pokers.length; i++) {

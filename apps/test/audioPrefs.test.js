@@ -15,13 +15,10 @@ describe('mezcla de audio', () => {
     expect(speakerIcon({ music: 0, sfx: 0 })).toBe('🔇');
   });
 
-  it('la selva comparte un tema y el muelle se queda con el suyo', () => {
+  it('la selva tiene su tema y el muelle se queda con el suyo', () => {
     expect(musicSlotFor('aldea')).toBe('musica-selva');
-    expect(musicSlotFor('templo')).toBe('musica-selva');
-    expect(musicSlotFor('puente')).toBe('musica-selva');
     expect(musicSlotFor('muelle')).toBe('musica-loop');
     expect(musicSlotFor('campamento')).toBe('musica-loop');
-    expect(musicSlotFor('canon')).toBe('musica-loop');
     expect(slotKind('musica-selva')).toBe('music');
   });
 });
