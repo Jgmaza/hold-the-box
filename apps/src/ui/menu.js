@@ -107,11 +107,16 @@ export class Menu {
 
   // ---------------------------------------------------------------- acciones
 
-  _act(act) {
+  async _act(act) {
     const s = this.state;
-    if (act === 'play') s.go('map');
-    else if (act === 'scores') return this.arcade.showBoard();
-    else if (act === 'controls') this.overlay = true;
+    if (act === 'play') {
+      // Nombre una sola vez al empezar; si cancela, se queda en el home.
+      const ok = await this.arcade.ensureRegistered();
+      if (!ok) return;
+      s.go('map');
+    } else if (act === 'scores') {
+      return this.arcade.showBoard();
+    } else if (act === 'controls') this.overlay = true;
     else if (act === 'close') this.overlay = false;
     else if (act === 'back') s.back();
     else if (act === 'next') s.go('chars');

@@ -3,7 +3,6 @@
 import { CONFIG } from '../config.js';
 import { submitWin } from '../leaderboard/api.js';
 import { computeScore, isCampaignLevel } from '../leaderboard/score.js';
-import { ArcadeOverlay } from './arcade.js';
 import './theme.css';
 import './ui.css';
 
@@ -62,7 +61,6 @@ export class UI {
     for (const k of ['ui', 'danger', 'goal', 'water', 'box']) root.style.setProperty(`--${k}`, palette[k]);
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
-    this.arcade = new ArcadeOverlay(root);
     this.meters = {};
     for (const el of root.querySelectorAll('.meter')) {
       this.meters[el.dataset.k] = { el, bar: el.querySelector('i'), val: el.querySelector('b') };
@@ -92,7 +90,6 @@ export class UI {
     this.root.removeEventListener('mousedown', this._noFocus);
     this.root.removeEventListener('click', this._onClick);
     for (const t of this._timers) clearTimeout(t);
-    this.arcade?.destroy();
     this.root.innerHTML = '';
   }
 
@@ -283,18 +280,19 @@ export class UI {
     m.el.classList.toggle('low', low);
   }
 
-  /** Envía score al backend; si ya completó los 3 mapas, ofrece guardar nombre arcade. */
+  /** Envía score al backend (nombre ya se eligió al inicio en el menú). */
   async _submitArcade(win) {
-    const status = await submitWin(this.game.level.id, win);
+    const levelId = this.game.level.id;
+    const status = await submitWin(levelId, win);
     if (!status) return;
     const note = this.$('.win .lb-note');
     if (note) {
       note.hidden = false;
+      const best = status.bests?.[levelId] ?? '—';
       note.textContent = status.improved === false
-        ? `Mejor en este mapa: ${status.bests[this.game.level.id]} · Total ${status.total}`
-        : `¡Nuevo mejor! Total campaña: ${status.total}`;
+        ? `Mejor en este mapa: ${best} · General ${status.total}`
+        : `¡Nuevo mejor en este mapa! General ${status.total}`;
     }
-    if (status.canSave && !status.saved) await this.arcade.promptSave(status);
   }
 }
 

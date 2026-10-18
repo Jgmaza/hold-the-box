@@ -4,6 +4,13 @@
 
 export const CAMPAIGN_LEVELS = ['muelle', 'bahia', 'tormenta'];
 export const ARCADE_ROLES = ['CARGADOR', 'CAPITAN', 'GRUMETE', 'PIRATA'];
+export const BOARD_SCOPES = ['general', ...CAMPAIGN_LEVELS];
+export const LEVEL_LABEL = {
+  general: 'General',
+  muelle: 'Muelle',
+  bahia: 'Bahía',
+  tormenta: 'Tormenta',
+};
 
 /** @param {{ time: number, integrity: number, wetness: number }} win */
 export function computeScore(win) {

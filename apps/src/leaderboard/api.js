@@ -41,7 +41,7 @@ async function request(pathQuery, { method = 'GET', body } = {}) {
   }
 }
 
-/** Envía el score de una victoria de campaña. Devuelve status { bests, total, canSave, saved } o null. */
+/** Envía el score de una victoria de campaña. Devuelve status { bests, total, saved } o null. */
 export async function submitWin(levelId, win) {
   if (!isCampaignLevel(levelId)) return null;
   const score = computeScore(win);
@@ -58,6 +58,7 @@ export async function submitWin(levelId, win) {
   });
 }
 
+/** Registra nombre + rol una sola vez (al inicio). */
 export async function saveArcade(name, role) {
   return request('', {
     method: 'POST',
@@ -65,9 +66,15 @@ export async function saveArcade(name, role) {
   });
 }
 
-export async function fetchBoard(limit = 10) {
-  const data = await request(`?action=board&limit=${limit}`);
-  return data?.board ?? null;
+/**
+ * @param {number} [limit]
+ * @param {'general'|'muelle'|'bahia'|'tormenta'} [scope]
+ * @returns {Promise<{ scope: string, board: object[] } | null>}
+ */
+export async function fetchBoard(limit = 10, scope = 'general') {
+  const data = await request(`?action=board&scope=${encodeURIComponent(scope)}&limit=${limit}`);
+  if (!data) return null;
+  return { scope: data.scope ?? scope, board: data.board ?? [] };
 }
 
 export async function fetchMe() {

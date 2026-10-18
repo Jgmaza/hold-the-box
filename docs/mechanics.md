@@ -26,7 +26,7 @@ Burla al fallar · mods/skins · más perfiles de caja
 - **Rieles asimétricos**: dos tablones largos (uno por jugador) con piedras, huecos y topes **desfasados** — hay que coordinar saltos. `railsPair()` en `levels/sections.js`. Ver [`rieles.md`](./rieles.md).
 - **Mapas de campaña** (menú): Nivel 1 El Muelle → Nivel 2 La Bahía → Nivel 3 La Tormenta (`?level=muelle|bahia|tormenta`). Misma caja y controles; crecen en largo, peligros apilados y checkpoints más separados.
 - **Escenografía**: modelos Kenney en las orillas (`dressLevel`); ver [`escenografia.md`](./escenografia.md). Agua con olas en [`agua.md`](./agua.md).
-- **Leaderboard arcade**: al ganar mapas de campaña se envía un score (fórmula por integridad/tiempo/mojado). Tras los 3 mapas se puede guardar nombre + rol. Ver [`leaderboard.md`](./leaderboard.md).
+- **Leaderboard arcade**: nombre + rol una vez al empezar a jugar; al ganar un mapa de campaña se envía el score. Hay ranking general y por mapa. Ver [`leaderboard.md`](./leaderboard.md).
 - NPCs easy / medium / hard que botan contenido o mojan la caja. Al inicio del Muelle hay **una isla por NPC** (easy → medium → hard) unidas por puentes seguros con checkpoint,. Ver `apps/README.md`.
 
 ## Controles

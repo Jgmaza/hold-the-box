@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CAMPAIGN_LEVELS, computeScore, isCampaignLevel } from '../src/leaderboard/score.js';
+import { BOARD_SCOPES, CAMPAIGN_LEVELS, computeScore, isCampaignLevel, LEVEL_LABEL } from '../src/leaderboard/score.js';
 
 describe('computeScore (fórmula A)', () => {
   it('entrega perfecta rápida puntúa alto', () => {
@@ -24,5 +24,11 @@ describe('campaña', () => {
     expect(CAMPAIGN_LEVELS).toEqual(['muelle', 'bahia', 'tormenta']);
     expect(isCampaignLevel('muelle')).toBe(true);
     expect(isCampaignLevel('npcs')).toBe(false);
+  });
+
+  it('scopes de board: general + 3 mapas', () => {
+    expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'tormenta']);
+    expect(LEVEL_LABEL.general).toBe('General');
+    expect(LEVEL_LABEL.bahia).toBe('Bahía');
   });
 });
