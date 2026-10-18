@@ -27,15 +27,7 @@ Eventos para PlayCanvas: `cat:warn { player }` y `cat:scratch { player }`.
 
 ## Audio
 
-Hasta que haya archivos, el maullido y el arañazo son tonos generados en el navegador (sin copyright).
-
-Para reemplazarlos, soltar en `deliveries/luis/audio/` con estos nombres:
-
-- `sfx-maullido.ogg` (o `.mp3` / `.wav`)
-- `sfx-aranyo.ogg`
-- `musica-loop` para la música de fondo, igual que el resto de slots
-
-Licencias que sirven: CC0 (Kenney, Freesound filtrado por CC0, OpenGameArt) o CC-BY guardando autor y enlace (Kevin MacLeod). No usar rips ni bandas sonoras.
+Los archivos están en `deliveries/luis/audio/` (CC0, ver `ATTRIBUTION.txt`). Si falta uno, el maullido y el arañazo siguen siendo un tono del navegador.
 
 ## Qué mirar después en PlayCanvas
 

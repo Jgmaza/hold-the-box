@@ -19,6 +19,8 @@ const SLOTS = {
   'sfx-trueno': { volume: 0.8 },
   'sfx-olas': { volume: 0.5, loop: true },
   'sfx-ola': { volume: 0.85 },
+  'sfx-mecha': { volume: 0.45 },
+  'sfx-explosion': { volume: 0.85 },
 };
 
 const WEATHER_LOOP = { rain: 'sfx-lluvia', wind: 'sfx-viento', waves: 'sfx-olas' };
