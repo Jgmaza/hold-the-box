@@ -140,7 +140,7 @@ export const CONFIG = {
     cactus: {
       reach: 1.15, // pincha a la caja o a un jugador dentro de este radio
       warn: 2.4, // el radar pasa a PELIGRO
-      damage: 12, // % que sube Daño y que baja Contenido
+      damage: 12, // % que baja Contenido
       cooldown: 1.15,
       lunge: 0.28, // segundos del estirón de espinas
     },

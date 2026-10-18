@@ -32,7 +32,7 @@
 //   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
 //   glass:break     { id, x, y, z }          un vidrio normal se rompió bajo un jugador
 //   glass:restore   {}                       los paneles vuelven (reinicio del nivel)
-//   cactus:poke     { x, z, damage }         un cactus hostil pinchó; damage es el % acumulado (0..100)
+//   cactus:poke     { x, z }                 un cactus hostil pinchó y bajó Contenido
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
 import { Box } from './box.js';
@@ -90,8 +90,8 @@ export class Game {
     this._restoreSnapshot = false; // al reaparecer, la caja vuelve a como estaba en el checkpoint (se perdió)
     this._lifeSpent = false; // la vida de esta derrota ya se restó (la última, al caer al agua)
     this.checkpointIndex = -1;
-    this.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 100, poke: 0 };
-    this.cacti?.reset(0);
+    this.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 100 };
+    this.cacti?.reset();
     this.ready = { p1: false, p2: false };
     this.respawnTimer = 0;
     this._teleported = true;
@@ -147,7 +147,7 @@ export class Game {
     if (this.gameOver) return this.restart();
     this._restoreSnapshot = this._lifeSpent = false;
     this.box.reset(this.checkpointSnapshot);
-    this.cacti.reset(this.checkpointSnapshot.poke ?? 0);
+    this.cacti.reset();
     this.cat.reset();
     this.bomb.reset(this.checkpointSnapshot.bomb);
     this.box.invuln = CONFIG.respawn.invulnTime;
@@ -298,7 +298,7 @@ export class Game {
     const cp = this.world.checkpointAt(c);
     if (cp > this.checkpointIndex) {
       this.checkpointIndex = cp;
-      this.checkpointSnapshot = { ...this.box.snapshot(), bomb: this.bomb.health, poke: this.cacti.damage };
+      this.checkpointSnapshot = { ...this.box.snapshot(), bomb: this.bomb.health };
       this.events.emit('game:checkpoint', { index: cp });
     }
 

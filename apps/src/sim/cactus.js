@@ -1,5 +1,5 @@
 // Cactus hostiles del laberinto. No se mueven de sitio: si la caja o un jugador
-// entra en su zona, pinchan, suben el daño y le bajan contenido a la caja.
+// entra en su zona, pinchan y le bajan contenido a la caja.
 import { CONFIG } from '../config.js';
 
 export class CactusPatch {
@@ -12,12 +12,10 @@ export class CactusPatch {
       cd: 0,
       lunge: 0,
     }));
-    this.damage = 0;
     this.near = false;
   }
 
-  reset(damage = 0) {
-    this.damage = damage;
+  reset() {
     this.near = false;
     for (const p of this.plants) {
       p.cd = 0;
@@ -44,9 +42,8 @@ export class CactusPatch {
       if (!hit || p.cd > 0 || game.box.invuln > 0) continue;
       p.cd = C.cooldown;
       p.lunge = C.lunge;
-      this.damage = Math.min(100, this.damage + C.damage);
       game.box.damage(C.damage, 'cactus');
-      this.events.emit('cactus:poke', { x: p.x, z: p.z, damage: this.damage });
+      this.events.emit('cactus:poke', { x: p.x, z: p.z });
     }
   }
 }

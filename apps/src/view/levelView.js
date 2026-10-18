@@ -484,13 +484,24 @@ export class LevelView {
 
   _sign(s) {
     const g = this.gfx;
-    const post = s.post ?? 1.6;
+    const post = s.post ?? 1.45;
     const group = g.group('cartel', this.root, [s.x, s.top, s.z]);
-    group.setLocalEulerAngles(0, s.x < -6 ? 25 : s.x < 0 ? 12 : -12, 0);
-    for (const side of s.w > 4 ? [-1, 1] : [0]) {
-      g.prim('box', g.solid('trunk'), { parent: group, pos: [side * s.w * 0.35, post / 2, -0.06], scale: [0.14, post, 0.14] });
+    const yaw = s.yaw ?? (s.x < -6 ? 20 : s.x < 0 ? 16 : s.x > 0 ? -16 : 0);
+    group.setLocalEulerAngles(0, yaw, 0);
+    // Un poste redondo, igual en todos: base, palo y casquillo. El tablero apoya encima.
+    if (post > 0) {
+      const wood = g.solid('#7a5233', { gloss: 0.14 });
+      const dark = g.solid('#4e3422', { gloss: 0.08 });
+      const sides = s.w > 4 ? [-1, 1] : [0];
+      for (const side of sides) {
+        const x = side * s.w * 0.38;
+        g.prim('cylinder', dark, { parent: group, pos: [x, 0.05, -0.02], scale: [0.36, 0.1, 0.36], name: 'base' });
+        g.prim('cylinder', wood, { parent: group, pos: [x, post / 2, -0.02], scale: [0.18, post, 0.18], name: 'poste' });
+        g.prim('cylinder', dark, { parent: group, pos: [x, post - 0.03, -0.02], scale: [0.26, 0.07, 0.26], name: 'casquillo' });
+      }
     }
-    const board = g.prim('box', g.solid('#ffffff'), { parent: group, pos: [0, post + s.h / 2, 0], scale: [s.w, s.h, 0.08], name: 'tablero' });
+    const lift = post > 0 ? post + s.h / 2 : s.h / 2 + 0.06;
+    const board = g.prim('box', g.solid('#ffffff'), { parent: group, pos: [0, lift, 0], scale: [s.w, s.h, 0.08], name: 'tablero' });
     const canvasTex = g.textureFromCanvas(signCanvas(s.text, { style: s.style, aspect: s.w / s.h, palette: g.palette }));
     board.render.material = g.textured(canvasTex);
     if (s.art) this._applyArtTexture(board, s.art);

@@ -1,7 +1,8 @@
 // Desierto 1 — "El Campamento".
 // El arranque es un pasillo de arena, como el dibujo: cactus, tinajas, arco.
-// Después se parte. El carril ancho es trampa y se corta. El bueno es más estrecho
-// y hay que escorarse juntos para no rozar los cactus. Nadie dice cuál es cuál.
+// Después se parte. Entre los dos carriles queda una raja de ~2.5 m: el cuerpo no la
+// puentea y, si la cruzan, caen. El carril ancho es trampa y se corta. El bueno es
+// más estrecho y hay que escorarse juntos para no rozar los cactus. Nadie dice cuál es cuál.
 import { dressPathRim } from './sections.js';
 
 const TOP = 1;
@@ -34,12 +35,12 @@ const level = {
   platforms: [
     sand({ id: 'calle', x: 0, z: 48, w: 8, d: 24, top: TOP }),
     sand({ id: 'boca', x: 0, z: 33, w: 12, d: 8, top: TOP }),
-    sand({ id: 'carril-izq', x: -3.1, z: 21.3, w: 5.2, d: 16.6, top: TOP }),
-    sand({ id: 'trampa-der', x: 3.2, z: 24.2, w: 5.6, d: 10.4, top: TOP }),
+    sand({ id: 'carril-izq', x: -3.5, z: 21.3, w: 4.4, d: 16.6, top: TOP }),
+    sand({ id: 'trampa-der', x: 3.6, z: 24.2, w: 4.8, d: 10.4, top: TOP }),
     sand({ id: 'cruce', x: 0, z: 10, w: 12, d: 8, top: TOP }),
     sand({ id: 'boca-2', x: 0, z: 4, w: 12, d: 6, top: TOP }),
-    sand({ id: 'trampa-izq', x: -3.2, z: -2, w: 5.6, d: 8, top: TOP }),
-    sand({ id: 'carril-der', x: 3.1, z: -4.3, w: 5.2, d: 14.6, top: TOP }),
+    sand({ id: 'trampa-izq', x: -3.6, z: -2, w: 4.8, d: 8, top: TOP }),
+    sand({ id: 'carril-der', x: 3.5, z: -4.3, w: 4.4, d: 14.6, top: TOP }),
     sand({ id: 'boca-3', x: 0, z: -14, w: 10, d: 6, top: TOP }),
     sand({ id: 'calle-fina', x: 0, z: -24.8, w: 5.4, d: 17, top: TOP }),
     sand({ id: 'plaza-meta', x: 0, z: -40, w: 12, d: 16, top: TOP }),
@@ -82,10 +83,10 @@ const level = {
   goal: { x: 0, z: -44, w: 8, d: 5, top: TOP },
 
   signs: [
-    { x: 3.2, z: 46, top: TOP, w: 3.3, h: 1.45, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
-    { x: -3.3, z: 34.2, top: TOP, w: 3.5, h: 1.65, text: '¡CUIDADO!\nCACTUS QUE PINCHAN\nY DAÑAN LA CAJA', style: 'warn' },
-    { x: 0, z: 30.2, top: TOP, w: 3.4, h: 1.35, text: 'UN CAMINO PINCHA\nY SE CORTA', style: 'warn' },
-    { x: -3.4, z: -44.2, top: TOP, w: 3.2, h: 1.3, text: 'CAMPAMENTO\nDEL ORO', style: 'bar' },
+    { x: 3.2, z: 46, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
+    { x: -3.3, z: 34.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: '¡CUIDADO!\nCACTUS QUE PINCHAN\nY DAÑAN LA CAJA', style: 'warn' },
+    { x: 0, z: 30.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'UN CAMINO PINCHA\nY SE CORTA', style: 'warn' },
+    { x: -3.4, z: -44.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'CAMPAMENTO\nDEL ORO', style: 'bar' },
   ],
 
   props: [
@@ -98,11 +99,10 @@ const level = {
     { type: 'pot', x: -3.4, z: 28.4, top: TOP, h: 1.5 },
     { type: 'pot', x: 2.15, z: -27, top: TOP, h: 1.9 },
     { type: 'deadTree', x: -3.5, z: 55, top: TOP, h: 3.6, yaw: 18 },
-    { type: 'deadTree', x: 3.55, z: 47.5, top: TOP, h: 3.2, yaw: -24 },
-    { type: 'deadTree', x: 4.6, z: 23, top: TOP, h: 2.9, yaw: 10 },
+    { type: 'deadTree', x: 6.35, z: 21.2, top: TOP, h: 2.9, yaw: 10 },
     { type: 'arch', x: 3.15, z: 36.2, top: TOP, w: 4.4, h: 3.6 },
     { type: 'rock', x: -3.5, z: 32.4, top: TOP, size: 1.3 },
-    { type: 'rock', x: 3.4, z: -10.5, top: TOP, size: 1.15 },
+    { type: 'rock', x: 5.35, z: -10.5, top: TOP, size: 1.15 },
   ],
 };
 

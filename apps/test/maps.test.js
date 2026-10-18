@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS, MAPS } from '../src/levels/index.js';
 import { dressIsland, SCENERY_SETS } from '../src/levels/sections.js';
-import { BACK, FWD, Game, IDLE, jump, run } from './helpers.js';
+import { BACK, FWD, Game, IDLE, RIGHT, jump, run } from './helpers.js';
 
 const CAMPAIGN = ['muelle', 'bahia', 'tormenta'];
 
@@ -174,7 +174,7 @@ describe('desierto', () => {
     expect(c.spawn.p1.y).toBeGreaterThan(2);
   });
 
-  it('el cactus hostil pincha: sube Daño y baja Contenido', () => {
+  it('el cactus hostil pincha y baja Contenido', () => {
     const g = start({
       id: 'pinche',
       waterLevel: 0,
@@ -184,7 +184,6 @@ describe('desierto', () => {
     });
     run(g, 0.5, IDLE, IDLE);
     expect(g.cacti.near).toBe(true);
-    expect(g.cacti.damage).toBeGreaterThan(0);
     expect(g.box.integrity).toBeLessThan(100);
   });
 
@@ -198,6 +197,41 @@ describe('desierto', () => {
     const next = LEVELS.campamento.platforms.find((p) => p.id === 'cruce');
     expect(trap.z - trap.d / 2).toBeGreaterThan(next.z + next.d / 2);
     expect(hostile.some((c) => Math.hypot(c.x - 3.2, c.z - 23.2) < 0.2)).toBe(true);
+  });
+
+  it('la raja entre carriles es más ancha que la pareja y cruzarla tira al vacío', () => {
+    const plats = LEVELS.campamento.platforms;
+    const gap = (a, b) => {
+      const left = plats.find((p) => p.id === a);
+      const right = plats.find((p) => p.id === b);
+      return right.x - right.w / 2 - (left.x + left.w / 2);
+    };
+    expect(gap('carril-izq', 'trampa-der')).toBeGreaterThan(2.2);
+    expect(gap('trampa-izq', 'carril-der')).toBeGreaterThan(2.2);
+
+    const g = start(LEVELS.campamento);
+    g.teleport({
+      p1: { x: -2.2, y: 1, z: 24 },
+      p2: { x: -2.2, y: 1, z: 22 },
+    });
+    let low = 1;
+    run(g, 1.4, RIGHT, RIGHT, (_, game) => {
+      low = Math.min(low, game.p1.pos.y, game.p2.pos.y);
+    });
+    expect(low).toBeLessThan(0);
+  });
+
+  it('la tinaja del campamento frena a los muñecos', () => {
+    const g = start(LEVELS.campamento);
+    g.teleport({
+      p1: { x: 0.2, y: 1, z: 41.2 },
+      p2: { x: 1.6, y: 1, z: 41.2 },
+    });
+    run(g, 1.2, RIGHT, RIGHT);
+    const pot = g.world.solids.find((s) => s.def.art === 'pot' && s.aabb.min.z < 41.2 && s.aabb.max.z > 41.2);
+    expect(pot).toBeTruthy();
+    expect(g.p2.pos.x).toBeLessThan(pot.aabb.min.x);
+    expect(g.p1.pos.y).toBeGreaterThan(0.5);
   });
 });
 

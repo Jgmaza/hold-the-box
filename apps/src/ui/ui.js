@@ -256,8 +256,7 @@ export class UI {
     });
     ev.on('box:wet', () => !this.bombMode && this.flash('wetness'));
     ev.on('cactus:poke', () => {
-      this.toast('¡Daño! El cactus pinchó la caja', 'bad');
-      this.flash('poke');
+      this.toast('¡El cactus pinchó la caja!', 'bad');
       this.flash('integrity');
     });
     ev.on('player:jump', (e) => {
@@ -308,11 +307,6 @@ export class UI {
       if (!this.catMode) this.$('.timer').textContent = fmtTime(g.runTime);
     }
     this._meter('sync', b.sync * 100, b.sync < 0.4);
-    if (this.meters.poke) {
-      const maze = (g.level.cacti ?? []).some((c) => c.hostile);
-      this.meters.poke.el.hidden = !maze;
-      if (maze) this._meter('poke', g.cacti.damage, g.cacti.damage > 35);
-    }
 
     const zone = g.weather.current;
     const chip = this.$('.weather');
@@ -379,7 +373,6 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="integrity"><span>Contenido</span><div class="bar"><i></i></div><b>100%</b></div>
       <div class="meter" data-k="wetness"><span>Mojado</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
-      <div class="meter" data-k="poke" hidden><span>Daño</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="lives-row"><span>Vidas</span><div class="lives" title="Vidas que les quedan"></div></div>
     </div>
     <div class="weather" data-type=""></div>
