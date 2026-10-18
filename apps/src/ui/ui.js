@@ -58,6 +58,11 @@ const NPC_HIT_JUNGLE = {
   medium: ['¡El mono tiró agua!', 'wet'],
   hard: ['¡El jaguar! Contenido y agua', 'bad'],
 };
+const NPC_HIT_DESERT = {
+  easy: ['¡El aprendiz picó! Se botó contenido', 'bad'],
+  medium: ['¡El minero tiró agua!', 'wet'],
+  hard: ['¡El coyote! Contenido y agua', 'bad'],
+};
 const NPC_HIT_VILLAGE = {
   easy: ['¡El niño del pueblo! Se botó contenido', 'bad'],
   medium: ['¡El aldeano tiró agua!', 'wet'],
@@ -83,6 +88,7 @@ export class UI {
     this.bombMode = CONFIG.box.bomb.enabled;
     this.catMode = CONFIG.box.cat.enabled;
     this.jungle = game.world?.level?.theme === 'jungle';
+    this.desert = game.world?.level?.theme === 'desert';
     this.village = game.world?.level?.biome === 'village';
     if (this.bombMode) this._setupBombHud();
     else if (this.catMode) this._setupCatHud();
@@ -234,7 +240,7 @@ export class UI {
       this.flash('integrity');
     });
     ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : this.jungle ? '¡Vapor! Se moja la caja!' : '¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.desert ? NPC_HIT_DESERT : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
@@ -249,6 +255,11 @@ export class UI {
       this.flash('integrity');
     });
     ev.on('box:wet', () => !this.bombMode && this.flash('wetness'));
+    ev.on('cactus:poke', () => {
+      this.toast('¡Daño! El cactus pinchó la caja', 'bad');
+      this.flash('poke');
+      this.flash('integrity');
+    });
     ev.on('player:jump', (e) => {
       const now = this.game.time;
       this._lastJump[e.player] = now;
@@ -297,6 +308,11 @@ export class UI {
       if (!this.catMode) this.$('.timer').textContent = fmtTime(g.runTime);
     }
     this._meter('sync', b.sync * 100, b.sync < 0.4);
+    if (this.meters.poke) {
+      const maze = (g.level.cacti ?? []).some((c) => c.hostile);
+      this.meters.poke.el.hidden = !maze;
+      if (maze) this._meter('poke', g.cacti.damage, g.cacti.damage > 35);
+    }
 
     const zone = g.weather.current;
     const chip = this.$('.weather');
@@ -314,9 +330,11 @@ export class UI {
     const y = Math.max(-1, Math.min(1, b.tilt.pitch / max)) * R;
     this.$('.level .dot').style.transform = `translate(${x}px, ${y}px)`;
     const lvl = this.$('.level');
-    if (lvl.dataset.state !== b.state) {
-      lvl.dataset.state = b.state;
-      this.$('.level .state').textContent = STATE_LABEL[b.state];
+    const poked = g.state === 'playing' && g.cacti?.near && b.state !== 'critical';
+    const state = poked ? 'danger' : b.state;
+    if (lvl.dataset.state !== state) {
+      lvl.dataset.state = state;
+      this.$('.level .state').textContent = poked ? 'PELIGRO' : STATE_LABEL[b.state];
     }
 
     const warn = g.state === 'playing' && b.state === 'critical';
@@ -361,6 +379,7 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="integrity"><span>Contenido</span><div class="bar"><i></i></div><b>100%</b></div>
       <div class="meter" data-k="wetness"><span>Mojado</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
+      <div class="meter" data-k="poke" hidden><span>Daño</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="lives-row"><span>Vidas</span><div class="lives" title="Vidas que les quedan"></div></div>
     </div>
     <div class="weather" data-type=""></div>

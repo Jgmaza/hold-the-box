@@ -5,6 +5,9 @@ import level3 from './level3.js';
 import aldea from './aldea.js';
 import templo from './templo.js';
 import puente from './puente.js';
+import campamento from './campamento.js';
+import mina from './mina.js';
+import canon from './canon.js';
 
 export const LEVELS = {
   muelle: level1,
@@ -13,6 +16,9 @@ export const LEVELS = {
   aldea,
   templo,
   puente,
+  campamento,
+  mina,
+  canon,
 };
 
 export const DEFAULT_LEVEL = 'muelle';
@@ -25,4 +31,7 @@ export const MAPS = [
   { key: 'aldea', icon: '🛖', tag: 'Selva 1', difficulty: 1, blurb: 'Pueblo en tierra: niño, aldeano, aguacero y chozas. Camino de tierra hasta la plaza.' },
   { key: 'templo', icon: '🗿', tag: 'Selva 2', difficulty: 2, blurb: 'Losa de piedra, lianas, jaguar y la ofrenda en la pirámide.' },
   { key: 'puente', icon: '🌉', tag: 'Selva 3', difficulty: 3, blurb: 'Risco, viento, puente de cuerdas sobre la catarata y elevador.' },
+  { key: 'campamento', icon: '🌵', tag: 'Desierto 1', difficulty: 1, blurb: 'Laberinto de cactus: un camino pincha y se corta. En el bueno hay que escorarse juntos.' },
+  { key: 'mina', icon: '⛏️', tag: 'Desierto 2', difficulty: 2, blurb: 'Grúas, rieles de vagoneta y el coyote antes de la boca de la mina.' },
+  { key: 'canon', icon: '🏜️', tag: 'Desierto 3', difficulty: 3, blurb: 'Viento en el cañón, tablón que va y viene, y elevador hasta el oro.' },
 ].map((m) => ({ ...m, name: LEVELS[m.key].name }));

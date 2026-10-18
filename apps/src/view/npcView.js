@@ -48,7 +48,7 @@ export class NpcViews {
     const root = g.group(`npc-${npc.id}`, this.root);
     const body = g.group('body', root);
     const v = { npc, root, body, bob: 0, walk: 0, fov: null, legs: [], markY: npc.T.height + 0.5, particles: this.particles };
-    const pack = this.biome === 'village' ? VILLAGE : this.theme === 'jungle' ? JUNGLE : BUILDERS;
+    const pack = this.biome === 'village' ? VILLAGE : this.theme === 'desert' ? DESERT : this.theme === 'jungle' ? JUNGLE : BUILDERS;
     pack[npc.difficulty](this.parts, body, g.solid(ACCENT[npc.difficulty], { gloss: 0.5 }), v);
 
     v.calmMat = g.solid(ACCENT[npc.difficulty], { opacity: 0.16, unlit: true });
@@ -515,4 +515,101 @@ const VILLAGE = {
   },
 
   hard: JUNGLE.hard,
+};
+
+const MINER = { skin: '#e0a070', cloth: '#c47a3a', hat: '#6b3a22', hair: '#3a2418', canteen: '#3a7ca5' };
+const COYOTE = { fur: '#c4a574', dark: '#5a4030', belly: '#efe0c4', ear: '#8a6848' };
+
+/** Mineros del desierto y el coyote. Misma conducta, otra pinta, animada en PlayCanvas. */
+const DESERT = {
+  easy(P, body, shirt, v) {
+    const skin = P.mat(MINER.skin, { gloss: 0.25 });
+    [-1, 1].forEach((s) => {
+      const hip = P.group('pierna', body, [s * 0.07, 0.2, 0]);
+      P.limb(hip, skin, [0, 0, 0], [0, -0.16, 0], 0.04);
+      P.ball(hip, P.mat('#5a3a18'), [0, -0.18, 0.03], [0.09, 0.06, 0.12]);
+      v.legs.push({ g: hip, axis: 'x', amp: 26, phase: s > 0 ? Math.PI : 0 });
+    });
+    P.ball(body, P.mat(MINER.cloth, { gloss: 0.3 }), [0, 0.28, 0], [0.26, 0.22, 0.2], { name: 'camisa' });
+    P.ball(body, shirt, [0, 0.3, 0.08], [0.1, 0.08, 0.04], { shadows: false });
+    const head = P.group('cabeza', body, [0, 0.48, 0]);
+    v.head = head;
+    P.ball(head, skin, [0, 0, 0], [0.28, 0.26, 0.26]);
+    P.ball(head, P.mat(MINER.hair), [0, 0.04, -0.04], [0.26, 0.12, 0.2]);
+    P.eye(head, [-0.06, 0.02, 0.11], 0.06, 0.5);
+    P.eye(head, [0.06, 0.02, 0.11], 0.06, 0.5);
+    P.ball(head, P.mat(MINER.hat, { gloss: 0.2 }), [0, 0.16, 0.02], [0.36, 0.06, 0.36], { name: 'ala' });
+    P.ball(head, P.mat(MINER.hat), [0, 0.22, 0], [0.2, 0.12, 0.2], { name: 'copa' });
+    v.markY = 0.85;
+    v.animate = (vv, _dt, time) => {
+      vv.head.setLocalEulerAngles(Math.sin(time * 2) * 6, vv.npc.state === 'idle' ? Math.sin(time * 1.4) * 16 : 0, 0);
+    };
+  },
+
+  medium(P, body, shirt, v) {
+    const skin = P.mat(MINER.skin, { gloss: 0.25 });
+    [-1, 1].forEach((s) => {
+      const hip = P.group('pierna', body, [s * 0.09, 0.36, 0]);
+      P.limb(hip, skin, [0, 0, 0], [0, -0.28, 0], 0.05);
+      P.ball(hip, P.mat('#5a3a18'), [0, -0.3, 0.04], [0.11, 0.07, 0.14]);
+      v.legs.push({ g: hip, axis: 'x', amp: 30, phase: s > 0 ? Math.PI : 0 });
+    });
+    P.ball(body, P.mat(MINER.cloth, { gloss: 0.3 }), [0, 0.52, 0], [0.32, 0.36, 0.24], { name: 'camisa' });
+    P.ball(body, shirt, [0, 0.58, 0.1], [0.12, 0.1, 0.05], { shadows: false });
+    const head = P.group('cabeza', body, [0, 0.86, 0]);
+    v.head = head;
+    P.ball(head, skin, [0, 0, 0], [0.34, 0.32, 0.32]);
+    P.ball(head, P.mat(MINER.hair), [0, 0.02, -0.06], [0.32, 0.12, 0.22]);
+    P.eye(head, [-0.07, 0.02, 0.14], 0.07, 0.5);
+    P.eye(head, [0.07, 0.02, 0.14], 0.07, 0.5);
+    P.ball(head, P.mat(MINER.hat), [0, 0.18, 0.02], [0.46, 0.06, 0.46], { name: 'ala' });
+    P.ball(head, P.mat(MINER.hat), [0, 0.26, 0], [0.24, 0.14, 0.24], { name: 'copa' });
+    const canteen = P.group('cantimplora', body, [0.16, 0.5, 0.2]);
+    P.ball(canteen, P.mat(MINER.canteen, { gloss: 0.55 }), [0, 0, 0], [0.12, 0.18, 0.1]);
+    v.pump = canteen;
+    for (const s of [-1, 1]) P.limb(body, skin, [s * 0.16, 0.66, 0], [0.1, 0.5, 0.18], 0.04);
+    v.markY = 1.4;
+    v.animate = (vv, _dt, time) => {
+      const n = vv.npc;
+      vv.pump.setLocalPosition(0.16, 0.5 + Math.abs(Math.sin(time * 16)) * 0.08 * n.windup, 0.2);
+      vv.head.setLocalEulerAngles(n.windup > 0 ? -8 : Math.sin(time * 1.8) * 5, n.state === 'idle' ? Math.sin(time * 1.2) * 18 : 0, 0);
+    };
+  },
+
+  hard(P, body, collar, v) {
+    const fur = P.mat(COYOTE.fur, { gloss: 0.4 });
+    const dark = P.mat(COYOTE.dark, { gloss: 0.3 });
+    const belly = P.mat(COYOTE.belly, { gloss: 0.25 });
+    for (const [x, z, phase] of [[-0.12, 0.22, 0], [0.12, 0.22, Math.PI], [-0.12, -0.28, Math.PI], [0.12, -0.28, 0]]) {
+      const hip = P.group('pata', body, [x, 0.4, z]);
+      P.limb(hip, fur, [0, 0, 0], [0, -0.3, 0.02], 0.055);
+      P.ball(hip, dark, [0, -0.34, 0.04], [0.11, 0.06, 0.13]);
+      v.legs.push({ g: hip, axis: 'x', amp: 30, phase });
+    }
+    P.limb(body, fur, [0, 0.48, -0.3], [0, 0.5, 0.22], 0.18, { name: 'cuerpo' });
+    P.ball(body, belly, [0, 0.4, 0], [0.26, 0.14, 0.48], { name: 'panza' });
+    P.ring(body, collar, [0, 0.6, 0.26], 0.12, 0.02, { rot: [40, 0, 0], name: 'collar' });
+    const head = P.group('cabeza', body, [0, 0.7, 0.42]);
+    v.head = head;
+    P.ball(head, fur, [0, 0, 0], [0.28, 0.24, 0.34]);
+    P.ball(head, belly, [0, -0.04, 0.16], [0.14, 0.1, 0.18], { name: 'hocico' });
+    P.ball(head, dark, [0, -0.02, 0.26], [0.06, 0.04, 0.05], { name: 'nariz' });
+    P.eye(head, [-0.07, 0.04, 0.12], 0.06, 0.55);
+    P.eye(head, [0.07, 0.04, 0.12], 0.06, 0.55);
+    v.ears = [-1, 1].map((s) => {
+      const e = P.group('oreja', head, [s * 0.1, 0.12, -0.02]);
+      P.ball(e, P.mat(COYOTE.ear), [0, 0.08, 0], [0.06, 0.14, 0.04]);
+      return { g: e, s };
+    });
+    v.tail = P.group('cola', body, [0, 0.5, -0.46]);
+    P.limb(v.tail, fur, [0, 0, 0], [0, 0.08, -0.32], 0.035);
+    v.markY = 1.2;
+    v.animate = (vv, _dt, time) => {
+      const n = vv.npc;
+      const angry = n.state === 'alert' || n.state === 'attack';
+      vv.tail.setLocalEulerAngles(0, Math.sin(time * (angry ? 18 : 7)) * 26, 0);
+      vv.ears.forEach(({ g, s }) => g.setLocalEulerAngles(angry ? -16 : 0, 0, s * (angry ? 10 : 0)));
+      vv.head.setLocalEulerAngles(n.windup > 0 ? 12 * n.windup : Math.sin(time * 2) * 3, 0, 0);
+    };
+  },
 };

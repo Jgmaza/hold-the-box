@@ -137,6 +137,13 @@ export const CONFIG = {
     sweeperLift: 4,
     sweeperHitCooldown: 0.6,
     sweeperKickDeg: 320, // golpe angular a la caja (grados/s)
+    cactus: {
+      reach: 1.15, // pincha a la caja o a un jugador dentro de este radio
+      warn: 2.4, // el radar pasa a PELIGRO
+      damage: 12, // % que sube Daño y que baja Contenido
+      cooldown: 1.15,
+      lunge: 0.28, // segundos del estirón de espinas
+    },
   },
 
   // NPCs (solo en niveles que declaren `npcs`, ver src/sim/npcs/). Atacan la CAJA: botan contenido o la mojan.

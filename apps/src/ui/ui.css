@@ -70,6 +70,9 @@
 .meter[data-k='sync'] .bar i {
   background: var(--ui);
 }
+.meter[data-k='poke'] .bar i {
+  background: var(--danger);
+}
 .meter.low .bar i {
   background: var(--danger);
 }
@@ -250,7 +253,8 @@
 .level[data-state='tilting'] .state {
   color: var(--ui);
 }
-.level[data-state='critical'] .state {
+.level[data-state='critical'] .state,
+.level[data-state='danger'] .state {
   color: var(--danger);
 }
 

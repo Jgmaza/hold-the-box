@@ -13,7 +13,7 @@ import { island, seeded } from './nature.js';
 export function buildBackdrop(P, parent, { minZ, maxZ, seaY, seed = 1, clear = 16, theme, biome, islands = true } = {}) {
   const g = P.gfx;
   const rand = seeded(seed * 977 + 13);
-  const look = theme === 'jungle' ? (biome === 'temple' ? 'ruins' : biome === 'canyon' ? 'canyon' : biome === 'village' ? 'village' : 'jungle') : 'beach';
+  const look = theme === 'desert' ? 'desert' : theme === 'jungle' ? (biome === 'temple' ? 'ruins' : biome === 'canyon' ? 'canyon' : biome === 'village' ? 'village' : 'jungle') : 'beach';
   const sky = P.ball(parent, skyMaterial(g, look), [0, 0, 0], [400, 400, 400], { shadows: false, name: 'cielo' });
 
   const shores = [];
@@ -44,9 +44,13 @@ function skyMaterial(g, look = 'beach') {
   c.height = 512;
   const ctx = c.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  const jungle = look === 'jungle' || look === 'ruins' || look === 'canyon' || look === 'village';
-  const horizon = look === 'ruins' ? '#cfc6b4' : look === 'canyon' ? '#c5d0d4' : look === 'jungle' || look === 'village' ? '#b8d4c0' : (g.palette.sky ?? '#8fd3f4');
-  if (look === 'ruins') {
+  const horizon = look === 'desert' ? '#f2c9a0' : look === 'ruins' ? '#cfc6b4' : look === 'canyon' ? '#c5d0d4' : look === 'jungle' || look === 'village' ? '#b8d4c0' : (g.palette.sky ?? '#8fd3f4');
+  if (look === 'desert') {
+    grad.addColorStop(0, '#2f6fbf');
+    grad.addColorStop(0.22, '#5aa0e0');
+    grad.addColorStop(0.4, '#f0c48a');
+    grad.addColorStop(0.5, '#f6d2a0');
+  } else if (look === 'ruins') {
     grad.addColorStop(0, '#5a7a9a');
     grad.addColorStop(0.3, '#8aa8b8');
     grad.addColorStop(0.47, '#ddd4c4');
