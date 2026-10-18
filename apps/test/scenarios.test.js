@@ -81,6 +81,7 @@ describe('caja compartida', () => {
 
   it('tirar en direcciones opuestas: ¡Soltaron la caja!', () => {
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     let fail = null;
     g.events.on('game:fail', (e) => (fail = e));
     run(g, 4, FWD, BACK);
@@ -113,6 +114,7 @@ describe('agua, respawn y derrotas', () => {
 
   it('contenido en 0 → derrota "empty"', () => {
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     g.box.integrity = 0;
     run(g, 2, IDLE, IDLE);
     expect(g.state).toBe('failed');
@@ -121,22 +123,23 @@ describe('agua, respawn y derrotas', () => {
 
   it('mojado al 100% → derrota "soaked"', () => {
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     g.box.wetness = 100;
     run(g, 2, IDLE, IDLE);
     expect(g.state).toBe('failed');
     expect(g.failReason).toBe('soaked');
   });
 
-  it('reintentar tras la derrota vuelve al checkpoint con la caja guardada', () => {
+  it('con vidas, perder la caja reaparece solo en el checkpoint con la caja guardada', () => {
     const g = playingGame();
     g.teleport(0);
     g.checkpointSnapshot = { integrity: 80, wetness: 10 };
     g.box.integrity = 0;
     run(g, 2, IDLE, IDLE);
-    expect(g.state).toBe('failed');
-    g.setInputs(jump(), IDLE);
     expect(g.state).toBe('playing');
+    expect(g.lives).toBe(2);
     expect(g.box.integrity).toBe(80);
+    expect(g.box.wetness).toBeLessThanOrEqual(10);
     expect(g.p1.pos.z).toBeCloseTo(level1.checkpoints[0].spawn.p1.z);
   });
 
@@ -245,6 +248,7 @@ describe('gato', () => {
   it('en la meta, quedarse quieto vacía la caja', () => {
     selectBox('gato');
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     g.teleport('goal');
     run(g, 7.5, IDLE, IDLE);
     expect(g.box.integrity).toBe(0);
@@ -272,6 +276,7 @@ describe('gato', () => {
   it('la bomba explota cuando llega a 0 %', () => {
     selectBox('bomba');
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     expect(g.cat.phase).toBe('calm');
     g.bomb.health = 5;
     let boom = 0;
@@ -283,16 +288,17 @@ describe('gato', () => {
     expect(g.state).toBe('failed');
   });
 
-  it('con la bomba, reintentar vuelve con el % que tenía en el checkpoint', () => {
+  it('con la bomba, perder una vida vuelve con el % que tenía en el checkpoint', () => {
     selectBox('bomba');
     const g = playingGame();
     g.teleport(0);
     g.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 62 };
     g.bomb.health = 1;
     g.box.damage(5, 'sweeper');
+    let cause = null;
+    g.events.on('game:life', (e) => (cause = e.cause));
     run(g, 2, IDLE, IDLE);
-    expect(g.failReason).toBe('exploded');
-    g.setInputs(jump(), IDLE);
+    expect(cause).toBe('exploded');
     expect(g.state).toBe('playing');
     expect(g.bomb.health).toBe(62);
     expect(g.bomb.exploded).toBe(false);
@@ -357,6 +363,7 @@ describe('gato', () => {
   it('apagado no araña ni cambia la derrota de siempre', () => {
     selectBox('vip');
     const g = playingGame();
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     let n = 0;
     let fail = null;
     g.events.on('cat:scratch', () => n++);

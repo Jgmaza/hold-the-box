@@ -97,6 +97,7 @@ describe('lluvia', () => {
 
   it('quedarse al descubierto bajo el aguacero termina en derrota "soaked"', () => {
     const { g, zone } = island('rain');
+    g.lives = 1; // última vida: esta derrota va a la pantalla
     hold(zone, 'active');
     run(g, 7, IDLE, IDLE);
     expect(g.state).toBe('failed');

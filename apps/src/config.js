@@ -284,6 +284,7 @@ export const CONFIG = {
     fadeTime: 0.5,
     invulnTime: 1.2,
     failDelay: 1.2, // segundos viendo caer la caja antes de la pantalla de derrota
+    lives: 3, // vidas por partida: cada derrota gasta una; sin vidas, se empieza el nivel desde la salida
   },
 
   camera: {

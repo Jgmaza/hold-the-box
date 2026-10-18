@@ -10,14 +10,11 @@ Feel / perfiles: **Luis** · Código: **Danel** · Scope: `MVP_SCOPE.md`
 - **Huequito** → baja integridad/contenido
 - **Mojado** → penalizaciones; chorros; fall al agua
 - Checkpoints, meta con rating (perfect / ok / dañada)
-
-## Trabajo de Luis
-Tunear knobs y definir **perfiles** en `deliveries/luis/BOX_VARIANTS.md` — no rehacer el motor.
-
-## Después (opcional)
-Burla al fallar · mods/skins · más perfiles de caja
-
-## Obstáculos del nivel
+- **3 vidas por partida** (`CONFIG.respawn.lives`), con corazones en el panel de la izquierda del HUD (debajo de Sincronía):
+  - **Caer al agua / al vacío** gasta una vida: la caja se moja (+45 %) y reaparecen en el último checkpoint con la caja como iba.
+  - **Perder la caja** (suelta, vacía, empapada o explotada) gasta una vida: se la ve caer y reaparecen **solos** en el último checkpoint con la caja como estaba al pasar por él.
+  - Si una caída además deshace la caja, cuenta como **una sola** vida (vuelve como estaba en el checkpoint).
+  - **Sin vidas** sale la pantalla "¡Se acabaron las vidas!" y **Empezar de nuevo** reinicia el nivel desde la salida con las 3 vidas. **Reiniciar nivel** (pausa) también las devuelve.
 - Huecos entre plataformas
 - Rodillos giratorios
 - Plataformas móviles
