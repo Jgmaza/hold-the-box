@@ -112,7 +112,9 @@ apps/
       water.js          agua 3D con olas (también en el menú)
       backdrop.js       cielo + islas lejanas del nivel
       playerView.js     jugadores (o sprite de Juanes)
-      characters.js     personajes escogibles (Ejecutivo / Repartidor): CHARACTERS + buildCharacter()
+      characters.js     personajes escogibles (Alebarto, Gustambo, Alcázar, Matías, Melith, Manolo): CHARACTERS + buildCharacter()
+      charFeatures.js   frijol base en piezas suaves (mangas, manos), cara (ojos, cejas, boca) y rasgos: gafas, gorros, bufanda, chaleco…
+      lowpolyHead.js    cabeza low-poly de los personajes: forma con nariz y mandíbula, pelo y barba en casquetes facetados
       menuStage.js      escena 3D del menú: pedestales que giran, latigazo al cambiar, LISTO con salto
       menuScenery.js    escenario del menú: cielo, sol, nubes, mar con espuma, islas, faro, velero, gaviotas, muelle
       nature.js         palmeras, arbustos, rocas e islas por capas (menú y palmeras del nivel)

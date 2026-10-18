@@ -34,7 +34,7 @@ describe('menú', () => {
   it('el mismo personaje para los dos: P2 sale con color alterno', () => {
     const m = menu();
     expect(m.alt('p2')).toBe(false);
-    m.stepChar('p2', 1);
+    m.stepChar('p2', -1); // Gustambo → Alebarto, el mismo de P1
     expect(m.chars.p2.id).toBe(m.chars.p1.id);
     expect(m.alt('p2')).toBe(true);
     expect(m.alt('p1')).toBe(false);
