@@ -4,8 +4,9 @@
 // con otro largo (sin rodillo ni elevador):
 //   inicio → isla NPC medium → aguacero de 5 carpas → rieles de 36 m → ferry → viento alternado
 //   → isla cangrejos (medium + easy) → rieles cortos de 24 m → segundo ferry → chorros (4) → oleaje con rompeolas → META.
+// Como en el Muelle, las cuatro estaciones de recuperación están a los lados del spawn.
 
-import { dressLevel, rainIsland, railsPair, waveIsland, windIsland } from './sections.js';
+import { dressLevel, rainIsland, railsPair, recovery, waveIsland, windIsland } from './sections.js';
 
 const cp = (id, z, { d = 3, w = 4 } = {}) => ({ id, x: 0, z, w, d, top: 1, spawn: { p1: { x: -0.8, y: 1, z }, p2: { x: 0.8, y: 1, z } } });
 
@@ -20,7 +21,7 @@ const level = {
   },
 
   platforms: [
-    { id: 'inicio', x: 0, z: -4, w: 10, d: 8, top: 1 }, //                       z    0 .. -8
+    { id: 'inicio', x: 0, z: -4, w: 14, d: 8, top: 1 }, //                       z    0 .. -8
     { id: 'puente-npc', x: 0, z: -9.5, w: 4, d: 3, top: 1 }, //                  z   -8 .. -11
     { id: 'isla-npc', x: 0, z: -17, w: 10, d: 12, top: 1 }, //                   z  -11 .. -23
     { id: 'puente-lluvia', x: 0, z: -24.5, w: 4, d: 3, top: 1 }, //              z  -23 .. -26
@@ -53,6 +54,14 @@ const level = {
     { difficulty: 'easy', platform: 'isla-cangrejos', x: 1.5, z: -140 },
   ],
 
+  // Cuatro aparatos a los lados del spawn, como en el Muelle. El pasillo del centro queda libre.
+  recovery: [
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: -5.4, z: -1.2, top: 1 }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: -5.4, z: -5.6, top: 1 }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: 5.4, z: -1.2, top: 1 }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: 5.4, z: -5.6, top: 1 }),
+  ],
+
   geysers: [
     { x: -1.1, z: -199.5, baseY: 1, radius: 1.1, offset: 0 },
     { x: 1.2, z: -202.5, baseY: 1, radius: 1.1, offset: 0.8 },
@@ -66,6 +75,7 @@ const level = {
 
   signs: [
     { x: 3.6, z: -2, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
+    { x: -3.4, z: -3.4, top: 1, w: 3.0, h: 1.3, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
     { x: -3.8, z: -12, top: 1, w: 3, h: 1.4, text: 'NPC MEDIUM\n¡MUÉVANSE JUNTOS!', style: 'warn' },
     { x: -3.8, z: -21.8, top: 1, w: 3.4, h: 1.4, text: 'AGUACERO LARGO\nDE CARPA EN CARPA', style: 'info' },
     { x: 3.8, z: -49.2, top: 1, w: 3.4, h: 1.3, text: 'RIELES LARGOS\nCADA UNO EL SUYO', style: 'warn' },
@@ -78,7 +88,7 @@ const level = {
   ],
 
   props: [
-    { type: 'palm', x: -4.2, z: -1, top: 1 },
+    { type: 'palm', x: -6.4, z: -7.4, top: 1 },
     { type: 'flag', x: 3, z: -26.8, top: 1, checkpoint: 0 },
     { type: 'flag', x: 3.6, z: -94, top: 1, checkpoint: 1 },
     { type: 'flag', x: 3.3, z: -106, top: 1, checkpoint: 2 },
