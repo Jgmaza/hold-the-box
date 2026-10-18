@@ -307,6 +307,37 @@ export function dirtCanvas() {
   return c;
 }
 
+/** Arena del desierto, para repetir (2 m). */
+export function sandCanvas() {
+  const c = canvas(256, 256);
+  const g = c.getContext('2d');
+  let seed = 41;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  g.fillStyle = '#e39a45';
+  g.fillRect(0, 0, 256, 256);
+  for (let i = 0; i < 90; i++) {
+    const t = 150 + Math.floor(rand() * 70);
+    g.fillStyle = `rgb(${t + 30}, ${t - 20}, ${t - 70})`;
+    g.beginPath();
+    g.ellipse(rand() * 256, rand() * 256, 8 + rand() * 26, 4 + rand() * 10, rand() * 3, 0, Math.PI * 2);
+    g.fill();
+  }
+  for (let i = 0; i < 160; i++) {
+    const t = 90 + Math.floor(rand() * 50);
+    g.fillStyle = `rgba(${t + 40}, ${t}, ${t - 30}, 0.55)`;
+    g.fillRect(rand() * 256, rand() * 256, 1 + rand() * 2, 1 + rand() * 3);
+  }
+  g.globalAlpha = 0.18;
+  g.fillStyle = '#8a4a22';
+  for (let i = 0; i < 28; i++) {
+    g.beginPath();
+    g.ellipse(rand() * 256, rand() * 256, 3 + rand() * 7, 1.2 + rand() * 2.4, rand() * 3, 0, Math.PI * 2);
+    g.fill();
+  }
+  g.globalAlpha = 1;
+  return c;
+}
+
 /** Pasto para el suelo del templo / risco. */
 export function grassCanvas() {
   const c = canvas(256, 256);

@@ -1,5 +1,6 @@
 // Mundo: colliders del nivel, obstáculos y triggers (checkpoints, meta, recovery).
 import { propCollider } from '../levels/kenneyColliders.js';
+import { solidDressing } from '../levels/solidDressing.js';
 import { containsPoint, makeAABB, platformAABB } from './collision.js';
 import { Geyser, MovingPlatform, Sweeper } from './hazards.js';
 import { RecoveryStation } from './recovery.js';
@@ -68,9 +69,13 @@ export class World {
       .map((item) => ({ def: { kind: 'prop', art: item.art }, aabb: propCollider(item) }))
       .filter((p) => p.aabb);
 
+    // Adorno que se ve (cactus, tinajas, arco) y que el kit deja sin choque. No entra en `props`:
+    // el pasillo de ±1.9 m es para la escenografía del borde, y el laberinto sí pone cactus en el carril.
+    this.solids = solidDressing(level);
+
     // Lista que usan las colisiones (los móviles actualizan su aabb en el lugar).
     this.backWall = backStop(level);
-    this.colliders = [...this.statics, ...this.props, ...this.sweepers.map((s) => s.pillar), ...this.movers];
+    this.colliders = [...this.statics, ...this.props, ...this.solids, ...this.sweepers.map((s) => s.pillar), ...this.movers];
     if (this.backWall) this.colliders.push(this.backWall);
     this.update(0);
     for (const m of this.movers) m.sync(0);

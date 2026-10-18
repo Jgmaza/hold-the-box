@@ -4,9 +4,10 @@ import { KENNEY_BOUNDS } from '../levels/kenneyBounds.js';
 import { buildBackdrop } from './backdrop.js';
 import { deckGeometry } from './deck.js';
 import { imageUrl } from './deliveries.js';
-import { altar, bush, cliff, crocodile, hut, mangrove, monkey, palm, pyramid, rock, seeded, stoneHead, totem, waterfall } from './nature.js';
+import { buildCanyon } from './desert.js';
+import { altar, bush, cactus, clayPot, cliff, crocodile, deadTree, hut, lampPost, mangrove, mineMouth, monkey, palm, pyramid, rock, seeded, stoneArch, stoneHead, totem, waterfall } from './nature.js';
 import { Parts } from './parts.js';
-import { checkerCanvas, dirtCanvas, grassCanvas, plankCanvas, signCanvas, stoneCanvas } from './signs.js';
+import { checkerCanvas, dirtCanvas, grassCanvas, plankCanvas, sandCanvas, signCanvas, stoneCanvas } from './signs.js';
 import { buildValley } from './valley.js';
 import { Water } from './water.js';
 
@@ -25,7 +26,7 @@ export class LevelView {
     this._assets = new Map();
     const L = world.level;
     this.theme = L.theme;
-    this.land = L.biome === 'temple' || L.biome === 'canyon' || L.biome === 'village';
+    this.land = L.biome === 'temple' || L.biome === 'canyon' || L.biome === 'village' || L.biome === 'camp' || L.biome === 'mine' || L.biome === 'chasm';
 
     this.waterY = world.waterLevel;
     for (const s of world.statics) this._platform(s.def, s.aabb);
@@ -39,6 +40,7 @@ export class LevelView {
     for (const p of L.props ?? []) this._prop(p);
     this._scenery(L.scenery);
     if (L.biome === 'village') this._villageDetail(L);
+    this._mazeCacti(L.cacti);
     if (L.goal) this._goal(L.goal);
   }
 
@@ -54,20 +56,32 @@ export class LevelView {
     const maxZ = Math.max(...zs);
     const seed = [...(world.level.id ?? 'nivel')].reduce((n, ch) => n * 31 + ch.charCodeAt(0), 7) >>> 0;
     const biome = world.level.biome;
-    const groundY = biome === 'canyon' ? 2.48 : 0.86;
+    const desert = biome === 'camp' || biome === 'mine' || biome === 'chasm';
+    const groundY = biome === 'canyon' || biome === 'chasm' ? 2.48 : 0.86;
     const valley = biome === 'village' || biome === 'temple' || biome === 'canyon';
     const { sky } = buildBackdrop(P, this.root, {
-      minZ, maxZ, seaY: groundY, seed, clear: 14, theme: this.theme, biome, land: true, islands: !valley,
+      minZ, maxZ, seaY: groundY, seed, clear: 14, theme: this.theme, biome, land: true, islands: !valley && !desert,
     });
     this.sky = sky;
     this.groundY = groundY;
     this.valley = null;
+    this.desert = null;
 
     this._grassTex ??= g.textureFromCanvas(grassCanvas(), { repeat: true });
     const grass = g.textured(this._grassTex, { tint: g.color('#8fbf5a', 1.05) });
     grass.diffuseMapTiling = new pc.Vec2(40, 40);
     grass.update();
-    if (valley) {
+    if (desert) {
+      const gap = world.level.pit ?? null;
+      // El fondo no tapa el camino: se le pasan las plataformas y lo que el nivel ya pone (carteles, props, escenografía).
+      const L = world.level;
+      const spot = (o, r = 1.2) => ({ minX: o.x - r, maxX: o.x + r, minZ: o.z - r, maxZ: o.z + r, spot: true });
+      const avoid = [
+        ...world.statics.map(({ aabb: a }) => ({ minX: a.min.x, maxX: a.max.x, minZ: a.min.z, maxZ: a.max.z })),
+        ...[...(L.signs ?? []), ...(L.props ?? []), ...(L.scenery ?? [])].filter((o) => Number.isFinite(o.x) && Number.isFinite(o.z)).map((o) => spot(o)),
+      ];
+      this.desert = buildCanyon(g, P, this.root, { minZ, maxZ, groundY, seed, gap, cart: biome !== 'camp', carpet: !world.level.maze, avoid });
+    } else if (valley) {
       const gap = world.level.pit ?? (biome === 'canyon' ? { z0: -43, z1: -11 } : null);
       this.valley = buildValley(g, P, this.root, { minZ, maxZ, groundY, seed, gap });
       if (biome === 'temple') {
@@ -145,13 +159,16 @@ export class LevelView {
     const plank = def.kind === 'plank';
     const stone = def.skin === 'stone';
     const top = 0.14;
-    if ((stone || def.skin === 'dirt') && this.land) {
-      if (def.skin === 'dirt') {
-        this._dirtTex ??= g.textureFromCanvas(dirtCanvas(), { repeat: true });
-        const floor = g.textured(this._dirtTex, { tint: g.color('#c4a06a', 1.05) });
+    if ((stone || def.skin === 'dirt' || def.skin === 'sand') && this.land) {
+      if (def.skin === 'dirt' || def.skin === 'sand') {
+        const sand = def.skin === 'sand';
+        const tex = sand
+          ? (this._sandTex ??= g.textureFromCanvas(sandCanvas(), { repeat: true }))
+          : (this._dirtTex ??= g.textureFromCanvas(dirtCanvas(), { repeat: true }));
+        const floor = g.textured(tex, { tint: g.color(sand ? '#f2b15c' : '#c4a06a', 1.08) });
         floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
         floor.update();
-        g.prim('box', g.solid('#6b4a28', { mul: 0.9 }), { parent: this.root, pos: [cx, a.max.y - 0.1, cz], scale: [w, 0.16, d], name: def.id });
+        g.prim('box', g.solid(sand ? '#c47a32' : '#6b4a28', { mul: 0.9 }), { parent: this.root, pos: [cx, a.max.y - 0.1, cz], scale: [w, 0.16, d], name: def.id });
         g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - 0.02, cz], scale: [w + 0.08, 0.05, d + 0.08], name: `${def.id}-piso` });
         return;
       }
@@ -263,7 +280,8 @@ export class LevelView {
   _sweeper(s) {
     const g = this.gfx;
     const vine = this.theme === 'jungle';
-    const danger = g.solid(vine ? 'leaf' : 'danger', { gloss: vine ? 0.25 : 0.5, mul: vine ? 0.7 : 1 });
+    const desert = this.theme === 'desert';
+    const danger = g.solid(desert ? '#c48a4a' : vine ? 'leaf' : 'danger', { gloss: vine ? 0.25 : 0.35, mul: vine || desert ? 0.85 : 1 });
     g.prim('cylinder', vine ? g.solid('trunk', { mul: 0.7 }) : danger, { parent: this.root, pos: [s.x, s.top + 0.55, s.z], scale: [0.6, 1.1, 0.6], name: 'pilar' });
     g.prim('sphere', g.solid(vine ? 'leaf' : 'ui', { mul: vine ? 0.85 : 1 }), { parent: this.root, pos: [s.x, s.top + 1.15, s.z], scale: [0.5, 0.5, 0.5] });
     const pivot = g.group('rodillo', this.root, [s.x, s.top + s.armHeight, s.z]);
@@ -443,6 +461,7 @@ export class LevelView {
     }
     this._assets.clear();
     this.water?.destroy();
+    this.desert?.destroy?.();
   }
 
   /** Baranda baja detrás del inicio. El choque sigue más arriba para que no la salten. */
@@ -465,13 +484,24 @@ export class LevelView {
 
   _sign(s) {
     const g = this.gfx;
-    const post = s.post ?? 1.6;
+    const post = s.post ?? 1.45;
     const group = g.group('cartel', this.root, [s.x, s.top, s.z]);
-    group.setLocalEulerAngles(0, s.x < -6 ? 25 : s.x < 0 ? 12 : -12, 0);
-    for (const side of s.w > 4 ? [-1, 1] : [0]) {
-      g.prim('box', g.solid('trunk'), { parent: group, pos: [side * s.w * 0.35, post / 2, -0.06], scale: [0.14, post, 0.14] });
+    const yaw = s.yaw ?? (s.x < -6 ? 20 : s.x < 0 ? 16 : s.x > 0 ? -16 : 0);
+    group.setLocalEulerAngles(0, yaw, 0);
+    // Un poste redondo, igual en todos: base, palo y casquillo. El tablero apoya encima.
+    if (post > 0) {
+      const wood = g.solid('#7a5233', { gloss: 0.14 });
+      const dark = g.solid('#4e3422', { gloss: 0.08 });
+      const sides = s.w > 4 ? [-1, 1] : [0];
+      for (const side of sides) {
+        const x = side * s.w * 0.38;
+        g.prim('cylinder', dark, { parent: group, pos: [x, 0.05, -0.02], scale: [0.36, 0.1, 0.36], name: 'base' });
+        g.prim('cylinder', wood, { parent: group, pos: [x, post / 2, -0.02], scale: [0.18, post, 0.18], name: 'poste' });
+        g.prim('cylinder', dark, { parent: group, pos: [x, post - 0.03, -0.02], scale: [0.26, 0.07, 0.26], name: 'casquillo' });
+      }
     }
-    const board = g.prim('box', g.solid('#ffffff'), { parent: group, pos: [0, post + s.h / 2, 0], scale: [s.w, s.h, 0.08], name: 'tablero' });
+    const lift = post > 0 ? post + s.h / 2 : s.h / 2 + 0.06;
+    const board = g.prim('box', g.solid('#ffffff'), { parent: group, pos: [0, lift, 0], scale: [s.w, s.h, 0.08], name: 'tablero' });
     const canvasTex = g.textureFromCanvas(signCanvas(s.text, { style: s.style, aspect: s.w / s.h, palette: g.palette }));
     board.render.material = g.textured(canvasTex);
     if (s.art) this._applyArtTexture(board, s.art);
@@ -518,6 +548,17 @@ export class LevelView {
       else if (p.type === 'hut') hut(P, this.root, [p.x, p.top, p.z]);
       else if (p.type === 'totem') totem(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 2.6 });
       else if (p.type === 'bush') bush(P, this.root, [p.x, p.top, p.z], p.size ?? 0.8, rand);
+      else if (p.type === 'cactus') cactus(P, this.root, [p.x, p.top, p.z], { h: p.h ?? 1.7, yaw: p.yaw ?? 0 });
+      else if (p.type === 'pot') clayPot(P, this.root, [p.x, p.top, p.z], { h: p.h ?? 1.5 });
+      else if (p.type === 'deadTree') deadTree(P, this.root, [p.x, p.top, p.z], { h: p.h ?? 3.2, yaw: p.yaw ?? 0 });
+      else if (p.type === 'arch') stoneArch(P, this.root, [p.x, p.top, p.z], { w: p.w ?? 4.6, h: p.h ?? 3.6 });
+      else if (p.type === 'lamp') lampPost(P, this.root, [p.x, p.top, p.z]);
+      else if (p.type === 'rock' && this.theme === 'desert') {
+        const s = p.size ?? 1.4;
+        P.ball(this.root, g.solid('#c45a3a', { gloss: 0.08 }), [p.x, p.top + s * 0.35, p.z], [s * 1.4, s * 0.9, s], { name: 'roca' });
+        P.ball(this.root, g.solid('#8d3d32'), [p.x + s * 0.4, p.top + s * 0.2, p.z + 0.2], [s * 0.8, s * 0.55, s * 0.7], { name: 'roca' });
+      }
+      else if (p.type === 'mine') mineMouth(P, this.root, [p.x, p.top, p.z], { yaw: p.yaw ?? 180 });
       else if (p.type === 'cliff') cliff(P, this.root, [p.x, p.top, p.z], { h: p.height ?? 3.2, w: p.w ?? 2.2, d: p.d ?? 8 });
     }
   }
@@ -633,11 +674,28 @@ export class LevelView {
     this.shards.length = 0;
   }
 
+  /** Cactus del laberinto. Los hostiles se estiran cuando pinchan (lo marca la sim). */
+  _mazeCacti(list) {
+    this.pokers = [];
+    if (!list?.length) return;
+    const P = (this.parts ??= new Parts(this.gfx));
+    for (const c of list) {
+      const e = cactus(P, this.root, [c.x, 0.88, c.z], {
+        h: c.h ?? (c.kind === 'barrel' ? 0.7 : c.kind === 'pear' ? 1.05 : c.hostile ? 2.5 : 2.8),
+        yaw: c.yaw ?? c.x * 12,
+        hostile: !!c.hostile,
+        kind: c.kind ?? 'saguaro',
+      });
+      this.pokers.push(e);
+    }
+  }
+
   // ------------------------------------------------------------------ frame
 
   update(dt, time, game, camPos) {
     this.water?.update(time, camPos);
     this.valley?.update(time);
+    this.desert?.update(time);
     this.sky.setPosition(camPos.x, this.land ? (this.groundY ?? 0.8) : this.waterY, camPos.z);
     for (const f of this.floating) {
       f.e.setPosition(f.s.x, f.s.top + Math.sin(time * 1.1 + f.phase) * 0.06, f.s.z);
@@ -662,6 +720,16 @@ export class LevelView {
     }
     for (const f of this.bobbing) f.e.setLocalPosition(f.x, f.y + Math.sin(time * 1.2 + f.phase) * 0.05, f.z);
     for (const f of this.swingers) f.e.setLocalEulerAngles(Math.sin(time * 1.5 + f.phase) * 16, f.yaw, 0);
+    const plants = game.cacti?.plants;
+    if (plants && this.pokers) {
+      for (let i = 0; i < this.pokers.length; i++) {
+        const lung = plants[i]?.lunge ?? 0;
+        const sway = Math.sin(time * 1.15 + i) * 1.6;
+        const k = 1 + lung * 2.4;
+        this.pokers[i].setLocalScale(k, 1 + lung * 0.2, k);
+        this.pokers[i].setLocalEulerAngles(sway + Math.sin(time * 26) * lung * 16, 0, sway * 0.35);
+      }
+    }
 
     const grav = 24;
     for (const s of this.shards) {

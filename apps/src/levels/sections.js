@@ -336,6 +336,13 @@ export const SCENERY_SETS = {
     'nature/tree_default', 'nature/tree_tall', 'nature/tree_oak', 'nature/tree_fat', 'nature/tree_detailed',
     'nature/plant_bush', 'nature/plant_bushLarge', 'nature/log_large', 'nature/stump_round', 'nature/grass', 'nature/grass_large',
   ],
+  desert: [
+    'nature/rock_largeA', 'nature/rock_largeB', 'nature/rock_tallA', 'nature/rock_tallB', 'nature/rock_smallA',
+    'nature/stone_largeA', 'nature/stone_tallA', 'nature/stone_tallB',
+    'nature/pot_large', 'nature/pot_small', 'nature/log', 'nature/log_large', 'nature/stump_round',
+    'nature/tent_detailedOpen', 'nature/campfire_stones', 'nature/fence_simple',
+    'town/lantern', 'town/banner-red', 'town/cart', 'town/rock-small',
+  ],
 };
 const SCENERY_BIG = new Set(['castle-wall', 'castle-window', 'castle-door', 'castle-gate', 'tower-base', 'tower-middle-windows', 'tower-watch', 'tower-complete-small', 'tower-complete-large', 'structure']);
 const SHIPS = ['ship-large', 'ship-pirate-large', 'ship-medium', 'ship-pirate-medium', 'ship-small', 'ship-pirate-small', 'ship-ghost', 'ship-wreck'];
@@ -470,6 +477,13 @@ function jungleScale(art, r) {
   if (art.startsWith('nature/statue_head')) return 3.15 + r() * 0.45;
   if (art.startsWith('nature/statue_')) return 2.7 + r() * 0.55;
   if (/nature\/(rock_large|rock_tall|stone_tall|stone_large)/.test(art)) return 2.3 + r() * 0.9;
+  if (art.includes('tent')) return 2.2 + r() * 0.25;
+  if (art.includes('campfire')) return 2.6 + r() * 0.35;
+  if (/nature\/pot_/.test(art)) return 2.05 + r() * 0.45;
+  if (art.includes('lantern')) return 1.12 + r() * 0.18;
+  if (art.includes('banner')) return 1.5 + r() * 0.25;
+  if (art.includes('cart')) return 1.35 + r() * 0.2;
+  if (art.includes('fence')) return 1.7 + r() * 0.3;
   if (art.startsWith('nature/plant_bush')) return 2.35 + r() * 0.9;
   if (/nature\/(grass|flower_|mushroom_|crops_)/.test(art)) return 1.65 + r() * 0.7;
   if (/nature\/(log|stump_)/.test(art)) return 1.85 + r() * 0.45;
@@ -530,6 +544,54 @@ export function dressBanks(level, { set = 'village', seed = 1, ground = 0.88, ke
         if (crowded(x, z, rad)) continue;
         const motion = /grass|flower_|mushroom_/.test(art) ? 'sway' : undefined;
         out.push({ art, x: round(x), z: round(z), top, yaw: Math.round(r() * 360), s: round(s), ...(motion ? { motion } : {}) });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Props Kenney en el borde de un camino de arena, como las palmeras del muelle.
+ * El pasillo central queda libre. Las tiendas y el carro solo caben en plazas anchas.
+ */
+export function dressPathRim(level, { set = 'desert', seed = 21, lane = 2.05, keepOut = [] } = {}) {
+  const arts = SCENERY_SETS[set];
+  if (!arts) throw new Error(`[dressPathRim] set "${set}" no existe`);
+  const r = rng(seed);
+  const zones = [...keepOut];
+  for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.7 });
+  for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: 1.4 });
+  for (const c of level.cacti ?? []) zones.push({ x: c.x, z: c.z, r: 1.05 });
+  if (level.goal) zones.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 1.2, d: level.goal.d + 1.2 });
+  const spawn = level.spawn;
+  if (spawn?.p1) zones.push({ x: 0, z: spawn.p1.z, w: 3.6, d: 3.2 });
+
+  const out = [];
+  for (const p of level.platforms) {
+    if (p.kind || p.w < 7.4) continue;
+    const half = p.w / 2 - 0.4;
+    if (half - lane < 0.4) continue;
+    const step = 3.05;
+    for (const side of [-1, 1]) {
+      for (let z = p.z + p.d / 2 - 0.7 - r() * 1.1; z > p.z - p.d / 2 + 0.7; z -= step * (0.72 + r() * 0.5)) {
+        const art = arts[Math.floor(r() * arts.length)];
+        if ((art.includes('tent') || art.includes('cart')) && p.w < 10) continue;
+        const s = jungleScale(art, r);
+        const yaw = Math.round(r() * 360);
+        let x = p.x + side * (lane + 0.4 + r() * Math.max(0.15, half - lane - 0.25));
+        if (blockedBy(zones, x, z)) continue;
+        const col = propCollider({ art, x, z, top: p.top, yaw, s });
+        if (col) {
+          const near = side < 0 ? p.x - col.max.x : col.min.x - p.x;
+          const far = side < 0 ? p.x - col.min.x : col.max.x - p.x;
+          const shift = Math.max(0, lane - near);
+          if (far + shift > p.w / 2 + 0.35) continue;
+          x += side * shift;
+          if (blockedBy(zones, x, z)) continue;
+        }
+        const motion = art.includes('banner') ? 'sway' : art.includes('campfire') ? 'fire' : undefined;
+        out.push({ art, x: round(x), z: round(z), top: p.top, yaw, s: round(s), ...(motion ? { motion } : {}) });
+        zones.push({ x, z, r: 1.15 });
       }
     }
   }

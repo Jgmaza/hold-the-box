@@ -312,6 +312,170 @@ export function totem(P, parent, pos, { h = 2.6 } = {}) {
   return root;
 }
 
+/** Cactus low-poly. `kind`: saguaro, barril o nopal. El hostil lleva espinas rojas. */
+export function cactus(P, parent, pos, { h = 2.4, yaw = 0, hostile = false, kind = 'saguaro' } = {}) {
+  if (kind === 'barrel') return barrelCactus(P, parent, pos, { h, yaw, hostile });
+  if (kind === 'pear') return pearCactus(P, parent, pos, { h, yaw, hostile });
+  const g = P.gfx;
+  const root = P.group('cactus', parent, pos, [0, yaw, 0]);
+  const body = g.solid(hostile ? '#2a6f32' : '#3a8f42', { gloss: 0.18 });
+  const dark = g.solid(hostile ? '#1a4a22' : '#245c2c', { gloss: 0.1 });
+  const rib = g.solid(hostile ? '#1c5524' : '#2a7034', { gloss: 0.14 });
+  const spine = g.solid(hostile ? '#e23b32' : '#e8eec8', { gloss: 0.35 });
+  const bloom = g.solid(hostile ? '#e23b32' : '#f2c14d', { gloss: 0.45 });
+  P.ball(root, g.solid('#d4a05a', { gloss: 0.04 }), [0, 0.04, 0], [0.95, 0.14, 0.95], { shadows: false, name: 'monton' });
+  g.prim('cylinder', dark, { parent: root, pos: [0, h * 0.08, 0], scale: [0.5, h * 0.16, 0.5], name: 'base' });
+  g.prim('cylinder', body, { parent: root, pos: [0, h * 0.5, 0], scale: [0.46, h, 0.46], name: 'tronco' });
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    g.prim('cylinder', rib, {
+      parent: root,
+      pos: [Math.cos(a) * 0.2, h * 0.5, Math.sin(a) * 0.2],
+      scale: [0.07, h * 0.96, 0.07],
+      name: 'costilla',
+    });
+  }
+  g.prim('sphere', body, { parent: root, pos: [0, h, 0], scale: [0.42, 0.26, 0.42], name: 'punta' });
+  g.prim('sphere', bloom, { parent: root, pos: [0, h + 0.12, 0], scale: [0.14, 0.1, 0.14], name: 'flor' });
+  const arms = [
+    { s: -1, y: h * 0.38, up: h * 0.4, yaw: 8 },
+    { s: 1, y: h * 0.58, up: h * 0.48, yaw: -6 },
+    { s: -1, y: h * 0.72, up: h * 0.22, yaw: 95 },
+  ];
+  for (const arm of arms) {
+    g.prim('sphere', body, { parent: root, pos: [arm.s * 0.2, arm.y, 0], scale: [0.26, 0.2, 0.26], name: 'codo' });
+    g.prim('cylinder', body, { parent: root, pos: [arm.s * 0.32, arm.y, 0], rot: [0, arm.yaw, 76 * arm.s], scale: [0.2, 0.52, 0.2], name: 'brazo' });
+    g.prim('cylinder', body, { parent: root, pos: [arm.s * 0.58, arm.y + arm.up * 0.48, 0], scale: [0.18, arm.up, 0.18], name: 'brazo' });
+    g.prim('sphere', body, { parent: root, pos: [arm.s * 0.58, arm.y + arm.up, 0], scale: [0.2, 0.14, 0.2], name: 'punta' });
+    g.prim('cylinder', spine, { parent: root, pos: [arm.s * 0.74, arm.y + arm.up * 0.55, 0], rot: [0, 0, 58 * arm.s], scale: [0.035, 0.2, 0.035], name: 'espina' });
+  }
+  if (hostile) {
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      g.prim('cylinder', spine, {
+        parent: root,
+        pos: [Math.cos(a) * 0.24, h * 0.55, Math.sin(a) * 0.24],
+        rot: [68, (a * 180) / Math.PI, 0],
+        scale: [0.03, 0.2, 0.03],
+        name: 'espina',
+      });
+    }
+  }
+  return root;
+}
+
+function barrelCactus(P, parent, pos, { h = 0.7, yaw = 0, hostile = false }) {
+  const g = P.gfx;
+  const root = P.group('barril', parent, pos, [0, yaw, 0]);
+  const body = g.solid(hostile ? '#2f7a38' : '#48a050', { gloss: 0.22 });
+  const rib = g.solid('#245c30', { gloss: 0.12 });
+  const bloom = g.solid(hostile ? '#e23b32' : '#f0c14a', { gloss: 0.4 });
+  P.ball(root, g.solid('#d4a05a', { gloss: 0.04 }), [0, 0.03, 0], [h * 1.5, 0.1, h * 1.5], { shadows: false, name: 'monton' });
+  g.prim('sphere', body, { parent: root, pos: [0, h * 0.48, 0], scale: [h * 1.2, h, h * 1.2], name: 'cuerpo' });
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    g.prim('cylinder', rib, {
+      parent: root,
+      pos: [Math.cos(a) * h * 0.46, h * 0.48, Math.sin(a) * h * 0.46],
+      scale: [0.045, h * 0.88, 0.045],
+      name: 'costilla',
+    });
+  }
+  g.prim('sphere', bloom, { parent: root, pos: [0, h * 0.98, 0], scale: [0.15, 0.1, 0.15], name: 'flor' });
+  g.prim('sphere', bloom, { parent: root, pos: [0.1, h * 0.92, 0.08], scale: [0.08, 0.06, 0.08], name: 'flor' });
+  return root;
+}
+
+function pearCactus(P, parent, pos, { h = 1.1, yaw = 0, hostile = false }) {
+  const g = P.gfx;
+  const root = P.group('nopal', parent, pos, [0, yaw, 0]);
+  const pad = g.solid(hostile ? '#2a6e32' : '#3d9a44', { gloss: 0.16 });
+  const fruit = g.solid(hostile ? '#e23b32' : '#d24a3a', { gloss: 0.35 });
+  P.ball(root, g.solid('#d4a05a', { gloss: 0.04 }), [0, 0.03, 0], [0.7, 0.1, 0.7], { shadows: false, name: 'monton' });
+  g.prim('sphere', pad, { parent: root, pos: [0, h * 0.32, 0], scale: [0.58, h * 0.68, 0.15], name: 'pala' });
+  g.prim('sphere', pad, { parent: root, pos: [-0.3, h * 0.82, 0], scale: [0.44, h * 0.5, 0.13], rot: [0, 0, 28], name: 'pala' });
+  g.prim('sphere', pad, { parent: root, pos: [0.34, h * 0.76, 0], scale: [0.4, h * 0.46, 0.13], rot: [0, 0, -22], name: 'pala' });
+  g.prim('sphere', pad, { parent: root, pos: [0.08, h * 1.12, 0.02], scale: [0.28, h * 0.32, 0.1], rot: [0, 0, 8], name: 'pala' });
+  g.prim('sphere', fruit, { parent: root, pos: [0.42, h * 0.95, 0.04], scale: [0.08, 0.07, 0.08], name: 'tuna' });
+  return root;
+}
+
+/** Farol del campamento. Solo se ve. */
+export function lampPost(P, parent, pos) {
+  const g = P.gfx;
+  const root = P.group('farol', parent, pos);
+  g.prim('cylinder', g.solid('#6d767e', { gloss: 0.45 }), { parent: root, pos: [0, 1.15, 0], scale: [0.09, 2.3, 0.09], name: 'poste' });
+  g.prim('cylinder', g.solid('#8d97a0', { gloss: 0.4 }), { parent: root, pos: [0, 0.04, 0], scale: [0.22, 0.08, 0.22], name: 'base' });
+  g.prim('box', g.solid('#4c545c', { gloss: 0.32 }), { parent: root, pos: [0, 2.38, 0], scale: [0.32, 0.1, 0.32], name: 'techo' });
+  g.prim('box', g.solid('#ffe7a0', { unlit: true }), { parent: root, pos: [0, 2.22, 0], scale: [0.2, 0.22, 0.2], shadows: false, name: 'luz' });
+  g.prim('box', g.solid('#2a3036', { gloss: 0.25 }), { parent: root, pos: [0, 2.22, 0], scale: [0.28, 0.24, 0.04], name: 'marco' });
+  g.prim('box', g.solid('#2a3036', { gloss: 0.25 }), { parent: root, pos: [0, 2.22, 0], scale: [0.04, 0.24, 0.28], name: 'marco' });
+  return root;
+}
+
+/** Tinaja de barro rojo, semienterrada. Solo se ve. */
+export function clayPot(P, parent, pos, { h = 1.5 } = {}) {
+  const g = P.gfx;
+  const root = P.group('tinaja', parent, pos);
+  const clay = g.solid('#c24a32', { gloss: 0.16 });
+  const dark = g.solid('#8d3224', { gloss: 0.1 });
+  const lip = g.solid('#e06a48', { gloss: 0.2 });
+  P.ball(root, g.solid('#c4894a', { gloss: 0.04 }), [0, 0.04, 0], [h * 0.7, 0.1, h * 0.7], { shadows: false, name: 'arena' });
+  g.prim('sphere', clay, { parent: root, pos: [0, h * 0.3, 0], scale: [h * 0.88, h * 0.72, h * 0.88], name: 'panza' });
+  g.prim('cylinder', dark, { parent: root, pos: [0, h * 0.58, 0], scale: [h * 0.36, h * 0.16, h * 0.36], name: 'cintura' });
+  g.prim('cylinder', clay, { parent: root, pos: [0, h * 0.7, 0], scale: [h * 0.44, h * 0.22, h * 0.44], name: 'cuello' });
+  g.prim('cylinder', lip, { parent: root, pos: [0, h * 0.82, 0], scale: [h * 0.58, h * 0.08, h * 0.58], name: 'boca' });
+  g.prim('cylinder', dark, { parent: root, pos: [0, h * 0.8, 0], scale: [h * 0.4, h * 0.04, h * 0.4], name: 'hueco' });
+  return root;
+}
+
+/** Árbol seco retorcido. Solo se ve. */
+export function deadTree(P, parent, pos, { h = 3.2, yaw = 0 } = {}) {
+  const g = P.gfx;
+  const root = P.group('seco', parent, pos, [0, yaw, 0]);
+  const wood = g.solid('#6b5344', { gloss: 0.07 });
+  const dark = g.solid('#4a382e', { gloss: 0.05 });
+  P.ball(root, g.solid('#c4894a', { gloss: 0.04 }), [0, 0.05, 0], [0.7, 0.12, 0.7], { shadows: false, name: 'arena' });
+  g.prim('cylinder', wood, { parent: root, pos: [0.08, h * 0.36, 0], rot: [0, 0, 10], scale: [0.26, h * 0.72, 0.26], name: 'tronco' });
+  g.prim('cylinder', dark, { parent: root, pos: [0.48, h * 0.74, 0.12], rot: [18, 28, 50], scale: [0.1, h * 0.48, 0.1], name: 'rama' });
+  g.prim('cylinder', wood, { parent: root, pos: [-0.42, h * 0.64, -0.12], rot: [-14, -22, -52], scale: [0.09, h * 0.42, 0.09], name: 'rama' });
+  g.prim('cylinder', dark, { parent: root, pos: [0.18, h * 0.94, -0.22], rot: [38, 12, 16], scale: [0.07, h * 0.34, 0.07], name: 'rama' });
+  g.prim('cylinder', wood, { parent: root, pos: [-0.12, h * 0.88, 0.28], rot: [-30, 40, -20], scale: [0.06, h * 0.28, 0.06], name: 'rama' });
+  g.prim('sphere', dark, { parent: root, pos: [0.62, h * 0.96, 0.22], scale: [0.08, 0.08, 0.08], name: 'nudo' });
+  return root;
+}
+
+/** Arco de piedra. Solo se ve. */
+export function stoneArch(P, parent, pos, { w = 4.2, h = 3.4 } = {}) {
+  const g = P.gfx;
+  const root = P.group('arco', parent, pos);
+  const rock = g.solid('#d2643f', { gloss: 0.08 });
+  const dark = g.solid('#a84432', { gloss: 0.06 });
+  const cap = g.solid('#e2b06a', { gloss: 0.05 });
+  g.prim('box', rock, { parent: root, pos: [-w * 0.38, h * 0.34, 0], scale: [0.78, h * 0.68, 0.78], name: 'pilar' });
+  g.prim('box', rock, { parent: root, pos: [w * 0.38, h * 0.34, 0], scale: [0.78, h * 0.68, 0.78], name: 'pilar' });
+  g.prim('box', dark, { parent: root, pos: [-w * 0.38, h * 0.08, 0], scale: [0.92, 0.18, 0.92], name: 'basa' });
+  g.prim('box', dark, { parent: root, pos: [w * 0.38, h * 0.08, 0], scale: [0.92, 0.18, 0.92], name: 'basa' });
+  g.prim('box', dark, { parent: root, pos: [0, h * 0.74, 0], scale: [w, 0.42, 0.86], name: 'dintel' });
+  g.prim('sphere', rock, { parent: root, pos: [0, h * 0.94, 0], scale: [w * 0.52, 0.62, 0.86], name: 'clave' });
+  g.prim('box', cap, { parent: root, pos: [0, h * 1.08, 0], scale: [w * 0.7, 0.16, 0.7], name: 'arena' });
+  return root;
+}
+
+/** Boca de mina: arco de madera y un hueco oscuro. Solo se ve. */
+export function mineMouth(P, parent, pos, { yaw = 0 } = {}) {
+  const g = P.gfx;
+  const root = P.group('mina', parent, pos, [0, yaw, 0]);
+  const wood = g.solid('#a56b3c', { mul: 0.9 });
+  const dark = g.solid('#1a120e', { mul: 0.4 });
+  g.prim('box', dark, { parent: root, pos: [0, 1.15, -0.2], scale: [2.2, 2.1, 0.6], name: 'boca' });
+  g.prim('box', wood, { parent: root, pos: [-1.25, 1.2, 0], scale: [0.28, 2.5, 0.28], name: 'poste' });
+  g.prim('box', wood, { parent: root, pos: [1.25, 1.2, 0], scale: [0.28, 2.5, 0.28], name: 'poste' });
+  g.prim('box', wood, { parent: root, pos: [0, 2.45, 0], scale: [2.8, 0.28, 0.36], name: 'dintel' });
+  g.prim('box', g.solid('#e8c36a', { gloss: 0.15 }), { parent: root, pos: [0, 2.85, 0.05], scale: [1.6, 0.55, 0.08], name: 'letrero' });
+  return root;
+}
+
 /** Pared de risco (solo se ve). */
 export function cliff(P, parent, pos, { h = 3.2, w = 2.2, d = 8 } = {}) {
   const g = P.gfx;

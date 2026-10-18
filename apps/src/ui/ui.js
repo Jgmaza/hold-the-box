@@ -58,6 +58,11 @@ const NPC_HIT_JUNGLE = {
   medium: ['¡El mono tiró agua!', 'wet'],
   hard: ['¡El jaguar! Contenido y agua', 'bad'],
 };
+const NPC_HIT_DESERT = {
+  easy: ['¡El aprendiz picó! Se botó contenido', 'bad'],
+  medium: ['¡El minero tiró agua!', 'wet'],
+  hard: ['¡El coyote! Contenido y agua', 'bad'],
+};
 const NPC_HIT_VILLAGE = {
   easy: ['¡El niño del pueblo! Se botó contenido', 'bad'],
   medium: ['¡El aldeano tiró agua!', 'wet'],
@@ -83,6 +88,7 @@ export class UI {
     this.bombMode = CONFIG.box.bomb.enabled;
     this.catMode = CONFIG.box.cat.enabled;
     this.jungle = game.world?.level?.theme === 'jungle';
+    this.desert = game.world?.level?.theme === 'desert';
     this.village = game.world?.level?.biome === 'village';
     if (this.bombMode) this._setupBombHud();
     else if (this.catMode) this._setupCatHud();
@@ -246,7 +252,7 @@ export class UI {
       this.flash('integrity');
     });
     ev.on('geyser:hit', () => this.toast(this.bombMode ? '¡El agua daña la bomba!' : this.jungle ? '¡Vapor! Se moja la caja!' : '¡Se moja la caja!', 'wet'));
-    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
+    ev.on('npc:hit', (e) => !this.bombMode && this.toast(...(this.village ? NPC_HIT_VILLAGE : this.desert ? NPC_HIT_DESERT : this.jungle ? NPC_HIT_JUNGLE : NPC_HIT)[e.difficulty]));
     ev.on('weather:warn', (e) => !this.game.weather.sheltered && this.toast(...WEATHER_WARN[e.type](e.dir)));
     ev.on('weather:shelter', (e) => {
       const phase = this.game.weather.current?.phase;
@@ -261,6 +267,10 @@ export class UI {
       this.flash('integrity');
     });
     ev.on('box:wet', () => !this.bombMode && this.flash('wetness'));
+    ev.on('cactus:poke', () => {
+      this.toast('¡El cactus pinchó la caja!', 'bad');
+      this.flash('integrity');
+    });
     ev.on('player:jump', (e) => {
       const now = this.game.time;
       this._lastJump[e.player] = now;
@@ -326,9 +336,11 @@ export class UI {
     const y = Math.max(-1, Math.min(1, b.tilt.pitch / max)) * R;
     this.$('.level .dot').style.transform = `translate(${x}px, ${y}px)`;
     const lvl = this.$('.level');
-    if (lvl.dataset.state !== b.state) {
-      lvl.dataset.state = b.state;
-      this.$('.level .state').textContent = STATE_LABEL[b.state];
+    const poked = g.state === 'playing' && g.cacti?.near && b.state !== 'critical';
+    const state = poked ? 'danger' : b.state;
+    if (lvl.dataset.state !== state) {
+      lvl.dataset.state = state;
+      this.$('.level .state').textContent = poked ? 'PELIGRO' : STATE_LABEL[b.state];
     }
 
     const warn = g.state === 'playing' && b.state === 'critical';
