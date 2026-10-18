@@ -36,6 +36,10 @@ export class Box {
     return CONFIG.box.bomb.enabled && !!this.bomb;
   }
 
+  get catMode() {
+    return CONFIG.box.cat.enabled;
+  }
+
   reset({ integrity = 100, wetness = 0 } = {}) {
     this.integrity = integrity;
     this.wetness = wetness;
@@ -206,6 +210,13 @@ export class Box {
       // Sin huequito ni mojado: el viento y el agua que caen encima dañan la bomba.
       this.leakRate = 0;
       if (this.invuln <= 0) this.bomb.drain((ext.drain + this.wetRate * CONFIG.box.bomb.wetFactor) * dt);
+      if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
+      return;
+    }
+
+    if (this.catMode) {
+      // Sin huequito: el % solo baja por golpes y por el zarpazo (como la bomba).
+      this.leakRate = 0;
       if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
       return;
     }

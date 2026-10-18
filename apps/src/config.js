@@ -91,14 +91,15 @@ export const CONFIG = {
       desyncMul: 2.5, // separados o inclinados
       warnRage: 16, // asoma la pata (~9 s juntos, ~3 s separados)
       scratchRage: 22, // primer arañazo (~12 s juntos, ~4 s separados)
-      damageRage: 55, // a partir de aquí también baja la integridad
-      chipPerSec: 1.2, // % de contenido por segundo en esa etapa
+      scratchDamage: 12, // % que quita cada zarpazo (como un golpe de la bomba)
+      damageRage: 55, // si chipPerSec > 0, a partir de aquí también baja despacio
+      chipPerSec: 0, // el daño viene del zarpazo, no del reloj
       swipeHold: 0.7, // un zarpazo: sale, se queda y vuelve (la vista lee esto)
       cooldown: 6.5, // pausa entre arañazos; la rabia no se reinicia
-      knock: 3.4, // empujón horizontal al jugador arañado (m/s)
-      knockUp: 1.1,
-      controlTime: 0.45, // segundos con poco control tras el arañazo
-      kick: 240, // golpe angular a la caja hacia ese lado (grados/s)
+      knock: 4.2, // empujón horizontal al jugador arañado (m/s)
+      knockUp: 1.3,
+      controlTime: 0.6, // segundos con poco control tras el arañazo
+      kick: 380, // golpe angular a la caja hacia ese lado (grados/s)
       goalLead: 10, // metros antes de la meta (la terraza) donde aprieta
       hurrySpeed: 1.4, // m/s hacia la meta; por debajo cuenta como quedarse
       goalDrainPerSec: 20, // % de contenido por segundo si se quedan en ese tramo
@@ -289,12 +290,18 @@ export const CONFIG = {
   debug: {
     godMode: false, // sin derrotas (para probar el nivel)
   },
+
+  // Mezcla del jugador. 0 = silencio. Se guarda en el navegador (audioPrefs.js).
+  audio: {
+    music: 0.8,
+    sfx: 1,
+  },
 };
 
 /** Las cajas que se pueden elegir antes de empezar. */
 export const BOX_CHOICES = [
   { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
-  { id: 'gato', name: 'Caja del gato', blurb: 'Se ve el gato. Si se separan, saca las garras.' },
+  { id: 'gato', name: 'Caja del gato', blurb: 'Cada zarpazo rompe la caja. Si no atienden, se vacía.' },
   { id: 'bomba', name: 'Caja bomba', blurb: 'Golpes, agua y desorden la dañan. En 0 %, explota.' },
 ];
 

@@ -3,6 +3,7 @@
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
 import { CHARACTERS, character } from '../view/characters.js';
+import { SPEAKER_HTML, VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import { ArcadeOverlay } from './arcade.js';
 import { MenuState } from './menuState.js';
 import './theme.css';
@@ -29,12 +30,14 @@ export class Menu {
   /**
    * @param {HTMLElement} root
    * @param {{ stage: import('../view/menuStage.js').MenuStage, maps: object[], palette: object,
-   *           initial?: object, onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
+   *           initial?: object, audio?: import('../view/audio.js').GameAudio,
+   *           onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
    */
-  constructor(root, { stage, maps, palette, initial, onStart }) {
+  constructor(root, { stage, maps, palette, initial, onStart, audio = null }) {
     this.root = root;
     this.stage = stage;
     this.onStart = onStart;
+    this.audio = audio;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box', 'p2']) root.style.setProperty(`--${k}`, palette[k]);
     this.state = new MenuState({ maps, boxes: BOX_CHOICES, characters: CHARACTERS, initial });
     this.homeFocus = 0;
@@ -48,6 +51,7 @@ export class Menu {
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
+    bindVolumeSliders(this.root, () => this.audio?.applyMix());
     selectBox(this.state.box);
     this._syncStage(true);
     this.show(true);
@@ -120,6 +124,7 @@ export class Menu {
     else if (act === 'close') this.overlay = false;
     else if (act === 'back') s.back();
     else if (act === 'next') s.go('chars');
+    else if (act === 'audio') return;
     else if (act === 'fullscreen') {
       if (document.fullscreenElement) document.exitFullscreen?.();
       else document.documentElement.requestFullscreen?.().catch(() => {});
@@ -350,6 +355,10 @@ const TEMPLATE = /* html */ `
           ${padCard('p2', 'Jugador 2', ['', '↑', '', '←', '↓', '→'], 'Enter')}
         </div>
         <section class="m-section">
+          <h3>Audio</h3>
+          ${VOLUME_SLIDERS_HTML}
+        </section>
+        <section class="m-section">
           <h3>En partida</h3>
           <div class="m-chips">
             <span class="m-chip"><kbd>P</kbd><kbd>Esc</kbd>Pausa</span>
@@ -394,4 +403,5 @@ const TEMPLATE = /* html */ `
     <div class="m-count"></div>
     <p class="m-hint m-chars-hint">Los dos en LISTO para arrancar</p>
   </section>
+  ${SPEAKER_HTML}
 `;

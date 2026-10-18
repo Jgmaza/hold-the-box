@@ -101,7 +101,14 @@
 .m-fullscreen {
   position: absolute;
   top: 20px;
+  right: 88px;
+}
+#menu > .spk {
+  top: 20px;
   right: 20px;
+}
+#menu > .spk .spk-pop {
+  top: calc(100% + 10px);
 }
 .m-credit {
   position: absolute;
