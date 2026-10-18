@@ -4,15 +4,17 @@ import { CONFIG } from '../config.js';
 import { mixVolume, slotKind } from './audioPrefs.js';
 import { AUDIO } from './deliveries.js';
 
-/** La selva (aldea) tiene su tema. El muelle se queda con el suyo. */
+/** La selva (aldea) y el desierto (campamento) tienen su tema. El muelle se queda con el suyo. */
 export function musicSlotFor(levelId) {
   if (levelId === 'aldea') return 'musica-selva';
+  if (levelId === 'campamento') return 'musica-desierto';
   return 'musica-loop';
 }
 
 const SLOTS = {
   'musica-loop': { volume: 1, loop: true },
   'musica-selva': { volume: 1, loop: true },
+  'musica-desierto': { volume: 1, loop: true },
   'sfx-salto': { volume: 0.6 },
   'sfx-inclinacion': { volume: 0.7 },
   'sfx-mojado': { volume: 0.7 },
@@ -68,7 +70,7 @@ export class GameAudio {
     this._resumeMusic();
   }
 
-  /** El loop del nivel. Si falta el archivo de la selva, sigue el del muelle. */
+  /** El loop del nivel. Si falta el archivo, sigue el del muelle. */
   useLevel(level) {
     const pick = musicSlotFor(level?.id);
     this._musicName = this.available.has(pick) ? pick : 'musica-loop';
@@ -84,7 +86,7 @@ export class GameAudio {
   }
 
   _stopMusic() {
-    for (const name of ['musica-loop', 'musica-selva']) this.stop(name);
+    for (const name of ['musica-loop', 'musica-selva', 'musica-desierto']) this.stop(name);
   }
 
   play(name) {
@@ -194,7 +196,7 @@ export class GameAudio {
     if (slot) slot.volume = this._level(name, 0.35 + 0.65 * zone.intensity);
   }
 
-  /** Conecta los eventos del juego con los sonidos. `level` elige el loop (selva o muelle). */
+  /** Conecta los eventos del juego con los sonidos. `level` elige el loop (selva, desierto o muelle). */
   bind(events, level) {
     this.useLevel(level);
     events.on('game:start', () => {
