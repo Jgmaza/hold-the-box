@@ -105,15 +105,16 @@ export const CONFIG = {
       goalRagePerSec: 12, // rabia extra mientras se quedan ahí
     },
 
-    // Bomba: la mecha corre siempre. Llegar a la meta la apaga. En cero, explota.
+    // Bomba: arranca al 100 % y no baja sola. Golpes, agua y falta de sincronía la dañan. En 0 %, explota.
+    // Con la bomba no hay mojado ni huequito.
     bomb: {
       enabled: false,
-      fuseTime: 90, // segundos para llegar
-      warnTime: 20, // a partir de aquí la chispa se apura y la caja se pone roja
-      // Con la bomba no hay mojado ni huequito: golpes y agua le quitan segundos a la mecha.
-      secondsPerDamage: 0.4, // por cada 1 % de golpe (rodillo 8 % → 3.2 s, cangrejo 4 % → 1.6 s)
-      secondsPerWet: 0.1, // por cada 1 % de agua (chorro del niño 14 % → 1.4 s, caer al agua 45 % → 4.5 s)
-      rating: { perfect: 0.5, ok: 0.2 }, // vida que les sobra al llegar (fracción de fuseTime)
+      warnHealth: 25, // desde aquí la chispa se apura, la caja palpita y avisa
+      // Golpes: el mismo % que le quitarían a la caja VIP (rodillo 8, aterrizaje fuerte 6+, cangrejo 4, perro 9).
+      wetFactor: 0.3, // agua: % de mojado × esto (caer al agua 45 → 13.5, chorro del niño 14 → 4.2)
+      desyncBelow: 0.5, // por debajo de esta sincronía la bomba se daña
+      desyncPerSec: 6, // % por segundo con sincronía 0 (uno contra el otro); caminar uno solo (0.35) ≈ 1.8 %/s
+      rating: { perfect: 85, ok: 50 }, // % de bomba que les sobra al llegar
     },
 
     // Se moja: más peso, menos agarre, menos estabilidad.
@@ -294,7 +295,7 @@ export const CONFIG = {
 export const BOX_CHOICES = [
   { id: 'vip', name: 'Caja VIP', blurb: 'Cartón frágil. La caja de siempre.' },
   { id: 'gato', name: 'Caja del gato', blurb: 'Se ve el gato. Si se separan, saca las garras.' },
-  { id: 'bomba', name: 'Caja bomba', blurb: 'Mecha de 90 s. Si no llegan, explota.' },
+  { id: 'bomba', name: 'Caja bomba', blurb: 'Golpes, agua y desorden la dañan. En 0 %, explota.' },
 ];
 
 /** Activa una caja. VIP no tiene gato ni mecha. */

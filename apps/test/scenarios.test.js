@@ -251,17 +251,41 @@ describe('gato', () => {
     expect(g.box.integrity).toBeGreaterThan(70);
   });
 
-  it('la bomba explota si se acaba la mecha', () => {
+  it('la bomba no pierde nada con el tiempo si van juntos y quietos', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    run(g, 5, IDLE, IDLE);
+    expect(g.bomb.health).toBe(100);
+    expect(g.state).toBe('playing');
+  });
+
+  it('la bomba explota cuando llega a 0 %', () => {
     selectBox('bomba');
     const g = playingGame();
     expect(g.cat.phase).toBe('calm');
-    g.bomb.timeLeft = 0.25;
+    g.bomb.health = 5;
     let boom = 0;
     g.events.on('bomb:explode', () => boom++);
+    g.box.damage(10, 'sweeper');
     run(g, 2, IDLE, IDLE);
     expect(boom).toBe(1);
     expect(g.failReason).toBe('exploded');
     expect(g.state).toBe('failed');
+  });
+
+  it('con la bomba, reintentar vuelve con el % que tenía en el checkpoint', () => {
+    selectBox('bomba');
+    const g = playingGame();
+    g.teleport(0);
+    g.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 62 };
+    g.bomb.health = 1;
+    g.box.damage(5, 'sweeper');
+    run(g, 2, IDLE, IDLE);
+    expect(g.failReason).toBe('exploded');
+    g.setInputs(jump(), IDLE);
+    expect(g.state).toBe('playing');
+    expect(g.bomb.health).toBe(62);
+    expect(g.bomb.exploded).toBe(false);
   });
 
   it('la bomba no explota si llegan a la meta', () => {
@@ -273,19 +297,32 @@ describe('gato', () => {
     expect(g.state).not.toBe('failed');
   });
 
-  it('con la bomba, golpes y agua le quitan segundos sin tocar contenido ni mojado', () => {
+  it('con la bomba, golpes y agua le quitan % sin tocar contenido ni mojado', () => {
     selectBox('bomba');
     const g = playingGame();
     const B = CONFIG.box.bomb;
     const hits = [];
     g.events.on('bomb:hit', (e) => hits.push(e));
-    const start = g.bomb.timeLeft;
     g.box.damage(10, 'sweeper');
     g.box.addWet(20, 'fall');
-    expect(g.bomb.timeLeft).toBeCloseTo(start - 10 * B.secondsPerDamage - 20 * B.secondsPerWet);
+    expect(g.bomb.health).toBeCloseTo(100 - 10 - 20 * B.wetFactor);
     expect(hits.map((h) => h.cause)).toEqual(['sweeper', 'fall']);
     expect(g.box.integrity).toBe(100);
     expect(g.box.wetness).toBe(0);
+  });
+
+  it('con la bomba, ir desincronizados le quita %', () => {
+    selectBox('bomba');
+    const together = playingGame();
+    run(together, 2, FWD, FWD);
+    expect(together.bomb.health).toBe(100);
+    let warned = 0;
+    const alone = playingGame();
+    alone.events.on('bomb:desync', () => warned++);
+    run(alone, 1.5, FWD, IDLE);
+    expect(alone.box.dropped).toBe(false);
+    expect(alone.bomb.health).toBeLessThan(99);
+    expect(warned).toBeGreaterThan(0);
   });
 
   it('la caja bomba no gotea aunque vaya inclinada', () => {
@@ -300,10 +337,10 @@ describe('gato', () => {
     selectBox('bomba');
     const g = playingGame();
     g.teleport('goal');
-    g.bomb.timeLeft = CONFIG.box.bomb.fuseTime * 0.1;
+    g.bomb.health = 30;
     run(g, 1.5, FWD, FWD);
     expect(g.state).toBe('won');
-    expect(g.result.bombLeft).toBeGreaterThan(0);
+    expect(g.result.bombHealth).toBeCloseTo(30, 0);
     expect(g.result.rating).toBe('damaged');
   });
 

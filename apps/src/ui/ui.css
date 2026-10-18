@@ -65,9 +65,29 @@
 .meter.low .bar i {
   background: var(--danger);
 }
-/* Caja bomba: la etiqueta "Vida de bomba" es más larga y la barra cambia de color con el tiempo. */
-.meters.bomb .meter {
-  grid-template-columns: 116px 160px 48px;
+/* Caja bomba: la barra ¡BUM! cambia de color con el tiempo. */
+.meter[data-k='bomb'] span {
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+.meter[data-k='bomb'] .bar {
+  height: 14px;
+  border-radius: 7px;
+}
+.meter[data-k='bomb'].desync .bar {
+  box-shadow: 0 0 0 2px var(--danger);
+  animation: bomb-shake 0.18s linear infinite;
+}
+@keyframes bomb-shake {
+  25% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+}
+.hud.bomb .box-name {
+  top: 16px;
 }
 .meter[data-k='bomb'] .bar i {
   transition: width 0.1s linear, background 0.3s;
@@ -111,10 +131,6 @@
   font-variant-numeric: tabular-nums;
   background: rgba(20, 20, 30, 0.55);
   border-radius: 12px;
-}
-.timer.urgent {
-  background: var(--danger);
-  animation: bomb-pulse 0.55s ease-in-out infinite;
 }
 .box-name {
   position: absolute;

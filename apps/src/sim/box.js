@@ -12,7 +12,7 @@
 //   center/axis/forward  geometría para dibujarla
 //
 // Con la caja bomba (`bomb` lo pone Game) no hay huequito ni mojado: integrity y wetness se quedan
-// fijos y cada golpe o chorro de agua le quita segundos a la mecha.
+// fijos y cada golpe o chorro de agua le baja el % a la bomba.
 //
 // Eventos (en game.events): box:state, box:impact, box:drop, box:wet
 import { CONFIG } from '../config.js';
@@ -96,7 +96,7 @@ export class Box {
 
   damage(amount, cause) {
     if (this.invuln > 0 || amount <= 0) return;
-    if (this.bombMode) this.bomb.hit(amount * CONFIG.box.bomb.secondsPerDamage, cause, this.events);
+    if (this.bombMode) this.bomb.hit(amount, cause, this.events);
     else this.integrity = clamp(this.integrity - amount, 0, 100);
     this.events.emit('box:impact', { amount, cause, integrity: this.integrity });
   }
@@ -104,7 +104,7 @@ export class Box {
   addWet(amount, cause) {
     if (amount <= 0) return;
     const before = this.wetness;
-    if (this.bombMode) this.bomb.hit(amount * CONFIG.box.bomb.secondsPerWet, cause, this.events);
+    if (this.bombMode) this.bomb.hit(amount * CONFIG.box.bomb.wetFactor, cause, this.events);
     else this.wetness = clamp(this.wetness + amount, 0, 100);
     this.events.emit('box:wet', { amount, cause, wetness: this.wetness, before });
   }
@@ -203,10 +203,9 @@ export class Box {
     else this.criticalTime = Math.max(0, this.criticalTime - dt * T.criticalRecover);
 
     if (this.bombMode) {
-      // Sin huequito ni mojado: el viento y el agua que caen encima gastan la mecha.
-      const B = CONFIG.box.bomb;
+      // Sin huequito ni mojado: el viento y el agua que caen encima dañan la bomba.
       this.leakRate = 0;
-      if (this.invuln <= 0) this.bomb.drain((ext.drain * B.secondsPerDamage + this.wetRate * B.secondsPerWet) * dt);
+      if (this.invuln <= 0) this.bomb.drain((ext.drain + this.wetRate * CONFIG.box.bomb.wetFactor) * dt);
       if (this.criticalTime >= T.dropGrace) this.drop(p1, p2);
       return;
     }

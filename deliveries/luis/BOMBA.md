@@ -5,39 +5,40 @@ Tercera caja, aparte de la VIP y del gato.
 ## Qué hace
 
 - En el título se elige con clic o con la tecla `3`. Para probar directo: `?level=level2&box=bomba`.
-- La mecha dura **90 segundos** (`box.bomb.fuseTime`). Corre aunque caminen bien. Juntos solo llegan antes.
-- **Sin mojado ni huequito.** Los golpes y el agua le quitan vida a la bomba:
-  - Golpes (rodillo, aterrizaje fuerte, NPC): `secondsPerDamage` segundos por cada 1 % de daño que haría en la caja VIP. Rodillo 8 % → 3.2 s.
-  - Agua (chorro del niño, caer al agua): `secondsPerWet` por cada 1 % de mojado. Caer al agua 45 % → 4.5 s.
-  - Chorros del piso, lluvia, ola y viento gastan la mecha mientras dura (mismas tasas, por segundo).
-  - Cada golpe avisa «¡Rodillo! −3 s de bomba».
-- A los 20 segundos (`warnTime`) la chispa se apura, la caja palpita y avisa «la mecha está corta».
-- Si pisan la meta antes, la mecha se apaga y ganan. La calificación sale de la vida que sobra: perfecta con la mitad o más, aceptable con 20 % o más (`rating`).
-- Si llega a cero, explota: sacudida, destello y «¡Explotó la bomba!».
-- Caerse por inclinarse sigue siendo la derrota de siempre, sin esperar al reloj.
-- Reintentar desde el checkpoint vuelve a dar los 90 segundos. Caer al agua no reinicia la mecha (y le quita 4.5 s).
+- La bomba arranca al **100 %**. **No hay tiempo:** si van bien, no baja nunca.
+- **Sin mojado ni huequito.** Solo la dañan tres cosas:
+  - Golpes (rodillo, aterrizaje fuerte, NPC): el mismo % que le quitarían de contenido a la caja VIP. Rodillo 8 % → −8 %.
+  - Agua (chorro del niño, caer al agua): el mojado que recibiría × `wetFactor` (0.3). Caer al agua 45 % → −13.5 %.
+  - Chorros del piso, lluvia, ola y viento la dañan mientras duran (mismas tasas, por segundo).
+  - Cada golpe avisa «¡Rodillo! −8% de bomba».
+- **Sin sincronía la bomba se daña.** Por debajo de `desyncBelow` (0.5) pierde hasta `desyncPerSec` (6) % por segundo con sincronía 0. Caminar uno solo (sincronía 0.35) quita ≈ 1.8 % por segundo. Avisa «¡Sin sincronía la bomba se daña!» y la barra tiembla con borde rojo.
+- Con `warnHealth` (25 %) o menos, la chispa se apura, la caja palpita y avisa «¡La bomba está por explotar!». El tic se acelera a medida que baja.
+- La calificación sale del % que queda al llegar a la meta: perfecta con 85 % o más, aceptable con 50 % o más (`rating`).
+- Si llega a 0 %, explota: sacudida, destello y «¡Explotó la bomba!».
+- Caerse por inclinarse sigue siendo la derrota de siempre.
+- Reintentar vuelve al checkpoint con el % que tenía la bomba al pasar por él. Reiniciar el nivel la deja en 100 %.
 
 ## HUD con la caja bomba
 
-- Primera barra: **Vida de bomba**, con los segundos que quedan (`1:30`). Verde, amarilla desde la mitad, roja y palpitando en los últimos 20 s. Se marca en azul mientras el agua la está gastando.
-- No hay barra de mojado. Sincronía sigue igual.
-- El cronómetro de arriba cuenta hacia atrás la vida de la bomba (`01:29.6`) y se pone rojo en los últimos 20 s. El chip de abajo dice solo `BOMBA`.
-- Al ganar se muestran el tiempo de carrera y la vida que sobró.
+- Primera barra: **¡BUM!**, con el % de la bomba (`100%`). Verde, amarilla bajo 50 %, roja y palpitando desde 25 %. Borde azul mientras el agua la daña, borde rojo y temblor si van desincronizados.
+- No hay barra de mojado ni cronómetro grande. Arriba al centro queda solo el chip `BOMBA` (rojo desde 25 %).
+- Al ganar se muestran el tiempo de carrera y el % con que llegó la «Bomba».
 
 ## Dónde está
 
 | Pieza | Archivo |
 |---|---|
 | Números | `apps/src/config.js` → `box.bomb` |
-| Reloj, golpes (`hit`) y desgaste (`drain`) | `apps/src/sim/bomb.js` |
-| Golpes y agua → segundos | `apps/src/sim/box.js` (`damage`, `addWet`, `update`) |
+| % de la bomba, golpes (`hit`), daño continuo (`drain`) y sincronía | `apps/src/sim/bomb.js` |
+| Golpes y agua → % de bomba | `apps/src/sim/box.js` (`damage`, `addWet`, `update`) |
+| % guardado en el checkpoint | `apps/src/sim/game.js` (`checkpointSnapshot.bomb`, `retry`) |
 | HUD | `apps/src/ui/ui.js` + `ui.css` |
 | Atado de TNT (malla) | `deliveries/luis/models/caja-bomba.glb` |
 | Script que genera la malla | `apps/scripts/make-bomb-glb.mjs` |
 | Cartón de la caja bomba | `apps/src/view/signs.js` → `bombBoxCanvas` |
 | Reloj, LED, mecha y chispa | `apps/src/view/boxView.js` |
 
-Eventos: `bomb:beep`, `bomb:warn`, `bomb:explode`, `bomb:hit { seconds, cause, timeLeft }`.
+Eventos: `bomb:beep`, `bomb:warn`, `bomb:explode`, `bomb:hit { amount, cause, health }`, `bomb:desync {}` (empiezan a ir desincronizados).
 
 ## Cómo se ve
 
@@ -48,11 +49,11 @@ Eventos: `bomb:beep`, `bomb:warn`, `bomb:explode`, `bomb:hit { seconds, cause, t
 
 ## Qué se mueve desde código
 
-- El reloj muestra el tiempo real que queda (`M:SS`). Los dos puntos parpadean cada segundo, y el doble de rápido en los últimos `warnTime` segundos.
+- La pantalla de la placa muestra el % de la bomba (`100%`, ` 87%`, `  5%`).
 - El LED se prende en cada tic (`bomb:beep`), al mismo ritmo del sonido.
-- La mecha se acorta con el tiempo y la chispa va en la punta, soltando chispitas (más en los últimos segundos).
-- En los últimos 8 segundos el atado tiembla.
-- En el menú, la caja de muestra cuenta hacia atrás en bucle.
+- La mecha se acorta con el daño y la chispa va en la punta, soltando chispitas (más desde 25 %).
+- Bajo 10 % el atado tiembla.
+- En el menú, la caja de muestra baja de 100 % a 0 % en bucle.
 - Si el `.glb` no carga, queda la bomba redonda de antes. Nada de esto cambia `box.size` ni los choques.
 
 ## Regenerar la malla

@@ -154,7 +154,7 @@ export class BoxView {
       name: 'pantalla',
     });
     this._clockKey = '';
-    this._drawClock(CONFIG.box.bomb.fuseTime, true, false);
+    this._drawClock(100, false);
 
     this.ledOn = this.gfx.solid('#ff2a1f', { emissive: 1.4 });
     this.ledOff = this.gfx.solid('#5a1712', { gloss: 0.7 });
@@ -194,10 +194,10 @@ export class BoxView {
     this.gfx.app.assets.load(asset);
   }
 
-  /** Reloj de 7 segmentos `M:SS`, rojo sobre negro, con los segmentos apagados apenas visibles. */
-  _drawClock(timeLeft, colon, urgent) {
-    const secs = Math.ceil(Math.max(0, timeLeft));
-    const key = `${secs}|${colon}|${urgent}`;
+  /** Pantalla de 7 segmentos con el % de la bomba, rojo sobre negro, con los segmentos apagados apenas visibles. */
+  _drawClock(health, urgent) {
+    const pct = Math.ceil(Math.max(0, Math.min(100, health)));
+    const key = `${pct}|${urgent}`;
     if (key === this._clockKey) return;
     this._clockKey = key;
     const c = this.clockCanvas;
@@ -210,8 +210,9 @@ export class BoxView {
 
     const lit = urgent ? '#ff3b2f' : '#ff4a36';
     const ghost = 'rgba(255, 70, 50, 0.1)';
-    const digits = [Math.min(9, Math.floor(secs / 60)), Math.floor((secs % 60) / 10), secs % 10];
-    const xs = [26, 118, 182];
+    // Ceros a la izquierda apagados: " 87", "  5", "100".
+    const digits = [pct >= 100 ? 1 : null, pct >= 10 ? Math.floor(pct / 10) % 10 : null, pct % 10];
+    const xs = [20, 82, 144];
     const W = 50;
     const H = 84;
     const th = 10;
@@ -229,18 +230,19 @@ export class BoxView {
     g.transform(1, 0, -0.1, 1, 8, 0);
     digits.forEach((d, i) => {
       for (const [name, [x, y, w, h]] of Object.entries(seg)) {
-        const on = SEGMENTS[d].includes(name);
+        const on = d !== null && SEGMENTS[d].includes(name);
         g.fillStyle = on ? lit : ghost;
         g.shadowColor = on ? lit : 'transparent';
         g.shadowBlur = on ? 10 : 0;
         g.fillRect(xs[i] + x + 1, y0 + y + 1, w - 2, h - 2);
       }
     });
-    g.fillStyle = colon ? lit : ghost;
-    g.shadowColor = colon ? lit : 'transparent';
-    g.shadowBlur = colon ? 10 : 0;
-    g.fillRect(88, y0 + 22, 11, 11);
-    g.fillRect(88, y0 + 52, 11, 11);
+    g.fillStyle = lit;
+    g.shadowColor = lit;
+    g.shadowBlur = 10;
+    g.font = '900 46px system-ui, "Arial Black", sans-serif';
+    g.textBaseline = 'middle';
+    g.fillText('%', 204, y0 + H / 2 + 2);
     g.restore();
     this.clockTex.upload();
   }
@@ -300,7 +302,7 @@ export class BoxView {
     }
     const wet = b.wetness / 100;
     const base = CONFIG.box.cat.enabled ? [1, 0.5, 0.2] : [1, 1, 1];
-    const bombHot = CONFIG.box.bomb.enabled && this.bomb && this.bomb.timeLeft <= CONFIG.box.bomb.warnTime;
+    const bombHot = CONFIG.box.bomb.enabled && this.bomb && this.bomb.health <= CONFIG.box.bomb.warnHealth;
     let r = base[0] * (1 - wet * 0.45);
     let g = base[1] * (1 - wet * 0.4);
     let bl = base[2] * (1 - wet * 0.25);
@@ -380,16 +382,14 @@ export class BoxView {
     this.pawHole.setLocalPosition(side * S.w * 0.22 * ease, -S.h * 0.16, face + 0.008);
   }
 
-  /** Acorta la mecha, mueve el reloj y prende el LED en cada tic. */
+  /** La mecha se acorta con el daño, la pantalla muestra el % y el LED se prende en cada tic. */
   _updateBomb(dt, time) {
     const on = CONFIG.box.bomb.enabled && this.bomb;
     this.bombLook.enabled = on;
     if (!on) return;
-    const cfg = CONFIG.box.bomb;
-    const total = Math.max(0.01, cfg.fuseTime);
-    const timeLeft = Math.max(0, this.bomb.timeLeft);
-    const left = timeLeft / total;
-    const urgent = timeLeft <= cfg.warnTime;
+    const health = Math.max(0, this.bomb.health);
+    const left = health / 100;
+    const urgent = health <= CONFIG.box.bomb.warnHealth;
     const S = CONFIG.box.size;
 
     // La mecha sale del casquillo del GLB; en la bomba redonda, de arriba de la esfera.
@@ -402,17 +402,16 @@ export class BoxView {
     this.spark.setLocalScale(flicker, flicker, flicker);
     if (!this._bombGlb) return;
 
-    const blink = urgent ? 2 : 1;
-    this._drawClock(timeLeft, timeLeft <= 0 || (timeLeft * blink) % 1 > 0.5, urgent);
-    const ledLit = timeLeft > 0 && this.bomb.sinceBeep < 0.12;
+    this._drawClock(health, urgent);
+    const ledLit = health > 0 && this.bomb.sinceBeep < 0.12;
     if (this.led.render.material !== (ledLit ? this.ledOn : this.ledOff)) this.led.render.material = ledLit ? this.ledOn : this.ledOff;
 
-    // Últimos 8 s: el atado tiembla un poco.
-    const shake = timeLeft > 0 && timeLeft <= 8 ? 0.004 * (1 - timeLeft / 8) : 0;
+    // Bajo 10 %: el atado tiembla un poco.
+    const shake = health > 0 && health <= 10 ? 0.004 * (1 - health / 10) : 0;
     this.bombTop.setLocalPosition(Math.sin(time * 61) * shake, S.h / 2 + Math.abs(Math.sin(time * 47)) * shake, Math.cos(time * 53) * shake);
 
     // Chispitas que saltan de la punta de la mecha.
-    if (this.box.dropped || timeLeft <= 0) return;
+    if (this.box.dropped || health <= 0) return;
     this._sparkAcc += dt * (urgent ? 22 : 9);
     if (this._sparkAcc < 1) return;
     const p = this.spark.getPosition();

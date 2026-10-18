@@ -180,9 +180,10 @@ game.events.on('game:win', ({ time, integrity, wetness, rating, ratingLabel }) =
 | `game:splash` | `{ player, x, y, z }` |
 | `game:respawn` | `{ checkpoint, retry? }` |
 | `game:fail` | `{ reason: 'dropped'\|'empty'\|'soaked', label, inWater }` |
-| `game:win` | `{ time, integrity, wetness, bombLeft, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` (`bombLeft`: segundos que sobraron, `null` sin bomba) |
-| `bomb:beep` / `bomb:warn` / `bomb:explode` | `{ timeLeft }` / `{ timeLeft }` / `{}` |
-| `bomb:hit` | `{ seconds, cause, timeLeft }` (con la caja bomba, un golpe o agua le quitó segundos a la mecha) |
+| `game:win` | `{ time, integrity, wetness, bombHealth, rating: 'perfect'\|'ok'\|'damaged', ratingLabel }` (`bombHealth`: % de la bomba al llegar, `null` sin bomba) |
+| `bomb:beep` / `bomb:warn` / `bomb:explode` | `{ health }` / `{ health }` / `{}` |
+| `bomb:hit` | `{ amount, cause, health }` (con la caja bomba, un golpe o agua le quitó `amount` %) |
+| `bomb:desync` | `{}` (con la caja bomba, empezaron a ir desincronizados y la bomba pierde % por segundo) |
 | `player:jump` / `player:land` | `{ player }` / `{ player, speed }` |
 | `hazard:hit` | `{ player }` |
 | `geyser:hit` | `{}` |
