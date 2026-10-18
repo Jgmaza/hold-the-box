@@ -8,9 +8,11 @@
 //   game:pause      { paused }
 //   game:checkpoint { index }
 //   game:splash     { player, x, y, z }      alguien cayó al agua (la caja se moja)
+//   game:life       { lives, cause }         se perdió una vida (caída o caja perdida); lives = las que quedan
 //   game:respawn    { checkpoint, retry? }
 //   game:teleport   {}                       (debug) se movió a los jugadores
-//   game:fail       { reason, label, inWater }   reason: 'dropped' | 'empty' | 'soaked'
+//   game:fail       { reason, label, inWater, lives, gameOver }   reason: 'dropped' | 'empty' | 'soaked' | 'exploded' | 'fell'
+//                   Solo sale sin vidas (gameOver): con vidas, la pérdida reaparece sola en el checkpoint.
 //   game:win        { time, integrity, wetness, bombHealth, rating, ratingLabel }   bombHealth: null sin bomba
 //   player:jump     { player }
 //   player:land     { player, speed }
@@ -47,6 +49,7 @@ export const FAIL_LABELS = {
   empty: '¡Se vació la caja por el huequito!',
   soaked: '¡La caja se deshizo de lo mojada!',
   exploded: '¡Explotó la bomba!',
+  fell: '¡Se cayeron!',
 };
 
 export const RATING_LABELS = {
@@ -80,6 +83,9 @@ export class Game {
 
   _resetRun() {
     this.runTime = 0;
+    this.lives = CONFIG.respawn.lives; // vidas que quedan en esta partida
+    this._restoreSnapshot = false; // al reaparecer, la caja vuelve a como estaba en el checkpoint (se perdió)
+    this._lifeSpent = false; // la vida de esta derrota ya se restó (la última, al caer al agua)
     this.checkpointIndex = -1;
     this.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 100 };
     this.ready = { p1: false, p2: false };
@@ -123,9 +129,19 @@ export class Game {
     this.events.emit('game:pause', { paused: this.state === 'paused' });
   }
 
-  /** Tras una derrota: reaparecer en el último checkpoint con la caja como estaba ahí. */
+  /** ¿Se acabaron las vidas? Entonces reintentar = empezar de cero desde la salida. */
+  get gameOver() {
+    return this.lives <= 0;
+  }
+
+  /**
+   * Tras una derrota: reaparecer en el último checkpoint con la caja como estaba ahí.
+   * Sin vidas no hay checkpoint que valga: se reinicia el nivel desde la salida con todas las vidas.
+   */
   retry() {
     if (this.state !== 'failed') return;
+    if (this.gameOver) return this.restart();
+    this._restoreSnapshot = this._lifeSpent = false;
     this.box.reset(this.checkpointSnapshot);
     this.cat.reset();
     this.bomb.reset(this.checkpointSnapshot.bomb);
@@ -295,12 +311,33 @@ export class Game {
     this.events.emit('glass:break', { id: g.def.id, x: p.pos.x, y: g.def.top, z: p.pos.z });
   }
 
+  /** Alguien cayó al agua / al vacío: la caja se moja y se pierde una vida. Con vidas, reaparecen en el checkpoint. */
   _splash(player) {
     this.events.emit('game:splash', { player: player.id, x: player.pos.x, y: this.world.waterLevel, z: player.pos.z });
     this.box.addWet(CONFIG.box.wet.fallPenalty, 'fall');
+    for (const p of this.players) p.setInput(0, 0, false);
+    if (this._loseLife('fell') === 0) {
+      // Era la última: a la pantalla de derrota (sin restar otra vida al terminar de caer).
+      this._lifeSpent = true;
+      this._fail(this._lossReason() ?? 'fell');
+      return;
+    }
+    // Si la caída además deshizo / vació / explotó la caja, es la misma pérdida: vuelve como estaba en el checkpoint.
+    if (this._lossReason()) this._restoreSnapshot = true;
+    this._fadeToCheckpoint();
+  }
+
+  /** Resta una vida y avisa. Devuelve las que quedan. */
+  _loseLife(cause) {
+    this.lives = Math.max(0, this.lives - 1);
+    this.events.emit('game:life', { lives: this.lives, cause });
+    return this.lives;
+  }
+
+  /** Fundido y reaparición en el checkpoint (ver _stepRespawn). */
+  _fadeToCheckpoint() {
     this.respawnTimer = CONFIG.respawn.fadeTime;
     this._teleported = false;
-    for (const p of this.players) p.setInput(0, 0, false);
   }
 
   _stepRespawn(dt) {
@@ -308,6 +345,11 @@ export class Game {
     if (!this._teleported && this.respawnTimer <= CONFIG.respawn.fadeTime / 2) {
       this._teleported = true;
       this._placeAtSpawn(this.currentSpawn);
+      if (this._restoreSnapshot) {
+        this._restoreSnapshot = false;
+        this.box.reset(this.checkpointSnapshot);
+        this.bomb.reset(this.checkpointSnapshot.bomb);
+      }
       this.box.invuln = CONFIG.respawn.invulnTime;
       this.events.emit('game:respawn', { checkpoint: this.checkpointIndex });
     }
@@ -315,20 +357,31 @@ export class Game {
     this._checkFail();
   }
 
-  _checkFail() {
-    if (CONFIG.debug.godMode) return false;
+  /** Por qué se perdió la caja ahora mismo, o null si sigue entera. */
+  _lossReason() {
     const b = this.box;
-    let reason = null;
-    if (this.bomb.exploded) reason = 'exploded';
-    else if (b.dropped) reason = 'dropped';
-    else if (b.integrity <= 0) reason = 'empty';
-    else if (b.wetness >= 100) reason = 'soaked';
+    if (this.bomb.exploded) return 'exploded';
+    if (b.dropped) return 'dropped';
+    if (b.integrity <= 0) return 'empty';
+    if (b.wetness >= 100) return 'soaked';
+    return null;
+  }
+
+  _checkFail() {
+    // Con la caja ya marcada para volver al checkpoint (se perdió en una caída), no se cuenta otra vez.
+    if (CONFIG.debug.godMode || this._restoreSnapshot) return false;
+    const reason = this._lossReason();
     if (!reason) return false;
+    this._fail(reason);
+    return true;
+  }
+
+  /** La caja se perdió: se la ve caer `failDelay` segundos y luego se decide (ver _stepFailing). */
+  _fail(reason) {
     this.failReason = reason;
     this.failTimer = CONFIG.respawn.failDelay;
     this.state = 'failing';
     for (const p of this.players) p.setInput(0, 0, false);
-    return true;
   }
 
   _stepFailing(dt) {
@@ -346,10 +399,20 @@ export class Game {
     }
     this.failTimer -= dt;
     if (this.failTimer > 0) return;
+    // Se gasta la vida (si no se gastó ya al caer). Con vidas, reaparecen solos con la caja del checkpoint.
+    if (!this._lifeSpent) this._loseLife(this.failReason);
+    this._lifeSpent = false;
+    if (!this.gameOver) {
+      this.state = 'playing';
+      this.failReason = null;
+      this._restoreSnapshot = true;
+      this._fadeToCheckpoint();
+      return;
+    }
     this.state = 'failed';
     const inWater = b.center.y < this.world.waterLevel + 0.2;
     const label = this.failReason === 'dropped' && inWater ? '¡La caja cayó al agua!' : FAIL_LABELS[this.failReason];
-    this.events.emit('game:fail', { reason: this.failReason, label, inWater });
+    this.events.emit('game:fail', { reason: this.failReason, label, inWater, lives: this.lives, gameOver: this.gameOver });
   }
 
   _win() {

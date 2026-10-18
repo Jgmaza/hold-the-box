@@ -157,6 +157,48 @@
   background: rgba(20, 20, 30, 0.55);
   border-radius: 999px;
 }
+.lives-row {
+  display: grid;
+  grid-template-columns: 92px auto;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.lives {
+  display: flex;
+  gap: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+.lives i {
+  font-style: normal;
+  transition: opacity 0.3s, filter 0.3s, transform 0.3s;
+}
+.lives i.lost {
+  opacity: 0.3;
+  filter: grayscale(1);
+  transform: scale(0.8);
+}
+.lives i.just-lost {
+  animation: life-lost 0.6s ease-out;
+}
+@keyframes life-lost {
+  0% {
+    opacity: 1;
+    filter: none;
+    transform: scale(1.6);
+  }
+}
+.lives.last i:not(.lost) {
+  animation: life-last 0.8s ease-in-out infinite alternate;
+}
+@keyframes life-last {
+  to {
+    transform: scale(1.18);
+  }
+}
 .box-name[data-box='gato'] {
   background: #e07a3d;
   color: #1d1d1d;
@@ -445,6 +487,12 @@
 .fail h2 {
   color: var(--danger);
 }
+.fail .lives-left {
+  margin: 0;
+  font-weight: 900;
+  font-size: 18px;
+}
+
 
 @media (max-width: 640px) {
   .meter {

@@ -12,6 +12,7 @@ const TIPS = {
   empty: 'Tip: el huequito gotea cuando la caja va inclinada. Caminen juntos y salten juntos.',
   soaked: 'Tip: esperen a que los chorros se apaguen (burbujas = va a salir agua) y no se caigan al agua.',
   exploded: 'Tip: cada golpe, cada chorro y cada paso descoordinado daña la bomba. Vayan juntos.',
+  fell: 'Tip: cada caída al agua cuesta una vida. Caminen contra el viento y miren dónde pisan.',
 };
 
 const fmtTime = (t) => {
@@ -135,6 +136,18 @@ export class UI {
     this.$('.win .integrity').previousSibling.textContent = '¡Miau!';
   }
 
+  /** Vidas que quedan (corazones, en el panel de la izquierda): una por intento; las perdidas se ven apagadas. */
+  _paintLives() {
+    const { lives } = this.game;
+    const total = CONFIG.respawn.lives;
+    const key = `${lives}/${total}`;
+    if (this._livesKey === key) return;
+    this._livesKey = key;
+    const el = this.$('.lives');
+    el.innerHTML = Array.from({ length: total }, (_, i) => `<i class="${i < lives ? '' : 'lost'}">❤️</i>`).join('');
+    el.classList.toggle('last', lives === 1);
+  }
+
   _paintBoxName() {
     const id = CONFIG.box.profile;
     const name = this.$('.box-name');
@@ -195,6 +208,12 @@ export class UI {
     ev.on('game:checkpoint', () => this.toast('¡Checkpoint!', 'good'));
     ev.on('game:splash', () => !this.bombMode && this.toast(`¡Al agua! +${CONFIG.box.wet.fallPenalty}% mojada`, 'wet'));
     ev.on('game:respawn', (e) => e.retry && this.show('playing'));
+    ev.on('game:life', (e) => {
+      this.toast(e.lives === 1 ? '💔 ¡Perdieron una vida! Queda la última' : e.lives > 1 ? `💔 ¡Perdieron una vida! Quedan ${e.lives}` : '💔 ¡Sin vidas!', 'bad');
+      this._paintLives();
+      const lost = this.$(`.lives i:nth-child(${e.lives + 1})`);
+      lost?.classList.add('just-lost');
+    });
     ev.on('hazard:hit', () => !this.bombMode && this.toast('¡Rodillo! La caja se sacude', 'bad'));
     ev.on('cat:warn', (e) => this.toast(`El gato asoma la pata hacia P${e.player}`, 'bad'));
     ev.on('cat:scratch', (e) => {
@@ -252,12 +271,13 @@ export class UI {
       if (campaign) this._submitArcade(r);
     });
     ev.on('game:fail', (r) => {
-      this.$('.fail h2').textContent = r.label;
+      // Solo sale sin vidas (con vidas reaparecen solos en el checkpoint).
       this.$('.fail .tip').textContent =
         this.catMode && r.reason === 'empty'
           ? 'Tip: cada zarpazo rompe la caja. Enderecen al momento; si lo ignoran, se vacía.'
           : (TIPS[r.reason] ?? '');
-      this.$('.fail .cp').textContent = this.game.checkpointIndex >= 0 ? 'desde el último checkpoint' : 'desde la salida';
+      this.$('.fail .lives-left').textContent = `${r.label} Era la última vida: toca empezar desde la salida.`;
+      this._paintLives();
       this.show('failed');
     });
   }
@@ -267,6 +287,7 @@ export class UI {
     const b = g.box;
     if (g.state === 'title') return;
     this._paintBoxName();
+    this._paintLives();
 
     if (this.bombMode) {
       this._paintBombLife();
@@ -340,6 +361,7 @@ const TEMPLATE = /* html */ `
       <div class="meter" data-k="integrity"><span>Contenido</span><div class="bar"><i></i></div><b>100%</b></div>
       <div class="meter" data-k="wetness"><span>Mojado</span><div class="bar"><i style="width:0"></i></div><b>0%</b></div>
       <div class="meter" data-k="sync"><span>Sincronía</span><div class="bar"><i></i></div><b>100%</b></div>
+      <div class="lives-row"><span>Vidas</span><div class="lives" title="Vidas que les quedan"></div></div>
     </div>
     <div class="weather" data-type=""></div>
     <div class="timer">00:00.0</div>
@@ -384,14 +406,14 @@ const TEMPLATE = /* html */ `
 
   <section class="screen fail" data-screen="failed">
     <div class="card">
-      <h2>¡Soltaron la caja!</h2>
+      <h2>¡Se acabaron las vidas!</h2>
+      <p class="lives-left"></p>
       <p class="tip"></p>
       <div class="actions">
-        <button type="button" class="btn big go" data-act="retry">Reintentar</button>
-        <button type="button" class="btn" data-act="restart">Reiniciar nivel</button>
+        <button type="button" class="btn big go" data-act="retry">Empezar de nuevo</button>
         <button type="button" class="btn light" data-act="menu">Menú</button>
       </div>
-      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> reintentar <span class="cp">desde el último checkpoint</span> · <kbd>Esc</kbd> reiniciar · <kbd>M</kbd> menú</p>
+      <p class="keys"><kbd>Espacio</kbd> / <kbd>Enter</kbd> empezar de nuevo <span class="cp">desde la salida</span> · <kbd>M</kbd> menú</p>
     </div>
   </section>
 `;
