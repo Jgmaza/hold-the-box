@@ -23,6 +23,7 @@ export class LevelView {
     this.floating = []; // barcos / botes Kenney (suben y bajan con el mar)
     this.bobbing = []; // caimanes u otra utilería sobre el agua
     this._assets = new Map();
+    this._floors = 0; // pisos dibujados: cada uno sube un poco para no pelear con el vecino (ver _rise)
     const L = world.level;
     this.theme = L.theme;
     this.land = L.biome === 'village' || L.biome === 'camp';
@@ -149,6 +150,7 @@ export class LevelView {
     const plank = def.kind === 'plank';
     const stone = def.skin === 'stone';
     const top = 0.14;
+    const rise = this._rise();
     if ((stone || def.skin === 'dirt' || def.skin === 'sand') && this.land) {
       if (def.skin === 'dirt' || def.skin === 'sand') {
         const sand = def.skin === 'sand';
@@ -159,7 +161,7 @@ export class LevelView {
         floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
         floor.update();
         g.prim('box', g.solid(sand ? '#c47a32' : '#6b4a28', { mul: 0.9 }), { parent: this.root, pos: [cx, a.max.y - 0.1, cz], scale: [w, 0.16, d], name: def.id });
-        g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - 0.02, cz], scale: [w + 0.08, 0.05, d + 0.08], name: `${def.id}-piso` });
+        g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - 0.02 + rise, cz], scale: [w + 0.08, 0.05, d + 0.08], name: `${def.id}-piso` });
         return;
       }
       this._stoneTex ??= g.textureFromCanvas(stoneCanvas(), { repeat: true });
@@ -167,7 +169,7 @@ export class LevelView {
       floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
       floor.update();
       g.prim('box', g.solid('#8d887c', { mul: 0.88 }), { parent: this.root, pos: [cx, a.max.y - 0.1, cz], scale: [w, 0.16, d], name: def.id });
-      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - 0.02, cz], scale: [w + 0.08, 0.05, d + 0.08], name: `${def.id}-piso` });
+      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - 0.02 + rise, cz], scale: [w + 0.08, 0.05, d + 0.08], name: `${def.id}-piso` });
       return;
     }
     g.prim('box', g.solid(stone ? '#8d887c' : plank ? 'plank' : 'wood', { mul: stone ? 0.88 : 0.75 }), { parent: this.root, pos: [cx, a.min.y + (h - top) / 2, cz], scale: [w, h - top, d], name: def.id });
@@ -177,13 +179,13 @@ export class LevelView {
       const floor = g.textured(this._stoneTex, { tint: g.color('#c4b8a4', 1.05) });
       floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
       floor.update();
-      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
+      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2 + rise, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
     } else {
       this._plankTex ??= g.textureFromCanvas(plankCanvas(), { repeat: true });
       const floor = g.textured(this._plankTex, { tint: g.color(plank ? 'plank' : 'wood', 1.12) });
       floor.diffuseMapTiling = new pc.Vec2(w / 2, d / 2);
       floor.update();
-      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
+      g.prim('box', floor, { parent: this.root, pos: [cx, a.max.y - top / 2 + rise, cz], scale: [w + 0.06, top, d + 0.06], name: `${def.id}-piso` });
     }
     if (!plank) {
       // Pilotes en las esquinas (se ven en el agua).
@@ -197,6 +199,16 @@ export class LevelView {
         g.prim('cylinder', g.solid('trunk', { mul: 0.8 }), { parent: this.root, pos: [cx, (a.min.y + this.waterY) / 2 - 0.2, z], scale: [0.18, a.min.y - this.waterY + 0.6, 0.18] });
       }
     }
+  }
+
+  /**
+   * Plataformas vecinas se pisan (en el campamento hasta 1-2 m) y sus pisos quedan en el mismo plano con texturas
+   * distintas: la GPU alterna cuál dibuja y el piso tiembla al mover la cámara. Cada piso sube unos milímetros
+   * según su orden, así siempre gana el mismo. 6 mm alcanzan para el buffer de profundidad hasta la niebla
+   * (near 0.1, far 400) y el ciclo de 5 no deja que la altura se note bajo los pies.
+   */
+  _rise() {
+    return (this._floors++ % 5) * 0.006;
   }
 
   /**

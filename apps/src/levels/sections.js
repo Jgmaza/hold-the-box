@@ -505,6 +505,7 @@ export function dressBanks(level, { set = 'village', seed = 1, ground = 0.88, ke
   for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.7 });
   for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: 1.5 });
   for (const n of level.npcs ?? []) zones.push({ x: n.x, z: n.z, r: 1.8 });
+  for (const s of level.recovery ?? []) zones.push({ x: s.x, z: s.z, r: 1.8 });
   for (const g of level.geysers ?? []) zones.push({ x: g.x, z: g.z, r: (g.radius ?? 1) + 0.8 });
   for (const s of level.sweepers ?? []) zones.push({ x: s.x, z: s.z, r: (s.length ?? 2) + 0.6 });
   for (const p of level.platforms) for (const s of p.weather?.shelters ?? []) zones.push({ x: s.x, z: s.z, w: s.w + 1.2, d: s.d + 1.2 });
@@ -562,6 +563,9 @@ export function dressPathRim(level, { set = 'desert', seed = 21, lane = 2.05, ke
   for (const s of level.signs ?? []) zones.push({ x: s.x, z: s.z, r: s.w / 2 + 0.7 });
   for (const p of level.props ?? []) zones.push({ x: p.x, z: p.z, r: 1.4 });
   for (const c of level.cacti ?? []) zones.push({ x: c.x, z: c.z, r: 1.05 });
+  for (const n of level.npcs ?? []) zones.push({ x: n.x, z: n.z, r: 1.8 });
+  // Estación de recuperación: libre ella y el paso desde el pasillo hasta ella.
+  for (const s of level.recovery ?? []) zones.push({ x: s.x / 2, z: s.z, w: Math.abs(s.x) + s.w + 1, d: s.d + 1.2 });
   if (level.goal) zones.push({ x: level.goal.x, z: level.goal.z, w: level.goal.w + 1.2, d: level.goal.d + 1.2 });
   const spawn = level.spawn;
   if (spawn?.p1) zones.push({ x: 0, z: spawn.p1.z, w: 3.6, d: 3.2 });
