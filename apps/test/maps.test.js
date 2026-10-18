@@ -277,6 +277,50 @@ describe('mapas de mar — ritmo', () => {
   });
 });
 
+describe('piezas del Muelle en todos los mapas', () => {
+  const KINDS = ['bomb', 'cat', 'dry', 'refill'];
+
+  for (const [key, L] of Object.entries(LEVELS)) {
+    it(`${key}: las cuatro estaciones, sobre piso y fuera del pasillo`, () => {
+      const rec = L.recovery ?? [];
+      expect(rec.map((r) => r.kind).sort()).toEqual(KINDS);
+      for (const r of rec) {
+        expect(onPlatform(L, r.x, r.z), r.id).toBe(true);
+        expect(Math.abs(r.x) - r.w / 2, `${r.id} tapa el pasillo`).toBeGreaterThan(1.9);
+      }
+    });
+  }
+
+  for (const key of ['muelle', 'bahia', 'campamento']) {
+    it(`${key}: las estaciones se ven al arrancar (al lado del spawn)`, () => {
+      const L = LEVELS[key];
+      for (const r of L.recovery) expect(Math.abs(r.z - L.spawn.p1.z), r.id).toBeLessThan(5);
+    });
+  }
+
+  it('cada estación se alcanza desde el spawn y hace su trabajo', () => {
+    const g = new Game(LEVELS.campamento, { seed: 1 });
+    g.setInputs(jump(), jump());
+    g.box.wetness = 60;
+    const fans = LEVELS.campamento.recovery.find((r) => r.kind === 'dry');
+    g.teleport({ p1: { x: fans.x - 0.8, y: 1, z: fans.z }, p2: { x: fans.x + 0.8, y: 1, z: fans.z } });
+    run(g, 1, IDLE, IDLE);
+    expect(g.box.wetness).toBeLessThan(60);
+  });
+
+  it('el campamento sube como el Muelle: minero → minero con agua → coyote, cada uno en su tramo', () => {
+    const L = LEVELS.campamento;
+    expect(L.npcs.map((n) => n.difficulty)).toEqual(['easy', 'medium', 'hard']);
+    const ids = new Set(L.platforms.map((p) => p.id));
+    for (const n of L.npcs) expect(ids.has(n.platform), n.platform).toBe(true);
+    const zs = L.npcs.map((n) => n.z);
+    expect([...zs].sort((a, b) => b - a)).toEqual(zs);
+    // Ningún checkpoint reaparece en la plaza del coyote.
+    const plaza = L.platforms.find((p) => p.id === 'plaza-meta');
+    for (const c of L.checkpoints) expect(Math.abs(c.spawn.p1.z - plaza.z) > plaza.d / 2, c.id).toBe(true);
+  });
+});
+
 describe('dressIsland', () => {
   const isla = { id: 'i', x: 0, z: 0, w: 10, d: 14, top: 1 };
 

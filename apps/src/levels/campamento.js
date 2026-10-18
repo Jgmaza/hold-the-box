@@ -3,7 +3,8 @@
 // Después se parte. Entre los dos carriles queda una raja de ~2.5 m: el cuerpo no la
 // puentea y, si la cruzan, caen. El carril ancho es trampa y se corta. El bueno es
 // más estrecho y hay que escorarse juntos para no rozar los cactus. Nadie dice cuál es cuál.
-import { dressPathRim } from './sections.js';
+// Como en el Muelle: cuatro estaciones a los lados del spawn y un NPC por tramo (minero → minero con agua → coyote).
+import { dressPathRim, recovery } from './sections.js';
 
 const TOP = 1;
 
@@ -28,12 +29,13 @@ const level = {
   waterLevel: 0,
 
   spawn: {
-    p1: { x: -0.8, y: TOP, z: 44 },
-    p2: { x: 0.8, y: TOP, z: 44 },
+    p1: { x: -0.8, y: TOP, z: 51 },
+    p2: { x: 0.8, y: TOP, z: 51 },
   },
 
   platforms: [
-    sand({ id: 'calle', x: 0, z: 48, w: 8, d: 24, top: TOP }),
+    sand({ id: 'base', x: 0, z: 54, w: 14, d: 12, top: TOP }), //  z 60 .. 48: campamento con las estaciones
+    sand({ id: 'calle', x: 0, z: 42, w: 8, d: 12, top: TOP }), //  z 48 .. 36
     sand({ id: 'boca', x: 0, z: 33, w: 12, d: 8, top: TOP }),
     sand({ id: 'carril-izq', x: -3.5, z: 21.3, w: 4.4, d: 16.6, top: TOP }),
     sand({ id: 'trampa-der', x: 3.6, z: 24.2, w: 4.8, d: 10.4, top: TOP }),
@@ -47,9 +49,9 @@ const level = {
   ],
 
   cacti: [
-    { x: -3.55, z: 52, h: 3.5, kind: 'saguaro' },
-    { x: 3.6, z: 50, h: 3.2, kind: 'saguaro', yaw: 20 },
-    { x: -3.3, z: 47.2, h: 0.75, kind: 'barrel' },
+    { x: -6.2, z: 57.6, h: 3.5, kind: 'saguaro' },
+    { x: 6.3, z: 58.6, h: 3.2, kind: 'saguaro', yaw: 20 },
+    { x: -3.3, z: 45.6, h: 0.75, kind: 'barrel' },
     { x: 3.35, z: 46.4, h: 1.05, kind: 'pear' },
     { x: -3.5, z: 41, h: 2.6, kind: 'saguaro', yaw: -12 },
     { x: 3.45, z: 38.5, h: 0.65, kind: 'barrel' },
@@ -78,12 +80,32 @@ const level = {
     { x: 4.2, z: -42, h: 1.1, kind: 'pear' },
   ],
 
-  checkpoints: [cp('cp-cruce', 10), cp('cp-segunda', -14, { w: 6, d: 4 }), cp('cp-meta', -36, { w: 6, d: 4 })],
+  // Un NPC por tramo, como las islas del Muelle. Cada uno camina solo en su plataforma.
+  npcs: [
+    { difficulty: 'easy', platform: 'boca', x: 1.5, z: 33 },
+    { difficulty: 'medium', platform: 'boca-2', x: 0, z: 4 },
+    { difficulty: 'hard', platform: 'plaza-meta', x: 0, z: -39 },
+  ],
+
+  // Cuatro aparatos a los lados del spawn: se ven al arrancar. El pasillo del centro queda libre.
+  recovery: [
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: -5.4, z: 54.2, top: TOP }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: -5.4, z: 49.8, top: TOP }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: 5.4, z: 54.2, top: TOP }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: 5.4, z: 49.8, top: TOP }),
+  ],
+
+  // El del coyote queda en la calle fina, antes de su plaza: si los tumba, no reaparecen al lado de él.
+  checkpoints: [cp('cp-cruce', 10), cp('cp-segunda', -14, { w: 6, d: 4 }), cp('cp-coyote', -30.8, { w: 5, d: 2.4 })],
 
   goal: { x: 0, z: -44, w: 8, d: 5, top: TOP },
 
   signs: [
     { x: 3.2, z: 46, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
+    { x: -3.4, z: 48.4, top: TOP, w: 3.0, h: 1.3, post: 1.45, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
+    { x: -3.3, z: 38.6, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'MINERO PERDIDO\n¡SÁLTENLO JUNTOS!', style: 'info' },
+    { x: -4.6, z: 11.8, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'MINERO CON AGUA\n¡MUÉVANSE JUNTOS!', style: 'warn' },
+    { x: -4.6, z: -33.4, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: '¡EL COYOTE!\nESQUIVEN Y PASEN', style: 'warn' },
     { x: -3.3, z: 34.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: '¡CUIDADO!\nCACTUS QUE PINCHAN\nY DAÑAN LA CAJA', style: 'warn' },
     { x: 0, z: 30.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'UN CAMINO PINCHA\nY SE CORTA', style: 'warn' },
     { x: -3.4, z: -44.2, top: TOP, w: 3.3, h: 1.45, post: 1.45, text: 'CAMPAMENTO\nDEL ORO', style: 'bar' },
@@ -92,13 +114,13 @@ const level = {
   props: [
     { type: 'flag', x: 4.2, z: 8.6, top: TOP, checkpoint: 0 },
     { type: 'flag', x: 3.6, z: -15.4, top: TOP, checkpoint: 1 },
-    { type: 'flag', x: 2.4, z: -34.2, top: TOP, checkpoint: 2 },
+    { type: 'flag', x: 2.1, z: -29.8, top: TOP, checkpoint: 2 },
     { type: 'lamp', x: -3.35, z: 43.2, top: TOP },
-    { type: 'pot', x: -3.45, z: 49.5, top: TOP, h: 2.2 },
+    { type: 'pot', x: -6.4, z: 52, top: TOP, h: 2.2 },
     { type: 'pot', x: 3.5, z: 41.2, top: TOP, h: 1.8 },
     { type: 'pot', x: -3.4, z: 28.4, top: TOP, h: 1.5 },
     { type: 'pot', x: 2.15, z: -27, top: TOP, h: 1.9 },
-    { type: 'deadTree', x: -3.5, z: 55, top: TOP, h: 3.6, yaw: 18 },
+    { type: 'deadTree', x: -6.3, z: 56.6, top: TOP, h: 3.6, yaw: 18 },
     { type: 'deadTree', x: 6.35, z: 21.2, top: TOP, h: 2.9, yaw: 10 },
     { type: 'arch', x: 3.15, z: 36.2, top: TOP, w: 4.4, h: 3.6 },
     { type: 'rock', x: -3.5, z: 32.4, top: TOP, size: 1.3 },
@@ -109,16 +131,16 @@ const level = {
 const camp = [
   { art: 'nature/tent_detailedOpen', x: -4.75, z: 34.6, top: TOP, yaw: 18, s: 2.3 },
   { art: 'nature/tent_detailedOpen', x: 4.85, z: 31.8, top: TOP, yaw: -150, s: 2.2 },
-  { art: 'nature/campfire_stones', x: -2.55, z: 50.2, top: TOP, yaw: 12, s: 2.7, motion: 'fire' },
-  { art: 'nature/stump_round', x: -3.35, z: 51.1, top: TOP, yaw: 20, s: 2.2 },
-  { art: 'nature/log', x: -3.45, z: 49.1, top: TOP, yaw: 42, s: 2.05 },
-  { art: 'town/lantern', x: 3.35, z: 53.4, top: TOP, yaw: -8, s: 1.2 },
+  { art: 'nature/campfire_stones', x: -2.2, z: 57.4, top: TOP, yaw: 12, s: 2.7, motion: 'fire' },
+  { art: 'nature/stump_round', x: -3.1, z: 58.4, top: TOP, yaw: 20, s: 2.2 },
+  { art: 'nature/log', x: -3.2, z: 56.4, top: TOP, yaw: 42, s: 2.05 },
+  { art: 'town/lantern', x: 3.2, z: 57.2, top: TOP, yaw: -8, s: 1.2 },
   { art: 'town/lantern', x: -3.4, z: 42.6, top: TOP, yaw: 10, s: 1.18 },
-  { art: 'nature/pot_large', x: 3.4, z: 55.6, top: TOP, yaw: 25, s: 2.2 },
+  { art: 'nature/pot_large', x: 4.6, z: 58.8, top: TOP, yaw: 25, s: 2.2 },
   { art: 'nature/pot_small', x: -3.35, z: 37.4, top: TOP, yaw: -12, s: 2.15 },
-  { art: 'nature/rock_largeA', x: 3.45, z: 57.2, top: TOP, yaw: 16, s: 1.85 },
-  { art: 'nature/rock_tallB', x: -3.5, z: 58.4, top: TOP, yaw: -20, s: 1.7 },
-  { art: 'nature/fence_simple', x: -3.55, z: 47.6, top: TOP, yaw: 90, s: 1.8 },
+  { art: 'nature/rock_largeA', x: 6.2, z: 56.8, top: TOP, yaw: 16, s: 1.85 },
+  { art: 'nature/rock_tallB', x: -5.6, z: 59.2, top: TOP, yaw: -20, s: 1.7 },
+  { art: 'nature/fence_simple', x: -4.2, z: 59.4, top: TOP, yaw: 0, s: 1.8 },
   { art: 'nature/campfire_stones', x: -2.7, z: -37.6, top: TOP, yaw: 0, s: 2.8, motion: 'fire' },
   { art: 'town/banner-red', x: 3.7, z: -40.2, top: TOP, yaw: -14, s: 1.65, motion: 'sway' },
   { art: 'town/cart', x: 4.6, z: -36.4, top: TOP, yaw: -22, s: 1.4 },

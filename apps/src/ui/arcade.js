@@ -190,10 +190,19 @@ export class ArcadeOverlay {
     const table = this.el.querySelector('.arcade-table');
     table.classList.remove('empty');
     table.textContent = 'Cargando…';
-    const data = await fetchBoard(10, this.scope);
+    const scope = this.scope;
+    const data = await fetchBoard(10, scope);
+    // Cambiaron de pestaña mientras cargaba: esta respuesta ya no es la que se ve.
+    if (this.scope !== scope) return;
     if (!data) {
       table.classList.add('empty');
       table.textContent = 'Sin conexión\n(reactiva Supabase / deploy de la function)';
+      return;
+    }
+    // Una function vieja no conoce el mapa y devuelve el general: no mostrarlo como si fuera de este mapa.
+    if (data.scope !== this.scope) {
+      table.classList.add('empty');
+      table.textContent = '— Pronto —\nEste mapa todavía no tiene ranking';
       return;
     }
     const board = data.board;
