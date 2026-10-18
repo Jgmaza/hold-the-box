@@ -7,7 +7,7 @@
 //   → isla lluvia → isla viento (clima: campo `weather` de la plataforma, ver src/sim/weather/)
 //   → muelle → hueco → ferry → CP1 → rodillo → rieles asimétricos → chorros → CP2 → escalones → elevador → bar + META.
 
-import { dressLevel, rainIsland, railsPair, windIsland } from './sections.js';
+import { dressLevel, rainIsland, railsPair, recovery, windIsland } from './sections.js';
 
 const level = {
   id: 'muelle',
@@ -21,7 +21,7 @@ const level = {
 
   platforms: [
     // Islas de NPCs (antes del muelle). Cada NPC pasea solo en SU isla; los puentes son zona segura.
-    { id: 'inicio', x: 0, z: 92, w: 10, d: 8, top: 1 }, //           z 96 .. 88
+    { id: 'inicio', x: 0, z: 92, w: 14, d: 8, top: 1 }, //           z 96 .. 88
     { id: 'puente-easy', x: 0, z: 86.5, w: 4, d: 3, top: 1 }, //     z 88 .. 85
     { id: 'isla-easy', x: 0, z: 79, w: 10, d: 12, top: 1 }, //       z 85 .. 73
     { id: 'puente-medium', x: 0, z: 71.5, w: 4, d: 3, top: 1 }, //   z 73 .. 70
@@ -70,6 +70,14 @@ const level = {
     { x: -0.6, z: -82.5, baseY: 1, radius: 1.1, offset: 2.13 },
   ],
 
+  // Cuatro aparatos a los lados del spawn: se ven al arrancar. El pasillo del centro queda libre.
+  recovery: [
+    recovery({ id: 'rec-cerveza', kind: 'refill', x: -5.4, z: 94.2, top: 1 }),
+    recovery({ id: 'rec-galletas', kind: 'cat', x: -5.4, z: 89.8, top: 1 }),
+    recovery({ id: 'rec-taller', kind: 'bomb', x: 5.4, z: 94.2, top: 1 }),
+    recovery({ id: 'rec-abanicos', kind: 'dry', x: 5.4, z: 89.8, top: 1 }),
+  ],
+
   // Se activan cuando la caja entra. Guardan dónde reaparecer y el estado de la caja.
   checkpoints: [
     // En los puentes: si caen en una isla, reaparecen justo antes de ella.
@@ -88,6 +96,7 @@ const level = {
   signs: [
     { x: -3.6, z: -3, top: 1, w: 3.4, h: 1.5, text: 'TRABAJO EN EQUIPO\n= RESULTADOS', art: 'matias/senal-trabajo-equipo.png' },
     { x: 3.6, z: 90, top: 1, w: 3.2, h: 1.5, text: 'P1: WASD + ESPACIO\nP2: FLECHAS + ENTER', style: 'info' },
+    { x: -3.4, z: 88.4, top: 1, w: 3.0, h: 1.3, text: '¿QUÉ NECESITA\nLA CAJA?', style: 'bar' },
     { x: -3.8, z: 84, top: 1, w: 3, h: 1.4, text: 'NPC EASY\n¡SÁLTENLO JUNTOS!', style: 'info' },
     { x: 3.8, z: 69, top: 1, w: 3, h: 1.4, text: 'NPC MEDIUM\n¡MUÉVANSE JUNTOS!', style: 'warn' },
     { x: -4.6, z: 54, top: 1, w: 3.2, h: 1.4, text: 'NPC HARD\n¡ESQUIVEN Y PASEN!', style: 'warn' },
@@ -104,7 +113,7 @@ const level = {
   ],
 
   props: [
-    { type: 'palm', x: -4.2, z: 94.5, top: 1 },
+    { type: 'palm', x: -6.4, z: 95.4, top: 1 },
     { type: 'palm', x: 4.2, z: 74, top: 1 },
     { type: 'palm', x: -4.2, z: 59, top: 1 },
     { type: 'palm', x: 5.2, z: 44, top: 1 },

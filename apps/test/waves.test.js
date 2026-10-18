@@ -1,5 +1,5 @@
 // Oleaje: waveIsland (isla + rompeolas), la cresta empuja y moja, el rompeolas del lado correcto tapa,
-// saltar juntos esquiva, el rompeolas choca, y la Bahía / Tormenta lo traen (sin navegador).
+// saltar juntos esquiva, el rompeolas choca, y la Bahía lo trae (sin navegador).
 import { describe, expect, it } from 'vitest';
 import { LEVELS } from '../src/levels/index.js';
 import { waveIsland } from '../src/levels/sections.js';
@@ -117,7 +117,7 @@ describe('oleaje', () => {
 });
 
 describe('oleaje en los mapas', () => {
-  for (const key of ['bahia', 'tormenta']) {
+  for (const key of ['bahia']) {
     it(`${key} tiene una isla de oleaje con rompeolas`, () => {
       const g = new Game(LEVELS[key], { seed: 1 });
       const zone = g.weather.zones.find((z) => z.type === 'waves');

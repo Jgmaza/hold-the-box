@@ -4,9 +4,9 @@ import { CONFIG } from '../config.js';
 import { mixVolume, slotKind } from './audioPrefs.js';
 import { AUDIO } from './deliveries.js';
 
-/** La selva (aldea, templo y puente) comparte un tema. El muelle se queda con el suyo. */
+/** La selva (aldea) tiene su tema. El muelle se queda con el suyo. */
 export function musicSlotFor(levelId) {
-  if (levelId === 'aldea' || levelId === 'templo' || levelId === 'puente') return 'musica-selva';
+  if (levelId === 'aldea') return 'musica-selva';
   return 'musica-loop';
 }
 

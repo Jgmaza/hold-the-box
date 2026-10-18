@@ -105,6 +105,14 @@ export class Box {
     this.events.emit('box:impact', { amount, cause, integrity: this.integrity });
   }
 
+  /** Recarga en estación (VIP / corazones de ayuda). No afecta bomba. */
+  heal(amount) {
+    if (amount <= 0 || this.bombMode) return 0;
+    const before = this.integrity;
+    this.integrity = clamp(this.integrity + amount, 0, 100);
+    return this.integrity - before;
+  }
+
   addWet(amount, cause) {
     if (amount <= 0) return;
     const before = this.wetness;

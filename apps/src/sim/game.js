@@ -29,13 +29,18 @@
 //   bomb:explode    {}                      llegó a 0 %
 //   bomb:hit        { amount, cause, health }   un golpe o agua le bajó el %
 //   bomb:desync     {}                      empezaron a ir desincronizados (la bomba se daña)
+//   recovery:enter  { id, kind, profile }   caja se acercó a un aparato (refill|cat|bomb|dry)
+//   recovery:tick   { id, kinds, heart }    ese aparato sí le sirvió este frame
+//   recovery:exit   { id, kind }            caja se alejó
 //   weather:enter / weather:exit / weather:warn / weather:start / weather:end  (ver sim/weather/weatherService.js)
 //   glass:break     { id, x, y, z }          un vidrio normal se rompió bajo un jugador
 //   glass:restore   {}                       los paneles vuelven (reinicio del nivel)
+//   cactus:poke     { x, z }                 un cactus hostil pinchó y bajó Contenido
 import { CONFIG } from '../config.js';
 import { Bomb } from './bomb.js';
 import { Box } from './box.js';
 import { Cat } from './cat.js';
+import { CactusPatch } from './cactus.js';
 import { solveCarry } from './carry.js';
 import { depenetrate, makeAABB } from './collision.js';
 import { Emitter } from './events.js';
@@ -72,7 +77,9 @@ export class Game {
     this.cat = new Cat();
     this.bomb = new Bomb();
     this.box.bomb = this.bomb;
+    this.box.cat = this.cat;
     this.weather = new WeatherService(level, { world: this.world, events: this.events, seed });
+    this.cacti = new CactusPatch(level.cacti, this.events);
     this._scratch = makeAABB(0, 0, 0, 0, 0, 0);
     this.state = 'title';
     this.time = 0; // reloj del mundo (obstáculos)
@@ -88,6 +95,7 @@ export class Game {
     this._lifeSpent = false; // la vida de esta derrota ya se restó (la última, al caer al agua)
     this.checkpointIndex = -1;
     this.checkpointSnapshot = { integrity: 100, wetness: 0, bomb: 100 };
+    this.cacti?.reset();
     this.ready = { p1: false, p2: false };
     this.respawnTimer = 0;
     this._teleported = true;
@@ -143,6 +151,7 @@ export class Game {
     if (this.gameOver) return this.restart();
     this._restoreSnapshot = this._lifeSpent = false;
     this.box.reset(this.checkpointSnapshot);
+    this.cacti.reset();
     this.cat.reset();
     this.bomb.reset(this.checkpointSnapshot.bomb);
     this.box.invuln = CONFIG.respawn.invulnTime;
@@ -276,6 +285,8 @@ export class Game {
 
     this.box.update(dt, p1, p2);
     this.cat.update(dt, this);
+    this.cacti.update(dt, this);
+    this._stepRecovery(dt, c);
 
     if (CONFIG.debug.godMode) {
       this.box.criticalTime = 0;
@@ -299,6 +310,25 @@ export class Game {
     if (this._checkFail()) return;
 
     if (this.world.inGoal(c)) this._win();
+  }
+
+  /** Estaciones de recuperación: curan / secan según perfil, sin vaciar contenido. */
+  _stepRecovery(dt, center) {
+    for (const st of this.world.recovery) {
+      const was = st.active;
+      st.active = st.contains(center.x, center.z);
+      if (st.active && !was) this.events.emit('recovery:enter', { id: st.id, kind: st.kind, profile: CONFIG.box.profile });
+      if (!st.active && was) {
+        st._heartAcc = 0;
+        this.events.emit('recovery:exit', { id: st.id, kind: st.kind });
+        continue;
+      }
+      if (!st.active) continue;
+      const tick = st.apply(dt, this.box, this.cat);
+      if (tick.kinds.length || tick.heart) {
+        this.events.emit('recovery:tick', { id: st.id, kinds: tick.kinds, heart: tick.heart, ...tick });
+      }
+    }
   }
 
   /** Si está parado en vidrio normal, el panel se va y al siguiente paso cae. */

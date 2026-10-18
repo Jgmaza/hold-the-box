@@ -353,7 +353,7 @@ const TEMPLATE = /* html */ `
       </nav>
       <p class="m-hint"><kbd>↑</kbd><kbd>↓</kbd> elegir · <kbd>Espacio</kbd> / <kbd>Enter</kbd> aceptar</p>
     </div>
-    <footer class="m-credit">Game Jam 2026 · Better Together</footer>
+    <footer class="m-credit">Game Jam 2026</footer>
 
     <div class="m-overlay">
       <div class="m-panel m-controls">

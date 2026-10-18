@@ -13,7 +13,7 @@ import { island, seeded } from './nature.js';
 export function buildBackdrop(P, parent, { minZ, maxZ, seaY, seed = 1, clear = 16, theme, biome, islands = true } = {}) {
   const g = P.gfx;
   const rand = seeded(seed * 977 + 13);
-  const look = theme === 'jungle' ? (biome === 'temple' ? 'ruins' : biome === 'canyon' ? 'canyon' : biome === 'village' ? 'village' : 'jungle') : 'beach';
+  const look = theme === 'desert' ? 'desert' : theme === 'jungle' ? (biome === 'village' ? 'village' : 'jungle') : 'beach';
   const sky = P.ball(parent, skyMaterial(g, look), [0, 0, 0], [400, 400, 400], { shadows: false, name: 'cielo' });
 
   const shores = [];
@@ -25,10 +25,10 @@ export function buildBackdrop(P, parent, { minZ, maxZ, seaY, seed = 1, clear = 1
     const x = side * (clear + w / 2 + rand() * 22);
     const h = 1.6 + rand() * 2.4;
     island(P, parent, {
-      x, z, w, d, h: look === 'canyon' ? h + 1.2 : h, seaY, look,
+      x, z, w, d, h, seaY, look,
       palms: look === 'jungle' || look === 'village' || look === 'beach' ? 1 + Math.floor(rand() * 3) : 0,
       bushes: 2 + Math.floor(rand() * 3),
-      rocks: look === 'canyon' ? 4 : 2,
+      rocks: 2,
       seed: Math.floor(rand() * 1e6),
     });
     shores.push({ x, z, w: w * 1.05, d: d * 1.05, round: true });
@@ -44,16 +44,12 @@ function skyMaterial(g, look = 'beach') {
   c.height = 512;
   const ctx = c.getContext('2d');
   const grad = ctx.createLinearGradient(0, 0, 0, 512);
-  const jungle = look === 'jungle' || look === 'ruins' || look === 'canyon' || look === 'village';
-  const horizon = look === 'ruins' ? '#cfc6b4' : look === 'canyon' ? '#c5d0d4' : look === 'jungle' || look === 'village' ? '#b8d4c0' : (g.palette.sky ?? '#8fd3f4');
-  if (look === 'ruins') {
-    grad.addColorStop(0, '#5a7a9a');
-    grad.addColorStop(0.3, '#8aa8b8');
-    grad.addColorStop(0.47, '#ddd4c4');
-  } else if (look === 'canyon') {
-    grad.addColorStop(0, '#4a6a88');
-    grad.addColorStop(0.3, '#7a9aaa');
-    grad.addColorStop(0.47, '#d0dde0');
+  const horizon = look === 'desert' ? '#f2c9a0' : look === 'jungle' || look === 'village' ? '#b8d4c0' : (g.palette.sky ?? '#8fd3f4');
+  if (look === 'desert') {
+    grad.addColorStop(0, '#2f6fbf');
+    grad.addColorStop(0.22, '#5aa0e0');
+    grad.addColorStop(0.4, '#f0c48a');
+    grad.addColorStop(0.5, '#f6d2a0');
   } else if (look === 'jungle' || look === 'village') {
     grad.addColorStop(0, '#3f7aaa');
     grad.addColorStop(0.3, '#6aa8c4');

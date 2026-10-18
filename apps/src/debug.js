@@ -17,6 +17,12 @@ export class DebugPanel {
     game.world.checkpoints.forEach((c, i) => (acts[`Checkpoint ${i + 1} (${c.def.id ?? i + 1})`] = () => game.teleport(i)));
     Object.assign(acts, {
       'Frente a la meta': () => game.teleport('goal'),
+      'Estaciones': () => {
+        const st = game.world.recovery[0];
+        if (!st) return;
+        const y = (st.top ?? 1);
+        game.teleport({ p1: { x: -0.8, y, z: st.z }, p2: { x: 0.8, y, z: st.z } });
+      },
       'Llenar caja': () => game.box.reset(),
       'Mojar +30%': () => game.box.addWet(30, 'debug'),
       'Copiar CONFIG': () => {

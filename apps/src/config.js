@@ -137,6 +137,13 @@ export const CONFIG = {
     sweeperLift: 4,
     sweeperHitCooldown: 0.6,
     sweeperKickDeg: 320, // golpe angular a la caja (grados/s)
+    cactus: {
+      reach: 1.15, // pincha a la caja o a un jugador dentro de este radio
+      warn: 2.4, // el radar pasa a PELIGRO
+      damage: 12, // % que baja Contenido
+      cooldown: 1.15,
+      lunge: 0.28, // segundos del estirón de espinas
+    },
   },
 
   // NPCs (solo en niveles que declaren `npcs`, ver src/sim/npcs/). Atacan la CAJA: botan contenido o la mojan.
@@ -285,6 +292,15 @@ export const CONFIG = {
     invulnTime: 1.2,
     failDelay: 1.2, // segundos viendo caer la caja antes de la pantalla de derrota
     lives: 3, // vidas por partida: cada derrota gasta una; sin vidas, se empieza el nivel desde la salida
+  },
+
+  // Estación de recuperación (trigger `level.recovery`): ayuda según la caja, sin vaciar contenido.
+  recovery: {
+    refillPerSec: 18, // VIP: recarga integrity
+    dryPerSec: 22, // abanicos: baja wetness
+    bombHealPerSec: 16, // bomba: sube health
+    catCalmPerSec: 35, // gato: baja rage
+    catHeartInterval: 0.35, // segundos entre corazones VFX
   },
 
   camera: {
