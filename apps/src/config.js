@@ -287,6 +287,15 @@ export const CONFIG = {
     lives: 3, // vidas por partida: cada derrota gasta una; sin vidas, se empieza el nivel desde la salida
   },
 
+  // Estación de recuperación (trigger `level.recovery`): ayuda según la caja, sin vaciar contenido.
+  recovery: {
+    refillPerSec: 18, // VIP: recarga integrity
+    dryPerSec: 22, // abanicos: baja wetness
+    bombHealPerSec: 16, // bomba: sube health
+    catCalmPerSec: 35, // gato: baja rage
+    catHeartInterval: 0.35, // segundos entre corazones VFX
+  },
+
   camera: {
     offset: { x: 0, y: 8.5, z: 10.5 },
     lookAhead: 2.5, // mira un poco hacia adelante (-Z)

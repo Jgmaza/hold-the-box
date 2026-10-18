@@ -32,6 +32,14 @@ export class Bomb {
     this.sinceDrain = 0;
   }
 
+  /** Reparación en estación de recuperación (nunca daña). */
+  heal(amount) {
+    if (this.exploded || amount <= 0) return 0;
+    const before = this.health;
+    this.health = Math.min(100, this.health + amount);
+    return this.health - before;
+  }
+
   update(dt, game) {
     if (!CONFIG.box.bomb.enabled || this.exploded || game.box.dropped) return;
     const B = CONFIG.box.bomb;

@@ -1,7 +1,8 @@
-// Mundo: colliders del nivel, obstáculos y triggers (checkpoints, meta).
+// Mundo: colliders del nivel, obstáculos y triggers (checkpoints, meta, recovery).
 import { propCollider } from '../levels/kenneyColliders.js';
 import { containsPoint, makeAABB, platformAABB } from './collision.js';
 import { Geyser, MovingPlatform, Sweeper } from './hazards.js';
+import { RecoveryStation } from './recovery.js';
 
 /** Trigger con forma de caja apoyada en `top` (alto `h`). */
 function triggerAABB({ x, z, w, d, top, h = 4 }) {
@@ -59,6 +60,7 @@ export class World {
     this.sweepers = (level.sweepers ?? []).map((s) => new Sweeper(s));
     this.geysers = (level.geysers ?? []).map((g) => new Geyser(g));
     this.checkpoints = (level.checkpoints ?? []).map((c) => ({ def: c, aabb: triggerAABB(c), spawn: c.spawn }));
+    this.recovery = (level.recovery ?? []).map((r) => new RecoveryStation(r));
     this.goal = level.goal ? triggerAABB({ ...level.goal, h: 5 }) : null;
 
     // Escenografía Kenney que choca (barriles, cajas, rocas, troncos de palmera…). No se dibuja aquí: es del nivel.
