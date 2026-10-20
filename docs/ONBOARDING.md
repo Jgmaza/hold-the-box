@@ -10,7 +10,7 @@ Juego online (prod): https://jgmaza.github.io/hold-the-box/
 ## 1) Arranque (15 min)
 
 1. Acepta la invitación de GitHub (mail o [invitations](https://github.com/Jgmaza/hold-the-box/invitations)).
-2. Clona y entra a **tu** rama:
+2. Clona, actualiza **`dev`** y abre una rama de **issue**:
 
 ```bash
 git clone https://github.com/Jgmaza/hold-the-box.git
@@ -18,9 +18,11 @@ cd hold-the-box
 
 > Si ya tenías el repo clonado con el nombre viejo, actualiza el remote:
 > `git remote set-url origin https://github.com/Jgmaza/hold-the-box.git`
-git checkout work/<tu-nombre>   # jose | danel | luis | zharick | juanes | matias
-git pull
+git checkout dev && git pull
+git checkout -b issue/<n>-slug   # n = número del issue en GitHub
 ```
+
+(Opcional) tu rama personal `work/<tu-nombre>` sigue existiendo para sync; las features van por **issue**.
 
 3. Lee [`INDEX.md`](../INDEX.md) → luego `team/<tu-nombre>/README.md`.
 4. Prueba el juego (opcional pero útil):
@@ -37,47 +39,44 @@ cd apps && npm install && npm run dev
 
 | Qué entregas | Dónde lo subes | Rama |
 |---|---|---|
-| Arte / audio / bugs | `deliveries/<tu-nombre>/` | `work/<tu-nombre>` |
-| Código del juego | `apps/` | `work/danel` (Zharick UI OK) |
-| Docs / deploy / jam | `docs/` | `work/jose` (u otra si te piden) |
+| Arte / audio / bugs | `deliveries/<tu-nombre>/` | `issue/<n>-…` (o `work/<tú>`) |
+| Código del juego | `apps/` | `issue/<n>-…` |
+| Docs / deploy / jam | `docs/` | `issue/<n>-…` |
 | Material oficial del jam | [`docs/jam/`](./jam/) | vía PR a `dev` |
 
-**No subas a `main`.** `main` solo recibe PRs desde `dev`.
+**No subas a `dev` ni a `main` en directo.** Solo PRs.
 
 ---
 
 ## 3) Flujo diario (modo de trabajo)
 
 ```
-work/<tú>  →  PR a dev  →  (auto) alimenta las demás work/*
-                 ↓
-            playtest en dev
-                 ↓
-         PR dev → main (2 ✅ + CI)
-                 ↓
-         GitHub Pages se actualiza solo
+issue/#N  →  rama issue/N-slug desde dev  →  PR → dev
+                                              ↓
+                                         playtest
+                                              ↓
+                              PR dev → main (solo Jose)
+                                              ↓
+                                         GitHub Pages
 ```
 
-### Tú (cada día)
+### Tú (cada issue)
 
 ```bash
-git checkout work/<tu-nombre>
-git pull                         # trae lo que llegó desde dev (sync automático)
+git checkout dev && git pull
+git checkout -b issue/<n>-slug
 # ... trabajas, commits ...
-git push -u origin work/<tu-nombre>
+git push -u origin HEAD
+gh pr create --base dev   # o el botón en GitHub
 ```
-
-Luego abre un **Pull Request → `dev`** (no a `main`).
 
 ### Qué pasa al entrar algo a `dev`
 
-1. Quien mergea el PR a `dev` (Jose/Danel) hace smoke test.
-2. El workflow **Sync work from dev** actualiza todas las `work/*` con un merge desde `dev`.
-3. Cada quien en su máquina: `git pull` en su `work/<nombre>` y sigue.
+1. Jose aprueba el PR (code owner) + CI verde; smoke test.
+2. El workflow **Sync work from dev** actualiza las `work/*`.
+3. Cuando el playtest está listo: **Jose** abre/mergea PR **`dev` → `main`**.
 
-Así nadie se queda en un snapshot viejo cuando hay entregas relevantes en `dev`.
-
-Detalle de ramas: [`BRANCHES.md`](./BRANCHES.md).
+Detalle: [`BRANCHES.md`](./BRANCHES.md).
 
 ---
 
@@ -91,10 +90,10 @@ Detalle de ramas: [`BRANCHES.md`](./BRANCHES.md).
 
 ### Reglas de `dev` y `main`
 
-- Solo por **pull request** (`work/*` → `dev`, `dev` → `main`)
-- **Aprueba solo Jose** (Lead + QA, code owner en `.github/CODEOWNERS`)
-- Check **CI / test** verde
-- Al mergear → deploy automático a Pages
+- **`dev`:** solo PR desde `issue/*` (o `work/*`); aprueba **Jose** + CI
+- **`main`:** solo PR desde **`dev`**; solo **Jose** puede mergear + CI
+- Nadie hace push directo a `dev` / `main`
+- Al mergear `main` → deploy automático a Pages
 
 ### Dos destinos de “publicado”
 
@@ -111,11 +110,11 @@ Guía completa de Jose: [`DEPLOY.md`](./DEPLOY.md).
 
 | Persona | Empuja a | Primero lee |
 |---|---|---|
-| Danel | `apps/` → PR `dev` | `team/danel/README.md` |
+| Danel | `apps/` → PR a `dev` | `team/danel/README.md` |
 | Luis | `deliveries/luis/` (+ jam en `docs/jam/` si aplica) | `team/luis/README.md` |
 | Juanes / Matias | `deliveries/<nombre>/` PNGs | su `team/.../README.md` |
 | Zharick | UI en `apps/` o bugs en `deliveries/zharick/` | `team/zharick/README.md` |
-| Jose | alcance + PR `dev→main` + itch | `team/jose/README.md` + `DEPLOY.md` |
+| Jose | alcance + merge PRs a `dev` + PR `dev→main` + itch | `team/jose/README.md` + `DEPLOY.md` |
 
 ---
 

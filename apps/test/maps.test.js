@@ -1,6 +1,6 @@
 // Mapas de mar (Muelle, Bahía): cargan, se pueden ganar, la dificultad sube y la escenografía no estorba.
 import { describe, expect, it } from 'vitest';
-import { LEVELS, MAPS } from '../src/levels/index.js';
+import { LEVELS, MAPS, mapLook } from '../src/levels/index.js';
 import { dressIsland, SCENERY_SETS } from '../src/levels/sections.js';
 import { BACK, FWD, Game, IDLE, RIGHT, jump, run } from './helpers.js';
 
@@ -45,6 +45,15 @@ describe('mapas de mar', () => {
   it('el selector los muestra primero, con 1 y 2 estrellas', () => {
     expect(MAPS.slice(0, 2).map((m) => m.key)).toEqual(SEA);
     expect(MAPS.slice(0, 2).map((m) => m.difficulty)).toEqual([1, 2]);
+  });
+
+  it('el preview del selector usa look por bioma', () => {
+    expect(mapLook(LEVELS.muelle)).toBe('beach');
+    expect(mapLook(LEVELS.bahia)).toBe('beach');
+    expect(mapLook(LEVELS.aldea)).toBe('jungle');
+    expect(mapLook(LEVELS.campamento)).toBe('desert');
+    expect(MAPS.find((m) => m.key === 'aldea').look).toBe('jungle');
+    expect(MAPS.find((m) => m.key === 'campamento').look).toBe('desert');
   });
 
   for (const key of SEA) {
