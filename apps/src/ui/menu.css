@@ -553,6 +553,25 @@
   border-radius: 50%;
   box-shadow: 0 4px 0 var(--ink);
 }
+/* Preview por bioma: mar = agua, selva = verde, desierto = arena. */
+.m-map[data-look='beach'] .m-map-icon {
+  background: linear-gradient(160deg, #7cc6f2 0%, var(--water) 55%, #0e7a9a 100%);
+}
+.m-map[data-look='jungle'] .m-map-icon {
+  background: linear-gradient(160deg, #b8d4a8 0%, #6aa85a 45%, #3d6b3a 100%);
+}
+.m-map[data-look='desert'] .m-map-icon {
+  background: linear-gradient(160deg, #f6d2a0 0%, #e0a868 50%, #c47a32 100%);
+}
+.m-map[data-look='jungle'].on {
+  background: #d4ecc8;
+}
+.m-map[data-look='desert'].on {
+  background: #f3d9b0;
+}
+.m-map[data-look='beach'].on {
+  background: #bfe8f6;
+}
 .m-map-tag {
   padding: 1px 10px;
   font-weight: 900;

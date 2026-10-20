@@ -66,6 +66,7 @@ export class Menu {
       card.type = 'button';
       card.className = 'm-map';
       card.dataset.level = m.key;
+      card.dataset.look = m.look ?? 'beach';
       const stars = '★'.repeat(m.difficulty) + '☆'.repeat(3 - m.difficulty);
       card.innerHTML = `
         <span class="m-map-icon">${m.icon}</span>

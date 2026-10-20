@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { LEVELS, MAPS } from '../src/levels/index.js';
 import { BOARD_SCOPES, CAMPAIGN_LEVELS, computeScore, isCampaignLevel, LEVEL_LABEL } from '../src/leaderboard/score.js';
 
 describe('computeScore (fórmula A)', () => {
@@ -30,5 +31,13 @@ describe('campaña', () => {
     expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'aldea', 'campamento']);
     expect(LEVEL_LABEL.general).toBe('General');
     expect(LEVEL_LABEL.bahia).toBe('Bahía');
+  });
+
+  it('cada mapa del selector está en la campaña y level.id = key', () => {
+    expect(MAPS.map((m) => m.key)).toEqual(CAMPAIGN_LEVELS);
+    for (const key of CAMPAIGN_LEVELS) {
+      expect(LEVELS[key]?.id).toBe(key);
+      expect(LEVEL_LABEL[key]).toBeTruthy();
+    }
   });
 });
