@@ -1,0 +1,100 @@
+HOLD THE BOX — VO limpia
+Video: export/htb-demo-v2-sin-vo.mp4
+Orden: personas → gameplay
+
+========== 0:00 PERSONAS ==========
+
+Lo más interesante de Hold the Box ocurrió
+cuando empezamos a verlo en manos de otras personas.
+
+Primero intentan coordinarse.
+Después se culpan.
+Después se ríen.
+Después vuelven a intentarlo.
+
+Y cuando finalmente llegan a la meta,
+celebran juntos.
+
+Ahí fue cuando entendimos que la idea funcionaba.
+
+Porque la sincronía dejó de estar en la pantalla
+y pasó a estar entre las personas.
+
+========== 0:25 CALLAR ==========
+(deja el audio de la gente hasta ~0:45)
+
+========== 0:45 HOOK (empieza el gameplay) ==========
+
+Parece un juego sobre llevar una caja.
+
+Pero Hold the Box es realmente un juego sobre sincronía.
+
+Dos jugadores.
+Un teclado.
+Y una sola oportunidad de llegar juntos.
+
+========== 1:05 QUÉ ES ==========
+
+Hold the Box es un juego cooperativo local para dos jugadores.
+
+Ambos comparten una sola carga.
+
+Cada salto, cada paso y cada error afecta directamente al otro jugador.
+
+Cuando trabajan juntos avanzan más rápido y controlan mejor la caja.
+
+Cuando se descoordinan, la estabilidad desaparece y empiezan los problemas.
+
+El enemigo no es el mapa.
+Es lo que cargan.
+
+========== 1:40 MECÁNICAS ==========
+
+Durante la campaña, los jugadores atraviesan cuatro mapas
+distribuidos en tres ambientes diferentes:
+
+mar,
+selva,
+y desierto.
+
+En el camino encontrarán lluvia, viento, oleaje, NPCs
+y peligros que pondrán a prueba su coordinación.
+
+El sistema de estabilidad responde constantemente a sus decisiones.
+
+Si saltan juntos, la caja permanece estable.
+
+Si se separan demasiado o aterrizan en momentos distintos,
+comienza a inclinarse.
+
+Y cuando el equilibrio se rompe, las consecuencias aparecen rápidamente.
+
+========== 2:25 CAJAS ==========
+
+Cada tipo de caja cambia la forma de cooperar.
+
+La caja VIP exige precisión.
+
+La caja del gato exige paciencia.
+
+Y la caja bomba exige control.
+
+Aunque los objetivos cambian,
+todas hacen la misma pregunta:
+
+¿qué tan bien pueden mantenerse sincronizados?
+
+========== 3:00 CIERRE ==========
+
+Hold the Box fue desarrollado durante GameJamPlus 2026
+bajo el tema Better Together.
+
+Y quisimos interpretarlo de la forma más simple posible:
+crear una experiencia donde avanzar depende menos de correr rápido
+y más de aprender a moverse juntos.
+
+Ya no jugamos a lo mismo.
+Pero crear un juego fue la mejor excusa para volver a hacerlo juntos.
+
+Hold the Box.
+Juéguenlo de a dos.

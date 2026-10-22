@@ -1,0 +1,152 @@
+1
+00:00:04,200 --> 00:00:08,500
+The most interesting part of Hold the Box
+happened when we saw it in other people's hands.
+
+2
+00:00:09,000 --> 00:00:13,200
+First they try to coordinate.
+Then they blame each other.
+
+3
+00:00:13,200 --> 00:00:16,500
+Then they laugh.
+Then they try again.
+
+4
+00:00:17,000 --> 00:00:19,300
+And when they finally reach the finish,
+they celebrate together.
+
+5
+00:00:20,000 --> 00:00:22,200
+That's when we knew the idea worked.
+
+6
+00:00:22,200 --> 00:00:24,300
+Because the sync left the screen
+and moved into the people.
+
+7
+00:00:45,500 --> 00:00:48,800
+It looks like a game about carrying a box.
+
+8
+00:00:48,800 --> 00:00:53,000
+But Hold the Box is really a game about sync.
+
+9
+00:00:53,000 --> 00:00:55,800
+Two players. One keyboard.
+And one chance to get there together.
+
+10
+00:00:59,000 --> 00:01:02,800
+Hold the Box is a local co-op game
+for two players.
+
+11
+00:01:02,800 --> 00:01:06,200
+You both share a single load.
+
+12
+00:01:06,200 --> 00:01:10,500
+Every jump, every step, and every mistake
+hits the other player directly.
+
+13
+00:01:10,500 --> 00:01:14,500
+When you work together, you move faster
+and control the box better.
+
+14
+00:01:14,500 --> 00:01:17,000
+When you fall out of sync,
+stability disappears — and the trouble starts.
+
+15
+00:01:17,500 --> 00:01:18,600
+The enemy isn't the map.
+It's what you're carrying.
+
+16
+00:01:22,000 --> 00:01:26,500
+Across the campaign, players cross four maps
+in three different environments:
+
+17
+00:01:27,200 --> 00:01:28,800
+sea, jungle, and desert.
+
+18
+00:01:29,500 --> 00:01:34,800
+Along the way: rain, wind, waves, NPCs,
+and hazards that test your coordination.
+
+19
+00:01:35,200 --> 00:01:38,300
+The stability system reacts
+to every decision you make.
+
+20
+00:01:38,700 --> 00:01:41,500
+Jump together, and the box stays stable.
+
+21
+00:01:41,500 --> 00:01:45,500
+Split too far, or land at different times,
+and it starts to tilt.
+
+22
+00:01:46,000 --> 00:01:50,300
+When the balance breaks,
+the consequences show up fast.
+
+23
+00:01:53,200 --> 00:01:56,000
+Each kind of box changes
+how you have to cooperate.
+
+24
+00:01:56,500 --> 00:02:00,500
+The VIP box needs precision.
+The cat box needs patience.
+
+25
+00:02:01,200 --> 00:02:03,500
+And the bomb box needs control.
+
+26
+00:02:03,500 --> 00:02:06,500
+The objectives change,
+but they all ask the same question:
+
+27
+00:02:06,500 --> 00:02:09,200
+How well can you stay in sync?
+
+28
+00:02:14,700 --> 00:02:20,500
+Hold the Box was made during GameJamPlus 2026
+under the theme Better Together.
+
+29
+00:02:21,000 --> 00:02:24,300
+We wanted the simplest take possible:
+
+30
+00:02:24,700 --> 00:02:29,800
+an experience where progress depends less
+on running fast —
+and more on learning to move together.
+
+31
+00:02:30,200 --> 00:02:35,500
+We don't play the same games anymore.
+But making a game was the best excuse
+to do it together again.
+
+32
+00:02:36,000 --> 00:02:38,000
+Hold the Box.
+Play it with two.

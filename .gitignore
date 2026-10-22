@@ -12,3 +12,18 @@ node_modules/
 .idea/
 .vscode/
 *.wav.bak
+
+# Video demo — keep docs/subs/oficial; ignore heavy sources & work files
+deliveries/**/video-demo/raw/**
+!deliveries/**/video-demo/raw/.gitkeep
+deliveries/**/video-demo/export/clips/
+deliveries/**/video-demo/export/_*
+deliveries/**/video-demo/export/htb-demo-v[123]*
+deliveries/**/video-demo/vo/parts/
+deliveries/**/video-demo/vo/_*
+deliveries/**/video-demo/vo/*.wav
+deliveries/**/video-demo/vo/*-synced*
+deliveries/**/video-demo/vo/*-clean*
+deliveries/**/video-demo/vo/*-mastered*
+deliveries/**/video-demo/assets/storyboard*/
+.cursor/plans/
