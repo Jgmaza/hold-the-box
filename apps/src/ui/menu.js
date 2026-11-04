@@ -33,10 +33,10 @@ export class Menu {
   /**
    * @param {HTMLElement} root
    * @param {{ stage: import('../view/menuStage.js').MenuStage, maps: object[], palette: object,
-   *           initial?: object, audio?: import('../view/audio.js').GameAudio,
+   *           initial?: object, audio?: import('../view/audio.js').GameAudio, touch?: boolean,
    *           onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
    */
-  constructor(root, { stage, maps, palette, initial, onStart, audio = null }) {
+  constructor(root, { stage, maps, palette, initial, onStart, audio = null, touch = false }) {
     this.root = root;
     this.stage = stage;
     this.onStart = onStart;
@@ -55,6 +55,12 @@ export class Menu {
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
+    // En celular/tablet cada jugador juega en su aparato: no hay Local (dos en un teclado).
+    if (touch) {
+      this.$('[data-act="play"]').hidden = true;
+      this.$('[data-act="online"]').classList.replace('light', 'big');
+      this.homeFocus = HOME_ACTS.indexOf('online');
+    }
     bindVolumeSliders(this.root, () => this.audio?.applyMix());
     selectBox(this.state.box);
     this._syncStage(true);
@@ -367,9 +373,15 @@ const TEMPLATE = /* html */ `
       <div class="m-panel m-controls">
         <header class="m-panel-head">
           <h2>Controles</h2>
-          <p>Los dos juegan en el mismo teclado</p>
+          <p class="m-only-keys">Los dos juegan en el mismo teclado</p>
+          <p class="m-only-touch">Cada jugador en su celular</p>
         </header>
-        <div class="m-pads">
+        <div class="m-touch-pads m-only-touch">
+          <div class="m-tip"><span class="m-tip-icon">🕹</span><b>Mover</b><span>Pon el dedo en la mitad izquierda y arrástralo.</span></div>
+          <div class="m-tip"><span class="m-tip-icon">⤒</span><b>Saltar</b><span>Botón amarillo abajo a la derecha.</span></div>
+          <div class="m-tip"><span class="m-tip-icon">❚❚</span><b>Pausa</b><span>Botón de arriba, junto al nivel de la caja.</span></div>
+        </div>
+        <div class="m-pads m-only-keys">
           ${padCard('p1', 'Jugador 1', ['', 'W', '', 'A', 'S', 'D'], 'Espacio')}
           ${padCard('p2', 'Jugador 2', ['', '↑', '', '←', '↓', '→'], 'Enter')}
         </div>
@@ -377,7 +389,7 @@ const TEMPLATE = /* html */ `
           <h3>Audio</h3>
           ${VOLUME_SLIDERS_HTML}
         </section>
-        <section class="m-section">
+        <section class="m-section m-only-keys">
           <h3>En partida</h3>
           <div class="m-chips">
             <span class="m-chip"><kbd>P</kbd><kbd>Esc</kbd>Pausa</span>

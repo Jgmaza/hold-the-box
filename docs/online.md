@@ -11,6 +11,7 @@ correo → "revisa tu correo" → nombre (3–16) → lobby (crear sala / unirse
 ```
 
 - **Local** no cambia y no pide login.
+- **Celular / tablet** (rama `issue/mobile-touch`): cada jugador juega en su aparato, así que ahí no aparece Local y Multijugador es el botón principal. En partida hay joystick (mitad izquierda), saltar (abajo a la derecha) y pausa. Hoy el táctil mueve a P1; cuando exista #67 debe mover al jugador de `room.me`. Para probar sin #67: `?level=muelle` en el celular.
 - Hoy la UI usa un **backend demo** (`apps/src/online/demoBackend.js`, se ve la etiqueta **DEMO**):
   - el enlace mágico "se abre" solo a los 2,5 s;
   - `admin`, `jose` y `holdthebox` salen como nombres ocupados;

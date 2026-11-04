@@ -8,6 +8,7 @@ import { Input } from './input.js';
 import { DEFAULT_LEVEL, LEVELS, MAPS } from './levels/index.js';
 import { buildPalette } from './palette.js';
 import { Game } from './sim/game.js';
+import { TouchControls, isTouchDevice, mergeInputs } from './touch.js';
 import { Menu } from './ui/menu.js';
 import { UI } from './ui/ui.js';
 import { GameAudio } from './view/audio.js';
@@ -38,6 +39,9 @@ const newSeed = () => (params.has('seed') ? Number(params.get('seed')) : (Math.r
 const audio = new GameAudio(app);
 window.audio = audio;
 const input = new Input(window);
+// Celular/tablet: joystick + saltar para el jugador de este aparato (P1 hasta que exista el online, #67).
+const touch = isTouchDevice() ? new TouchControls({ onPause: () => run?.game.togglePause() }) : null;
+document.documentElement.classList.toggle('is-touch', !!touch);
 const uiRoot = document.getElementById('ui');
 const stage = new MenuStage(app, palette);
 const menu = new Menu(document.getElementById('menu'), {
@@ -47,6 +51,7 @@ const menu = new Menu(document.getElementById('menu'), {
   initial: { box: CONFIG.box.profile, ...DEFAULT_CHARS },
   onStart: (sel) => startRun(sel),
   audio,
+  touch: !!touch,
 });
 
 /** Partida en curso: { game, view, ui } o null mientras se está en el menú. */
@@ -91,6 +96,7 @@ function endRun() {
 
 function backToMenu() {
   endRun();
+  touch?.show(false);
   stage.show(true);
   menu.open('map');
 }
@@ -112,7 +118,8 @@ app.on('update', (dt) => {
     const { game, view, ui } = run;
     globalKeys(game);
     if (run) {
-      game.setInputs(input.player('p1'), input.player('p2'));
+      touch?.show(game.state === 'playing');
+      game.setInputs(mergeInputs(input.player('p1'), touch?.state()), input.player('p2'));
       game.update(dt);
       view.update(dt);
       ui.update(dt);
@@ -124,6 +131,7 @@ app.on('update', (dt) => {
     stage.update(dt);
   }
   input.endFrame();
+  touch?.endFrame();
 });
 
 if (params.has('level')) {
