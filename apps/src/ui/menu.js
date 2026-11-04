@@ -1,11 +1,14 @@
 // Menú del juego en HTML encima de la escena 3D del menú (view/menuStage.js).
 //   Inicio → Mapa + caja → Personajes (cada uno escoge y marca LISTO) → 3, 2, 1 → onStart(selección)
+//   Inicio → Multijugador abre ui/online.js (login, salas, micro).
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
+import { online } from '../online/index.js';
 import { CHARACTERS, character } from '../view/characters.js';
 import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import { ArcadeOverlay } from './arcade.js';
 import { MenuState } from './menuState.js';
+import { OnlineOverlay } from './online.js';
 import './theme.css';
 import './menu.css';
 
@@ -24,7 +27,7 @@ const SLOT_KEYS = {
   p2: { left: ['ArrowLeft'], right: ['ArrowRight'], ok: ['Enter', 'NumpadEnter'] },
 };
 
-const HOME_ACTS = ['play', 'scores', 'controls'];
+const HOME_ACTS = ['play', 'online', 'scores', 'controls'];
 
 export class Menu {
   /**
@@ -48,6 +51,7 @@ export class Menu {
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
     this.arcade = new ArcadeOverlay(root);
+    this.online = new OnlineOverlay({ service: online, maps, onClose: () => this._render() });
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
@@ -120,6 +124,8 @@ export class Menu {
       const ok = await this.arcade.ensureRegistered();
       if (!ok) return;
       s.go('map');
+    } else if (act === 'online') {
+      return this.online.show();
     } else if (act === 'scores') {
       return this.arcade.showBoard();
     } else if (act === 'controls') this.overlay = true;
@@ -247,7 +253,7 @@ export class Menu {
   // ---------------------------------------------------------------- teclado (cada frame)
 
   update(dt, input) {
-    if (!this.visible) return;
+    if (!this.visible || this.online.visible) return;
     const s = this.state;
     const hit = (codes) => input.wasPressed(codes);
 
@@ -348,7 +354,8 @@ const TEMPLATE = /* html */ `
         </div>
       </div>
       <nav class="m-home">
-        <button type="button" class="btn big" data-act="play"><span class="ico">▶</span>Jugar</button>
+        <button type="button" class="btn big" data-act="play"><span class="ico">▶</span>Local</button>
+        <button type="button" class="btn light" data-act="online"><span class="ico">🌐</span>Multijugador</button>
         <button type="button" class="btn light" data-act="scores"><span class="ico">🏆</span>Records</button>
         <button type="button" class="btn light" data-act="controls"><span class="ico">🎮</span>Controles</button>
       </nav>

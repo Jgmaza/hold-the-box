@@ -82,6 +82,13 @@ apps/
     input.js            teclado → input de P1/P2 (event.code, sirve en teclado español)
     palette.js          paleta por defecto + lectura de deliveries/luis/PALETTE.md
     debug.js            panel lil-gui (?debug / F2)
+    online/             servicios del multijugador sin DOM (se prueban con vitest)
+      index.js          qué backend usa la UI (hoy: demo; contrato en docs/online.md)
+      demoBackend.js    login y salas de mentira para probar la UI sin Supabase
+      validate.js       reglas de correo, username (3–16) y código de sala
+      flow.js           qué paso del multijugador toca mostrar
+      voice.js          micro: permiso, silenciar y nivel de voz
+      emitter.js        avisos de "cambió algo" (auth, sala, micro)
     sim/                simulación pura (sin PlayCanvas → se prueba con vitest)
       game.js           GameState: estados, respawn, checkpoints, victoria/derrota, eventos
       box.js            la caja: sincronía, inclinación, estados, huequito, mojado
@@ -127,6 +134,7 @@ apps/
     ui/                 HTML/CSS encima del canvas
       menu.js  menu.css  Inicio, Mapas + caja, Personajes (lee menuState.js, mueve menuStage)
       menuState.js      estado del menú sin DOM (se prueba con vitest)
+      online.js  online.css  Multijugador: correo → nombre → lobby → sala con LISTO y micro (docs/online.md)
       ui.js  ui.css     HUD + pausa / victoria / derrota de la partida
       theme.css         colores, fuente (Lilita One), botones .btn y kbd compartidos
   test/                 tests de colisiones, escenarios de juego, NPCs y paleta
