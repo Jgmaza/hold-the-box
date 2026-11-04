@@ -160,6 +160,40 @@
   box-shadow: 0 4px 0 var(--ink);
 }
 
+/* "o" entre el correo y el invitado. */
+.ol-or {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+.ol-or::before,
+.ol-or::after {
+  content: '';
+  flex: 1;
+  border-top: 3px dashed rgba(29, 29, 29, 0.4);
+}
+.ol-guest {
+  margin: 2px 0 0;
+  font-weight: 800;
+  font-size: 13px;
+}
+.ol-link {
+  padding: 0;
+  font: inherit;
+  font-weight: 900;
+  color: var(--water);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
 /* ---------------------------------------------------------------- Revisa tu correo */
 
 .ol-email {
