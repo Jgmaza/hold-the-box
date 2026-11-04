@@ -77,6 +77,8 @@ apps/
   index.html            canvas + capa de UI
   vite.config.js        base relativa, acceso a ../deliveries, recarga al subir entregas
   src/
+    boot.js             entrada: en celular muestra "muy pronto" (ui/comingSoon.js) y no carga el juego; en PC carga main.js
+    mobile.js           detecta celular/tablet (?mobile fuerza la pantalla de celular, ?desktop el juego)
     main.js             arranque, menú ↔ partida (startRun / backToMenu) y loop: teclas → input → sim → vista → UI
     config.js           TODOS los parámetros ajustables
     input.js            teclado → input de P1/P2 (event.code, sirve en teclado español)
@@ -127,6 +129,7 @@ apps/
     ui/                 HTML/CSS encima del canvas
       menu.js  menu.css  Inicio, Mapas + caja, Personajes (lee menuState.js, mueve menuStage)
       menuState.js      estado del menú sin DOM (se prueba con vitest)
+      comingSoon.js  comingSoon.css  pantalla de celular (logo + "muy pronto")
       ui.js  ui.css     HUD + pausa / victoria / derrota de la partida
       theme.css         colores, fuente (Lilita One), botones .btn y kbd compartidos
   test/                 tests de colisiones, escenarios de juego, NPCs y paleta
