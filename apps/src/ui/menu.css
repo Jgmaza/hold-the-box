@@ -795,14 +795,55 @@
   }
 }
 
+/* Táctil (clase is-touch en <html>): sin pistas de teclado; Controles explica el joystick. */
+.m-only-touch {
+  display: none;
+}
+.is-touch .m-panel-head .m-only-touch {
+  display: block;
+}
+.is-touch .m-touch-pads {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+.is-touch .m-only-keys,
+.is-touch .m-hint:has(kbd),
+.is-touch .m-keys {
+  display: none;
+}
+
+/* Celular vertical: la fila de mapas se desliza con el dedo; las flechas solo quitaban espacio. */
+@media (max-width: 560px) {
+  .m-maps-wrap .m-arrow {
+    display: none;
+  }
+  .m-maps .m-map {
+    flex-basis: min(240px, 70vw);
+  }
+}
+
 @media (max-width: 720px) {
   .m-boxes,
   .m-pads,
-  .m-tips {
+  .m-tips,
+  .is-touch .m-touch-pads {
     grid-template-columns: 1fr;
   }
   .m-home-col {
     width: 100%;
+  }
+  .m-home .btn.big {
+    padding: 12px 20px;
+    font-size: clamp(22px, 7.5vw, 36px);
+  }
+  .m-fullscreen {
+    top: calc(env(safe-area-inset-top) + 10px);
+    right: calc(env(safe-area-inset-right) + 10px);
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
   }
   .m-box span:last-child,
   .m-char-blurb {

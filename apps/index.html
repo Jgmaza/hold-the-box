@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Hold the Box</title>
     <link rel="icon" href="data:," />
     <meta name="description" content="Hold the Box — plataformas cooperativo local para 2 jugadores. Game Jam 2026 · Better Together." />
@@ -15,13 +15,19 @@
         margin: 0;
         height: 100%;
         overflow: hidden;
+        overscroll-behavior: none;
         background: #8fd3f4;
+      }
+      body {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
       #app {
         display: block;
         width: 100%;
         height: 100%;
         outline: none;
+        touch-action: none;
       }
     </style>
   </head>

@@ -80,6 +80,7 @@ apps/
     main.js             arranque, menú ↔ partida (startRun / backToMenu) y loop: teclas → input → sim → vista → UI
     config.js           TODOS los parámetros ajustables
     input.js            teclado → input de P1/P2 (event.code, sirve en teclado español)
+    touch.js            celular/tablet: joystick + saltar + pausa para el jugador de ese aparato (?touch lo fuerza en PC)
     palette.js          paleta por defecto + lectura de deliveries/luis/PALETTE.md
     debug.js            panel lil-gui (?debug / F2)
     online/             servicios del multijugador sin DOM (se prueban con vitest)
@@ -135,7 +136,8 @@ apps/
       menu.js  menu.css  Inicio, Mapas + caja, Personajes (lee menuState.js, mueve menuStage)
       menuState.js      estado del menú sin DOM (se prueba con vitest)
       online.js  online.css  Multijugador: correo → nombre → lobby → sala con LISTO y micro (docs/online.md)
-      ui.js  ui.css     HUD + pausa / victoria / derrota de la partida
+      ui.js  ui.css     HUD + pausa / victoria / derrota de la partida (HUD compacto en celular)
+      touch.css         joystick y botones táctiles
       theme.css         colores, fuente (Lilita One), botones .btn y kbd compartidos
   test/                 tests de colisiones, escenarios de juego, NPCs y paleta
 ```
