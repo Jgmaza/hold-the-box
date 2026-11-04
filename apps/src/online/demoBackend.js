@@ -1,5 +1,5 @@
-// Backend de mentira para usar la UI online sin Supabase: el enlace mágico "se abre" solo
-// y en la sala aparece un compañero simulado que marca LISTO después de ti.
+// Backend de mentira para usar la UI online sin Supabase: el enlace mágico "se abre" solo,
+// se puede entrar como invitado y en la sala aparece un compañero simulado que marca LISTO después de ti.
 // Implementa el mismo contrato que el backend real (docs/online.md).
 import { Emitter } from './emitter.js';
 import { isValidEmail, isValidRoomCode, normalizeEmail, normalizeRoomCode, randomRoomCode, usernameError } from './validate.js';
@@ -27,7 +27,28 @@ class DemoAuth {
     const address = normalizeEmail(email);
     clearTimeout(this._linkTimer);
     this._linkTimer = setTimeout(() => {
-      this.session = { userId: `demo-${address}`, email: address };
+      this.session = { userId: `demo-${address}`, email: address, guest: false };
+      this._changed.emit();
+    }, this._delay.link);
+    return { ok: true };
+  }
+
+  async signInAsGuest() {
+    clearTimeout(this._linkTimer);
+    this.session = { userId: `demo-guest-${Math.random().toString(36).slice(2, 8)}`, email: null, guest: true };
+    this._changed.emit();
+    return { ok: true };
+  }
+
+  /** Invitado → cuenta con correo: el mismo usuario (y su nombre) cuando "abre" el enlace. */
+  async linkEmail(email) {
+    if (!this.session?.guest) return { ok: false, error: 'no_session' };
+    if (!isValidEmail(email)) return { ok: false, error: 'invalid_email' };
+    const address = normalizeEmail(email);
+    clearTimeout(this._linkTimer);
+    this._linkTimer = setTimeout(() => {
+      if (!this.session?.guest) return;
+      this.session = { ...this.session, email: address, guest: false };
       this._changed.emit();
     }, this._delay.link);
     return { ok: true };

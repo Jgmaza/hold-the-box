@@ -44,6 +44,7 @@ export class OnlineOverlay {
     this.visible = false;
     this.sentTo = null;
     this.editingName = false;
+    this.linking = false; // invitado agregando su correo
     this.room = null;
     this.voice = new VoiceChat();
     this._step = null;
@@ -59,7 +60,14 @@ export class OnlineOverlay {
     // Fuera de #menu: el menú tiene pointer-events:none.
     document.body.appendChild(this.el);
 
-    this._offAuth = service.auth.onChange(() => this.visible && this._refresh());
+    this._offAuth = service.auth.onChange(() => {
+      const { session } = service.auth;
+      if (this.linking && session && !session.guest) {
+        this.linking = false;
+        this.sentTo = null;
+      }
+      if (this.visible) this._refresh();
+    });
     this._offVoice = this.voice.onChange(() => this._paintMic());
     this._onKey = (e) => {
       if (!this.visible || e.key !== 'Escape') return;
@@ -107,7 +115,14 @@ export class OnlineOverlay {
 
   _currentStep() {
     const { session, profile } = this.service.auth;
-    return onlineStep({ session, profile, sentTo: this.sentTo, editingName: this.editingName, room: this.room });
+    return onlineStep({
+      session,
+      profile,
+      sentTo: this.sentTo,
+      editingName: this.editingName,
+      linking: this.linking,
+      room: this.room,
+    });
   }
 
   /** Cambia de panel si cambió el paso y repinta lo que se mueve. */
@@ -125,8 +140,8 @@ export class OnlineOverlay {
   }
 
   _template(step) {
-    if (step === 'email') return EMAIL_HTML;
-    if (step === 'sent') return sentHtml(this.service.demo);
+    if (step === 'email') return emailHtml(this.linking);
+    if (step === 'sent') return sentHtml(this.service.demo, this.linking);
     if (step === 'username') return usernameHtml(this.editingName);
     if (step === 'lobby') return LOBBY_HTML;
     return ROOM_HTML;
@@ -147,6 +162,7 @@ export class OnlineOverlay {
       const name = this.service.auth.profile?.username ?? '';
       $('.ol-name').textContent = name;
       $('.ol-user .ol-avatar').textContent = name.slice(0, 1).toUpperCase();
+      $('.ol-guest').hidden = !this.service.auth.session?.guest;
       if (this._lobbyError) this._error(errorText(this._lobbyError));
       this._lobbyError = null;
     } else if (step === 'room') {
@@ -168,6 +184,10 @@ export class OnlineOverlay {
       this.sentTo = null;
       return this._refresh();
     }
+    if (this._step === 'email' && this.linking) {
+      this.linking = false;
+      return this._refresh();
+    }
     this.hide();
   }
 
@@ -185,7 +205,17 @@ export class OnlineOverlay {
     if (act === 'sign-out') {
       this.sentTo = null;
       this.editingName = false;
+      this.linking = false;
       return auth.signOut();
+    }
+    if (act === 'guest') {
+      const res = await this._busy(() => auth.signInAsGuest());
+      return res?.ok ? this._refresh() : this._error(errorText(res?.error));
+    }
+    if (act === 'link') {
+      this.linking = true;
+      this.sentTo = null;
+      return this._refresh();
     }
     if (act === 'create') return this._enterRoom(await this._busy(() => rooms.create()));
     if (act === 'copy') return this._copyCode();
@@ -222,7 +252,8 @@ export class OnlineOverlay {
 
   async _sendLink(email) {
     if (this.sentTo && Date.now() < this._resendAt) return;
-    const res = await this._busy(() => this.service.auth.sendMagicLink(email));
+    const { auth } = this.service;
+    const res = await this._busy(() => (this.linking ? auth.linkEmail(email) : auth.sendMagicLink(email)));
     if (!res?.ok) return this._error(errorText(res?.error));
     this.sentTo = email;
     this._resendAt = Date.now() + RESEND_COOLDOWN_S * 1000;
@@ -379,22 +410,35 @@ function slotHtml(player, i, meId) {
   </div>`;
 }
 
-const EMAIL_HTML = /* html */ `
+const emailHtml = (linking) => /* html */ `
   <header class="ol-head">
-    <h2>Multijugador</h2>
-    <p>Entra con tu correo: te mandamos un enlace mágico, sin contraseña.</p>
+    <h2>${linking ? 'Guardar cuenta' : 'Multijugador'}</h2>
+    <p>${
+      linking
+        ? 'Agrega tu correo y conservas tu nombre y tus récords. Sin contraseña.'
+        : 'Entra con tu correo: te mandamos un enlace mágico, sin contraseña.'
+    }</p>
   </header>
   <form class="ol-form" data-form="email" novalidate>
     <input class="ol-input" name="email" type="email" autocomplete="email" placeholder="tu@correo.com" />
     <p class="ol-error" aria-live="polite"></p>
     <button type="submit" class="btn big go">Enviar enlace</button>
   </form>
-  <button type="button" class="btn light" data-act="close">Volver al menú</button>`;
+  ${
+    linking
+      ? '<button type="button" class="btn light" data-act="back">Cancelar</button>'
+      : `<div class="ol-or"><span>o</span></div>
+  <button type="button" class="btn" data-act="guest">👤 Jugar como invitado</button>
+  <p class="ol-help">Solo eliges un nombre. Puedes guardar tu cuenta con correo después.</p>
+  <button type="button" class="btn light" data-act="close">Volver al menú</button>`
+  }`;
 
-const sentHtml = (demo) => /* html */ `
+const sentHtml = (demo, linking) => /* html */ `
   <header class="ol-head">
     <h2>Revisa tu correo</h2>
-    <p>Te mandamos un enlace a <b class="ol-email"></b>. Ábrelo en este mismo navegador y entras solo.</p>
+    <p>Te mandamos un enlace a <b class="ol-email"></b>. Ábrelo en este mismo navegador y ${
+      linking ? 'tu cuenta queda guardada' : 'entras solo'
+    }.</p>
   </header>
   <div class="ol-wait"><span class="ol-spinner"></span>Esperando el enlace…</div>
   ${demo ? '<p class="ol-help">Modo demo: el enlace se abre solo en unos segundos.</p>' : ''}
@@ -421,7 +465,7 @@ const usernameHtml = (editing) => /* html */ `
   ${
     editing
       ? '<button type="button" class="btn light" data-act="back">Cancelar</button>'
-      : '<div class="ol-actions"><button type="button" class="btn light" data-act="close">Volver al menú</button><button type="button" class="btn light" data-act="sign-out">Usar otro correo</button></div>'
+      : '<div class="ol-actions"><button type="button" class="btn light" data-act="close">Volver al menú</button><button type="button" class="btn light" data-act="sign-out">Entrar de otra forma</button></div>'
   }`;
 
 const LOBBY_HTML = /* html */ `
@@ -433,6 +477,10 @@ const LOBBY_HTML = /* html */ `
       <button type="button" class="btn light small" data-act="edit-name">Editar</button>
       <button type="button" class="btn light small" data-act="sign-out">Salir</button>
     </div>
+    <p class="ol-guest" hidden>
+      Juegas como invitado: si sales, pierdes este nombre.
+      <button type="button" class="ol-link" data-act="link">Guardar con correo</button>
+    </p>
   </header>
   <div class="ol-cards">
     <section class="ol-card">

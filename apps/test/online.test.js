@@ -49,6 +49,14 @@ describe('pasos del multijugador', () => {
     expect(onlineStep({ session, profile, room: { closed: false } })).toBe('room');
   });
 
+  it('invitado: va directo al nombre; al guardar cuenta pasa por correo y vuelve al lobby', () => {
+    const guest = { userId: 'g1', guest: true };
+    expect(onlineStep({ session: guest, profile: null })).toBe('username');
+    expect(onlineStep({ session: guest, profile, linking: true })).toBe('email');
+    expect(onlineStep({ session: guest, profile, linking: true, sentTo: 'a@b.co' })).toBe('sent');
+    expect(onlineStep({ session: { ...guest, guest: false }, profile, linking: true })).toBe('lobby');
+  });
+
   it('editar el nombre vuelve al paso de nombre; una sala cerrada vuelve al lobby', () => {
     expect(onlineStep({ session, profile, editingName: true })).toBe('username');
     expect(onlineStep({ session, profile, room: { closed: true } })).toBe('lobby');
@@ -82,6 +90,21 @@ describe('backend demo', () => {
     await auth.signOut();
     expect(auth.session).toBe(null);
     expect(changes).toHaveBeenCalledTimes(3);
+  });
+
+  it('invitado: entra sin correo y al guardar la cuenta conserva usuario y nombre', async () => {
+    const { auth, rooms } = createDemoBackend();
+    expect(await auth.linkEmail('luis@correo.com')).toEqual({ ok: false, error: 'no_session' });
+    await auth.signInAsGuest();
+    expect(auth.session.guest).toBe(true);
+    await auth.setUsername('Luis');
+    expect((await rooms.create()).ok).toBe(true);
+    const { userId } = auth.session;
+    expect(await auth.linkEmail('mal')).toEqual({ ok: false, error: 'invalid_email' });
+    expect(await auth.linkEmail('Luis@Correo.com')).toEqual({ ok: true });
+    vi.advanceTimersByTime(DEMO_DELAY.link);
+    expect(auth.session).toEqual({ userId, email: 'luis@correo.com', guest: false });
+    expect(auth.profile.username).toBe('Luis');
   });
 
   it('sin sesión no se crean salas', async () => {

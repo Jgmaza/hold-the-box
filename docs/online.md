@@ -11,6 +11,7 @@ correo → "revisa tu correo" → nombre (3–16) → lobby (crear sala / unirse
 ```
 
 - **Local** no cambia y no pide login.
+- **Invitado** (rama `issue/63-guest-login`, propuesta para comparar): en la pantalla del correo hay "Jugar como invitado". Solo pide el nombre. En el lobby el invitado ve "Guardar con correo": agrega su correo y queda con **el mismo usuario y nombre**. Idea: el multijugador se juega como invitado y el correo solo se pide para entrar al ranking (#64).
 - Hoy la UI usa un **backend demo** (`apps/src/online/demoBackend.js`, se ve la etiqueta **DEMO**):
   - el enlace mágico "se abre" solo a los 2,5 s;
   - `admin`, `jose` y `holdthebox` salen como nombres ocupados;
@@ -25,7 +26,8 @@ correo → "revisa tu correo" → nombre (3–16) → lobby (crear sala / unirse
 1. Dashboard → **Authentication → Providers → Email**: activo, con *magic link*.
 2. **Authentication → URL Configuration**: Site URL `https://jgmaza.github.io/hold-the-box/` y en Redirect URLs agregar también `http://localhost:5173/`.
 3. **SMTP propio** (Resend, Brevo…): el correo de Supabase por defecto manda muy pocos por hora y en la expo no alcanza.
-4. Tabla de perfiles. Propuesta (mismas reglas que `apps/src/online/validate.js`):
+4. Si se usa invitado: **Authentication → Sign In / Providers → Allow anonymous sign-ins**. Conviene activar CAPTCHA (o límite por IP) para que no creen miles de cuentas, y borrar de vez en cuando los anónimos viejos que nunca guardaron correo. Guardar la cuenta es `supabase.auth.updateUser({ email })`: Supabase manda el correo de confirmación y el `user_id` no cambia, así que el perfil se conserva.
+5. Tabla de perfiles. Propuesta (mismas reglas que `apps/src/online/validate.js`):
 
 ```sql
 create table public.profiles (
@@ -68,10 +70,13 @@ WebRTC P2P entre los dos PCs, con la señalización (offer / answer / ICE) por *
 online = { demo?: boolean, auth, rooms }
 
 // auth: estado que se lee directo + aviso cuando cambia
-auth.session            // { userId, email } | null
+auth.session            // { userId, email, guest } | null   (guest: true = anónimo, email: null)
 auth.profile            // { username } | null
 auth.onChange(fn)       // → función para dejar de escuchar
 await auth.sendMagicLink(email) // { ok: true } | { ok: false, error: 'invalid_email' | 'rate_limited' | 'network' }
+await auth.signInAsGuest()      // { ok: true } | { ok: false, error: 'rate_limited' | 'network' }
+await auth.linkEmail(email)     // invitado → con correo; al confirmar, session.guest = false con el mismo userId
+                                // { ok: true } | { ok: false, error: 'invalid_email' | 'rate_limited' | 'no_session' | 'network' }
 await auth.setUsername(name)    // { ok: true } | { ok: false, error: 'invalid' | 'taken' | 'no_session' | 'network' }
 await auth.signOut()
 
