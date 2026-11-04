@@ -59,11 +59,24 @@
   text-shadow: 0 5px 0 var(--ink);
 }
 .m-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 6px;
   margin: 0;
   font-weight: 800;
   font-size: 14px;
   color: var(--paper);
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+.m-hint kbd {
+  min-width: 1.4em;
+  padding: 1px 8px;
+  line-height: 1.4;
+  text-shadow: none;
+  border-bottom-width: 3px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
 }
 .m-badge {
   display: inline-block;
