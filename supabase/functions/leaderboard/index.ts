@@ -1,28 +1,28 @@
 // Leaderboard arcade por IP (sin cuentas). verify_jwt = false; identidad = hash de la IP.
-// GET  ?action=board&scope=general|muelle|bahia|aldea|campamento&limit=10
+// GET  ?action=board&scope=general|muelle|bahia|aldea|aldea2|campamento&limit=10
 // POST { action: "score", level, score, time, integrity, wetness }
-// POST { action: "save", name, role }  — una sola vez, al inicio (no exige los 4 mapas)
+// POST { action: "save", name, role }  — una sola vez, al inicio (no exige todos los mapas)
 // POST { action: "me" }
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const LEVELS = ["muelle", "bahia", "aldea", "campamento"] as const;
+const LEVELS = ["muelle", "bahia", "aldea", "aldea2", "campamento"] as const;
 type Level = (typeof LEVELS)[number];
 const SCOPES = ["general", ...LEVELS] as const;
 type Scope = (typeof SCOPES)[number];
 const ROLES = new Set(["CARGADOR", "CAPITAN", "GRUMETE", "PIRATA"]);
-const SCORE_COL: Record<Level, string> = {
-  muelle: "score_muelle",
-  bahia: "score_bahia",
-  aldea: "score_aldea",
-  campamento: "score_campamento",
-};
-const TIME_COL: Record<Level, string> = {
-  muelle: "time_muelle",
-  bahia: "time_bahia",
-  aldea: "time_aldea",
-  campamento: "time_campamento",
-};
+const SCORE_COL = Object.fromEntries(LEVELS.map((l) => [l, `score_${l}`])) as Record<Level, string>;
+const TIME_COL = Object.fromEntries(LEVELS.map((l) => [l, `time_${l}`])) as Record<Level, string>;
+
+/** Scores y tiempos que ya tenía esta IP (para no borrarlos al hacer upsert). */
+function carry(existing: Record<string, unknown> | null | undefined) {
+  const out: Record<string, unknown> = {};
+  for (const l of LEVELS) {
+    out[SCORE_COL[l]] = Number(existing?.[SCORE_COL[l]] ?? 0);
+    out[TIME_COL[l]] = existing?.[TIME_COL[l]] ?? null;
+  }
+  return out;
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -59,19 +59,14 @@ function db() {
 }
 
 function bests(row: Record<string, unknown> | null | undefined) {
-  return {
-    muelle: Number(row?.score_muelle ?? 0),
-    bahia: Number(row?.score_bahia ?? 0),
-    aldea: Number(row?.score_aldea ?? 0),
-    campamento: Number(row?.score_campamento ?? 0),
-  };
+  return Object.fromEntries(LEVELS.map((l) => [l, Number(row?.[SCORE_COL[l]] ?? 0)])) as Record<Level, number>;
 }
 
 function statusOf(row: Record<string, unknown> | null | undefined) {
   const b = bests(row);
   return {
     bests: b,
-    total: Number(row?.total ?? b.muelle + b.bahia + b.aldea + b.campamento),
+    total: Number(row?.total ?? LEVELS.reduce((sum, l) => sum + b[l], 0)),
     saved: !!row?.name,
     name: (row?.name as string) ?? null,
     role: (row?.role as string) ?? null,
@@ -98,7 +93,7 @@ Deno.serve(async (req) => {
       if (scope === "general") {
         const { data, error } = await supabase
           .from("arcade_records")
-          .select("name, role, score_muelle, score_bahia, score_aldea, score_campamento, total")
+          .select(`name, role, ${LEVELS.map((l) => SCORE_COL[l]).join(", ")}, total`)
           .not("name", "is", null)
           .gt("total", 0)
           .order("total", { ascending: false })
@@ -106,14 +101,11 @@ Deno.serve(async (req) => {
         if (error) throw error;
         return json({
           scope,
-          board: (data ?? []).map((r, i) => ({
+          board: (data ?? []).map((r: Record<string, unknown>, i) => ({
             rank: i + 1,
             name: r.name,
             role: r.role,
-            muelle: r.score_muelle,
-            bahia: r.score_bahia,
-            aldea: r.score_aldea,
-            campamento: r.score_campamento,
+            ...Object.fromEntries(LEVELS.map((l) => [l, r[SCORE_COL[l]]])),
             total: r.total,
           })),
         });
@@ -164,14 +156,7 @@ Deno.serve(async (req) => {
 
       const patch: Record<string, unknown> = {
         ip_hash: ipHash,
-        score_muelle: Number(existing?.score_muelle ?? 0),
-        score_bahia: Number(existing?.score_bahia ?? 0),
-        score_aldea: Number(existing?.score_aldea ?? 0),
-        score_campamento: Number(existing?.score_campamento ?? 0),
-        time_muelle: existing?.time_muelle ?? null,
-        time_bahia: existing?.time_bahia ?? null,
-        time_aldea: existing?.time_aldea ?? null,
-        time_campamento: existing?.time_campamento ?? null,
+        ...carry(existing),
         name: existing?.name ?? null,
         role: existing?.role ?? null,
         [col]: score,
@@ -200,14 +185,7 @@ Deno.serve(async (req) => {
         ip_hash: ipHash,
         name,
         role,
-        score_muelle: Number(existing?.score_muelle ?? 0),
-        score_bahia: Number(existing?.score_bahia ?? 0),
-        score_aldea: Number(existing?.score_aldea ?? 0),
-        score_campamento: Number(existing?.score_campamento ?? 0),
-        time_muelle: existing?.time_muelle ?? null,
-        time_bahia: existing?.time_bahia ?? null,
-        time_aldea: existing?.time_aldea ?? null,
-        time_campamento: existing?.time_campamento ?? null,
+        ...carry(existing),
         updated_at: new Date().toISOString(),
       };
 

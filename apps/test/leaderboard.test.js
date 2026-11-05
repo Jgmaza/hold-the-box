@@ -21,14 +21,16 @@ describe('computeScore (fórmula A)', () => {
 });
 
 describe('campaña', () => {
-  it('solo muelle/bahia/aldea/campamento cuentan', () => {
-    expect(CAMPAIGN_LEVELS).toEqual(['muelle', 'bahia', 'aldea', 'campamento']);
+  it('solo muelle/bahia/aldea/aldea2/campamento cuentan', () => {
+    expect(CAMPAIGN_LEVELS).toEqual(['muelle', 'bahia', 'aldea', 'aldea2', 'campamento']);
     expect(isCampaignLevel('muelle')).toBe(true);
+    expect(isCampaignLevel('aldea2')).toBe(true);
     expect(isCampaignLevel('npcs')).toBe(false);
   });
 
-  it('scopes de board: general + 4 mapas', () => {
-    expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'aldea', 'campamento']);
+  it('scopes de board: general + 5 mapas', () => {
+    expect(BOARD_SCOPES).toEqual(['general', 'muelle', 'bahia', 'aldea', 'aldea2', 'campamento']);
+    expect(LEVEL_LABEL.aldea2).toBe('Aldea II');
     expect(LEVEL_LABEL.general).toBe('General');
     expect(LEVEL_LABEL.bahia).toBe('Bahía');
   });

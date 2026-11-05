@@ -2,12 +2,14 @@
 import level1 from './level1.js';
 import level2 from './level2.js';
 import aldea from './aldea.js';
+import aldea2 from './aldea2.js';
 import campamento from './campamento.js';
 
 export const LEVELS = {
   muelle: level1,
   bahia: level2,
   aldea,
+  aldea2,
   campamento,
 };
 
@@ -25,5 +27,6 @@ export const MAPS = [
   { key: 'muelle', icon: '⚓', tag: 'Mar 1', difficulty: 1, blurb: 'Primer turno: cangrejo, perro bravo y aguacero. Arriba los espera el ron.' },
   { key: 'bahia', icon: '🏴‍☠️', tag: 'Mar 2', difficulty: 2, blurb: 'Más larga y más mojada: rieles, ferries y olas que no tienen piedad.' },
   { key: 'aldea', icon: '🛖', tag: 'Selva', difficulty: 1, blurb: 'El aldeano tira baldados y el vidrio miente: uno aguanta, el otro no.' },
+  { key: 'aldea2', icon: '🐆', tag: 'Selva 2', difficulty: 2, blurb: 'El jaguar ronda la plaza, ocho filas de vidrio y un aguacero antes de llegar.' },
   { key: 'campamento', icon: '🌵', tag: 'Desierto', difficulty: 1, blurb: 'Cactus que chuzan, un coyote con hambre y dos caminos. Uno se corta, ¿cuál?' },
 ].map((m) => ({ ...m, name: LEVELS[m.key].name, look: mapLook(LEVELS[m.key]) }));

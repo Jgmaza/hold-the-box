@@ -2,7 +2,7 @@
 //   score = round(integrity * 1000 - timeSec * 10 - wetness * 5)
 // Datos del evento game:win: { time, integrity, wetness, rating }.
 
-export const CAMPAIGN_LEVELS = ['muelle', 'bahia', 'aldea', 'campamento'];
+export const CAMPAIGN_LEVELS = ['muelle', 'bahia', 'aldea', 'aldea2', 'campamento'];
 export const ARCADE_ROLES = ['CARGADOR', 'CAPITAN', 'GRUMETE', 'PIRATA'];
 export const BOARD_SCOPES = ['general', ...CAMPAIGN_LEVELS];
 export const LEVEL_LABEL = {
@@ -10,6 +10,7 @@ export const LEVEL_LABEL = {
   muelle: 'Muelle',
   bahia: 'Bahía',
   aldea: 'Aldea',
+  aldea2: 'Aldea II',
   campamento: 'Campamento',
 };
 

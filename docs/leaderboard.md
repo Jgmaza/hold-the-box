@@ -10,7 +10,7 @@ GitHub Pages **no** guarda datos (solo front). La BD vive en Supabase.
 score = round(integrity * 1000 - timeSec * 10 - wetness * 5)
 ```
 
-Más alto = mejor. **General** = mejor Muelle + mejor Bahía + mejor Aldea + mejor Campamento.
+Más alto = mejor. **General** = mejor Muelle + mejor Bahía + mejor Aldea + mejor Aldea II + mejor Campamento.
 
 ## Flujo
 
@@ -47,6 +47,19 @@ npx supabase functions deploy leaderboard --no-verify-jwt  # 2. function
 
 Comprobar: `GET ?action=board&scope=aldea` debe responder `"scope":"aldea"`. Mientras la function siga vieja, el front muestra «— Pronto —» en las pestañas Aldea y Campamento y no manda puntajes de esos mapas (no se rompe nada). `score_tormenta` / `time_tormenta` quedan en la tabla pero ya no suman.
 
+### Agregar La Aldea II (5 mapas)
+
+Mismo orden que arriba: **primero la migración, después la function**.
+
+```
+npx supabase db push                                       # 1. migración 20261105120000_aldea2.sql
+npx supabase functions deploy leaderboard --no-verify-jwt  # 2. function (ya conoce aldea2)
+```
+
+Mientras no se despliegue, el juego no se rompe: la pestaña "Aldea II" de Records muestra «— Pronto —» y el puntaje de ese mapa no se guarda.
+
+Comprobar: `GET ?action=board&scope=aldea2` debe responder `"scope":"aldea2"`.
+
 ### Front (local / Pages)
 
 En `apps/.env` (local) o secrets de GitHub Actions (Pages):
@@ -62,7 +75,7 @@ El build de Pages debe recibir esas vars (ver workflow). Sin anon key, el gatewa
 
 | Acción | Body / query | Respuesta |
 |--------|--------------|-----------|
-| `board` | `GET ?action=board&scope=general\|muelle\|bahia\|aldea\|campamento&limit=10` | `{ scope, board: [...] }` |
+| `board` | `GET ?action=board&scope=general\|muelle\|bahia\|aldea\|aldea2\|campamento&limit=10` | `{ scope, board: [...] }` |
 | `score` | `POST { action, level, score, time, integrity, wetness }` | `{ improved, bests, total, saved }` |
 | `save` | `POST { action, name, role }` | `{ saved, ... }` (idempotente si ya hay nombre) |
 | `me` | `POST { action: "me" }` | status de esta IP |

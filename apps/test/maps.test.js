@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS, MAPS, mapLook } from '../src/levels/index.js';
 import { dressIsland, SCENERY_SETS } from '../src/levels/sections.js';
+import { musicSlotFor } from '../src/view/audio.js';
 import { BACK, FWD, Game, IDLE, RIGHT, jump, run } from './helpers.js';
 
 const SEA = ['muelle', 'bahia'];
@@ -100,7 +101,7 @@ describe('mapas de mar', () => {
   }
 });
 
-const JUNGLE = ['aldea'];
+const JUNGLE = ['aldea', 'aldea2'];
 const DESERT = ['campamento'];
 
 describe('selva', () => {
@@ -125,6 +126,58 @@ describe('selva', () => {
       expect(g.state).toBe('won');
     });
   }
+
+  it('La Aldea II va justo después de la Aldea, con 2 estrellas y el mismo pueblo', () => {
+    const keys = MAPS.map((m) => m.key);
+    expect(keys.indexOf('aldea2')).toBe(keys.indexOf('aldea') + 1);
+    expect(MAPS.find((m) => m.key === 'aldea2').difficulty).toBe(2);
+    expect(MAPS.find((m) => m.key === 'aldea2').look).toBe('jungle');
+    expect(LEVELS.aldea2.theme).toBe(LEVELS.aldea.theme);
+    expect(LEVELS.aldea2.biome).toBe(LEVELS.aldea.biome);
+  });
+
+  it('La Aldea II es más difícil: más larga, más enemigos, jaguar, más vidrio y aguacero', () => {
+    const [a, b] = [LEVELS.aldea, LEVELS.aldea2];
+    const route = (L) => L.spawn.p1.z - L.goal.z;
+    expect(route(b)).toBeGreaterThan(route(a));
+    expect(hazards(b)).toBeGreaterThan(hazards(a));
+    expect(b.npcs.some((n) => n.difficulty === 'hard')).toBe(true);
+    const rows = (L) => new Set(L.platforms.filter((p) => p.kind === 'glass').map((p) => p.z)).size;
+    expect(rows(b)).toBe(8);
+    expect(rows(b)).toBeGreaterThan(rows(a));
+    const rain = b.platforms.find((p) => p.weather?.type === 'rain');
+    expect(rain.weather.shelters.length).toBeGreaterThan(1);
+    expect(rain.z).toBeGreaterThan(b.goal.z);
+    for (const n of b.npcs) expect(b.platforms.some((p) => p.id === n.platform), n.platform).toBe(true);
+  });
+
+  it('en La Aldea II cada fila de vidrio tiene un templado y bajo el vidrio no hay piso', () => {
+    const glass = LEVELS.aldea2.platforms.filter((p) => p.kind === 'glass');
+    const rows = Map.groupBy(glass, (p) => p.z);
+    for (const row of rows.values()) expect(row.filter((p) => p.tempered)).toHaveLength(1);
+    const g = new Game(LEVELS.aldea2, { seed: 1 });
+    const panel = g.world.statics.find((s) => s.def.kind === 'glass' && !s.def.tempered);
+    expect(g.world.breakGlass(panel)).toBe(true);
+    expect(g.world.floorBelow(panel.def.x, panel.def.z, panel.def.top - 0.02)).toBe(-Infinity);
+  });
+
+  it('La Aldea II: checkpoints sin caer, carteles separados y música de selva', () => {
+    const L = LEVELS.aldea2;
+    for (let i = 0; i < L.checkpoints.length; i++) {
+      const g = start(L);
+      g.teleport(i);
+      run(g, 0.8, IDLE, IDLE);
+      expect(g.state).toBe('playing');
+      expect(g.p1.pos.y).toBeGreaterThan(0.5);
+    }
+    const signs = L.signs;
+    for (let i = 0; i < signs.length; i++) {
+      for (let j = i + 1; j < signs.length; j++) {
+        expect(Math.hypot(signs[i].x - signs[j].x, signs[i].z - signs[j].z)).toBeGreaterThan(8);
+      }
+    }
+    expect(musicSlotFor('aldea2')).toBe('musica-selva');
+  });
 
   it('la aldea es tierra firme: camino de tierra, sin chorros ni rodillos', () => {
     const a = LEVELS.aldea;

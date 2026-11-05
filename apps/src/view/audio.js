@@ -6,7 +6,7 @@ import { AUDIO } from './deliveries.js';
 
 /** La selva (aldea) y el desierto (campamento) tienen su tema. El muelle se queda con el suyo. */
 export function musicSlotFor(levelId) {
-  if (levelId === 'aldea') return 'musica-selva';
+  if (levelId === 'aldea' || levelId === 'aldea2') return 'musica-selva';
   if (levelId === 'campamento') return 'musica-desierto';
   return 'musica-loop';
 }
