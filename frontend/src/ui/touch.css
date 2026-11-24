@@ -1,0 +1,117 @@
+/* Controles táctiles (touch.js): joystick a la izquierda, saltar a la derecha, pausa arriba. */
+.touch {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.touch.on {
+  display: block;
+}
+
+/* Mitad izquierda de abajo: donde se apoye el dedo aparece el joystick. */
+.touch-stick-zone {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 50%;
+  height: 62%;
+  pointer-events: auto;
+  touch-action: none;
+}
+.touch-stick {
+  position: absolute;
+  left: calc(env(safe-area-inset-left) + 96px);
+  top: calc(100% - 96px - env(safe-area-inset-bottom));
+  width: 128px;
+  height: 128px;
+  margin: -64px 0 0 -64px;
+  border-radius: 50%;
+  background: rgba(255, 248, 232, 0.18);
+  border: 4px solid rgba(255, 248, 232, 0.55);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.touch-stick.on {
+  opacity: 1;
+}
+.touch-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.touch-jump,
+.touch-pause {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-family: var(--display);
+  color: var(--ink);
+  border: 5px solid var(--ink);
+  border-radius: 50%;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-jump {
+  right: calc(env(safe-area-inset-right) + 28px);
+  bottom: calc(env(safe-area-inset-bottom) + 32px);
+  width: 96px;
+  height: 96px;
+  font-size: 44px;
+  background: var(--ui);
+  box-shadow: 0 8px 0 var(--ink);
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+.touch-jump.down {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+/* Pausa a la izquierda del nivel de burbuja (arriba a la derecha). */
+.touch-pause {
+  top: calc(env(safe-area-inset-top) + 16px);
+  right: calc(env(safe-area-inset-right) + 160px);
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+  border-width: 3px;
+  background: var(--paper);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+@media (max-width: 640px), (max-height: 500px) {
+  .touch-stick {
+    left: calc(env(safe-area-inset-left) + 80px);
+    top: calc(100% - 80px - env(safe-area-inset-bottom));
+    width: 112px;
+    height: 112px;
+    margin: -56px 0 0 -56px;
+  }
+  .touch-jump {
+    right: calc(env(safe-area-inset-right) + 20px);
+    bottom: calc(env(safe-area-inset-bottom) + 24px);
+    width: 84px;
+    height: 84px;
+    font-size: 38px;
+  }
+  .touch-pause {
+    top: calc(env(safe-area-inset-top) + 8px);
+    right: calc(env(safe-area-inset-right) + 104px);
+    width: 44px;
+    height: 44px;
+  }
+}

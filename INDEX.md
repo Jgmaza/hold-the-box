@@ -2,69 +2,65 @@
 
 **Lee esto primero.** Luego ve a tu asignación. No hace falta recorrer todo el repo.
 
+> **Documento único del proyecto:** [`docs/contexto/EL-PROYECTO.md`](./docs/contexto/EL-PROYECTO.md)  
+> (qué es · tech · arquitectura · Jose / Luis / Danel / 3 creativos).
+
 ---
 
 ## 1) ¿Qué es este repo?
 
 | Carpeta | Qué es | Quién entra |
 |---|---|---|
-| `apps/` | El **juego** (PlayCanvas) | Danel (código), Zharick (UI) |
-| `team/<tu-nombre>/` | **Tus tareas + prompts** | Cada uno la suya |
-| `deliveries/<tu-nombre>/` | **Lo que entregas** (PNG, audio, bugs) | Todos excepto solo-docs |
-| `docs/` | Decisiones y guías (diseño, visual, demo) | Consulta |
+| `frontend/` | El **juego** (PlayCanvas + online) | Danel (código), Luis (UI producto) |
+| `backend/` | Servidor online (salas, WS, auth) | Danel + Luis/Turriago |
+| `team/<tu-nombre>/` | **Tus tareas + prompts** | Cada activo / miembro nuevo |
+| `deliveries/<tu-nombre>/` | **Lo que entregas** (PNG, audio, bugs) | Técnicos + slots Docs/UX si aplica |
+| `docs/` | Decisiones, UX, story, contexto · online en `docs/online/` | Consulta; Docs/UX escribe en `ux/` y `story/` |
 | `prompts/shared/` | Prompts genéricos de respaldo | Opcional |
+| `supabase/` | Histórico arcade jam (deprecado) | Solo consulta |
 
-La raíz (`GAME_DESIGN_DOCUMENT.md`, `MVP_SCOPE.md`, `TASK_BOARD.md`) es referencia global del Lead.
+La raíz (`GAME_DESIGN_DOCUMENT.md`, `MVP_SCOPE.md`, `TASK_BOARD.md`) es referencia global del Lead.  
+**Lee primero:** [`docs/contexto/EL-PROYECTO.md`](./docs/contexto/EL-PROYECTO.md)
 
 ---
 
 ## 2) Flujo en 3 pasos (todos)
 
-**Cómo Git + CI/CD + dónde subir:** [`docs/ONBOARDING.md`](./docs/ONBOARDING.md)
+**Cómo Git + CI/CD:** [`docs/ONBOARDING.md`](./docs/ONBOARDING.md)
 
 ```
-① ONBOARDING + este INDEX  →  ② team/<tu-nombre>/README.md  →  ③ deliveries/ o apps/ → PR a dev
+① EL-PROYECTO.md  →  ② tu rol / slot  →  ③ PR a dev
 ```
 
-| Tu nombre | Abre esto ahora |
+| Quién | Abre esto ahora |
 |---|---|
-| **Jose** | [`team/jose/README.md`](./team/jose/README.md) |
-| **Danel** | [`team/danel/README.md`](./team/danel/README.md) · código en `apps/` · **Opus 5.5** |
-| **Luis** | [`team/luis/README.md`](./team/luis/README.md) · feel caja + audio/color |
-| **Zharick** | [`team/zharick/README.md`](./team/zharick/README.md) |
-| **Juanes** | [`team/juanes/README.md`](./team/juanes/README.md) |
-| **Matias** | [`team/matias/README.md`](./team/matias/README.md) |
+| **Cualquiera / nuevo** | [`docs/contexto/EL-PROYECTO.md`](./docs/contexto/EL-PROYECTO.md) |
+| **Jose** | Lead — además `team/jose/` · `docs/DEPLOY.md` |
+| **Danel** | Dev estrella — `frontend/` · `backend/` · `team/danel/` |
+| **Luis** | Relaciones + apoyo — UI lobby/online · `team/luis/` |
+| **Creativo nuevo** | Slot A/B/C en EL-PROYECTO §2 · `docs/ux/` / `docs/story/` |
 
-Cada carpeta de persona tiene:
-- `README.md` → qué hacer hoy / criterios de done  
-- `prompts.md` → qué pegar en la IA  
+Alumni (histórico): `team/zharick`, `team/juanes`, `team/matias`.
 
 ---
 
-## 3) Fase actual (leer esto)
+## 3) Fase actual (expo)
 
-El vertical slice **ya está** en `apps/` (caja compleja: tilt + huequito + mojado + nivel).  
-Scope real: **[`MVP_SCOPE.md`](./MVP_SCOPE.md)**
-
-| Quién | Ahora |
-|---|---|
-| **Luis** | Mejorar / seleccionar **perfiles de caja** + audio/color |
-| **Juanes / Matias** | Visuales **de este juego** (papel→PNG) |
-| **Zharick** | Pulir UI |
-| **Danel** | Estabilizar + integrar deliveries |
-| **Jose** | **Desplegar** + alcance + pitch → [`docs/DEPLOY.md`](./docs/DEPLOY.md) · jam en [`docs/jam/`](./docs/jam/) |
+Ver dibujo del equipo y producto en [`EL-PROYECTO.md`](./docs/contexto/EL-PROYECTO.md).  
+Issues: [`docs/contexto/roles.md`](./docs/contexto/roles.md) · Scope jam histórico: [`MVP_SCOPE.md`](./MVP_SCOPE.md)
 
 ## 4) Visual
 
-**Juanes/Matias NO modelan en 3D.** Papel → PNG.  
-[`docs/visual/PLAN.md`](./docs/visual/PLAN.md) · [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) · [`docs/visual/pipeline-papel.md`](./docs/visual/pipeline-papel.md) · [`docs/visual/refs/`](./docs/visual/refs/)
+Assets jam (PNG) pueden seguir en `deliveries/` históricos. Docs/UX nuevos **no modelan 3D**; escriben briefs.  
+[`docs/visual/PLAN.md`](./docs/visual/PLAN.md) · [`docs/visual/DECISIONS.md`](./docs/visual/DECISIONS.md) · [`docs/contexto/voz-y-estilo.md`](./docs/contexto/voz-y-estilo.md)
 
 ## 5) Correr / ramas / CI-CD
 
 ```bash
 git checkout work/<tu-nombre> && git pull
 # jugar lo integrado:
-git checkout dev && git pull && cd apps && npm install && npm run dev
+git checkout dev && git pull && npm run install:all && npm run dev:frontend
+# online: otra terminal → npm run dev:backend
 ```
 
 | Doc | Para qué |
@@ -79,6 +75,7 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 
 | Doc | Para qué |
 |---|---|
+| [`docs/contexto/EL-PROYECTO.md`](./docs/contexto/EL-PROYECTO.md) | **Documento único** (tech, arquitectura, equipo) |
 | [`docs/ONBOARDING.md`](./docs/ONBOARDING.md) | Onboarding + CI/CD |
 | [`MVP_SCOPE.md`](./MVP_SCOPE.md) | Piso real post-slice |
 | [`TASK_BOARD.md`](./TASK_BOARD.md) | Roles fase actual |
@@ -100,4 +97,5 @@ git checkout dev && git pull && cd apps && npm install && npm run dev
 ```bash
 git clone https://github.com/Jgmaza/hold-the-box.git
 cd hold-the-box && git checkout dev
+npm run install:all && npm run dev:frontend
 ```

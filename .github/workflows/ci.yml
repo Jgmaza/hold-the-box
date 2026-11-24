@@ -10,16 +10,20 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/package-lock.json
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+      - name: Install
+        run: npm run install:all
+      - name: Test backend
+        run: npm run test:backend
+      - name: Test frontend
+        run: npm run test:frontend
+      - name: Build frontend
+        run: npm run build:frontend
