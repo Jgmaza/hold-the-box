@@ -20,25 +20,25 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm test
       - name: Build
         env:
-          VITE_LEADERBOARD_URL: ${{ vars.VITE_LEADERBOARD_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          # URL del API online (HTTPS, sin / final). Sin ella el menú Online apunta a :3000.
+          VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
         run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/dist
+          path: frontend/dist
 
   deploy:
     name: deploy

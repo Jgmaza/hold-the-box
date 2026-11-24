@@ -1,0 +1,609 @@
+/* UI de la partida (HUD + pausa / victoria / derrota). Zharick puede rehacerla. Base compartida: theme.css. */
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font);
+  color: var(--paper);
+  user-select: none;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.3s;
+}
+.hud.hidden {
+  opacity: 0;
+}
+#ui > .spk {
+  top: auto;
+  right: 18px;
+  bottom: 18px;
+}
+#ui > .spk .spk-pop {
+  bottom: calc(100% + 10px);
+}
+
+/* Barras */
+.meters {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(20, 20, 30, 0.55);
+  border-radius: 14px;
+  backdrop-filter: blur(4px);
+}
+.meter {
+  display: grid;
+  grid-template-columns: 92px 160px 48px;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.meter .bar {
+  height: 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+}
+.meter .bar i {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 6px;
+  background: var(--goal);
+  transition: width 0.12s linear, background 0.2s;
+}
+.meter b {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.meter[data-k='wetness'] .bar i {
+  background: var(--water);
+}
+.meter[data-k='sync'] .bar i {
+  background: var(--ui);
+}
+.meter.low .bar i {
+  background: var(--danger);
+}
+/* Caja bomba: la barra ¡BUM! cambia de color con el tiempo. */
+.meter[data-k='bomb'] span {
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+.meter[data-k='bomb'] .bar {
+  height: 14px;
+  border-radius: 7px;
+}
+.meter[data-k='bomb'].desync .bar {
+  box-shadow: 0 0 0 2px var(--danger);
+  animation: bomb-shake 0.18s linear infinite;
+}
+@keyframes bomb-shake {
+  25% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+}
+.hud.bomb .box-name,
+.hud.cat .box-name {
+  top: 16px;
+}
+.meter[data-k='cat'][data-level='low'] .bar i,
+.meter[data-k='cat'] .bar i {
+  transition: width 0.1s linear, background 0.3s;
+}
+.meter[data-k='bomb'] .bar i {
+  transition: width 0.1s linear, background 0.3s;
+}
+.meter[data-k='bomb'][data-level='mid'] .bar i {
+  background: var(--ui);
+}
+.meter[data-k='bomb'][data-level='low'] .bar i {
+  background: var(--danger);
+  animation: bomb-pulse 0.55s ease-in-out infinite;
+}
+.meter[data-k='bomb'][data-level='low'] b {
+  color: var(--danger);
+}
+.meter[data-k='bomb'].draining .bar {
+  box-shadow: 0 0 0 2px var(--water);
+}
+@keyframes bomb-pulse {
+  50% {
+    filter: brightness(1.5);
+  }
+}
+.meter.flash {
+  animation: flash 0.4s;
+}
+@keyframes flash {
+  50% {
+    transform: scale(1.06);
+    color: var(--danger);
+  }
+}
+
+.timer {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  font-size: 26px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  background: rgba(20, 20, 30, 0.55);
+  border-radius: 12px;
+}
+.box-name {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  background: rgba(20, 20, 30, 0.55);
+  border-radius: 999px;
+}
+.lives-row {
+  display: grid;
+  grid-template-columns: 92px auto;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+.lives {
+  display: flex;
+  gap: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+.lives i {
+  font-style: normal;
+  transition: opacity 0.3s, filter 0.3s, transform 0.3s;
+}
+.lives i.lost {
+  opacity: 0.3;
+  filter: grayscale(1);
+  transform: scale(0.8);
+}
+.lives i.just-lost {
+  animation: life-lost 0.6s ease-out;
+}
+@keyframes life-lost {
+  0% {
+    opacity: 1;
+    filter: none;
+    transform: scale(1.6);
+  }
+}
+.lives.last i:not(.lost) {
+  animation: life-last 0.8s ease-in-out infinite alternate;
+}
+@keyframes life-last {
+  to {
+    transform: scale(1.18);
+  }
+}
+.box-name[data-box='gato'] {
+  background: #e07a3d;
+  color: #1d1d1d;
+}
+.box-name[data-box='bomba'] {
+  background: #3a2416;
+}
+.box-name.urgent {
+  background: var(--danger);
+  color: var(--paper);
+}
+
+/* Nivel de burbuja: muestra hacia dónde se inclina la caja */
+.level {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(20, 20, 30, 0.55);
+  border-radius: 14px;
+}
+.level .dial {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(60, 207, 110, 0.35) 0 22%, rgba(255, 204, 51, 0.3) 22% 52%, rgba(232, 69, 60, 0.35) 52% 100%);
+  border: 3px solid rgba(255, 255, 255, 0.7);
+}
+.level .dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--ink);
+}
+.level .state {
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.level[data-state='tilting'] .state {
+  color: var(--ui);
+}
+.level[data-state='critical'] .state,
+.level[data-state='danger'] .state {
+  color: var(--danger);
+}
+
+.warning {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.warning.on {
+  opacity: 1;
+  animation: shake 0.25s infinite;
+}
+.warning strong {
+  font-size: 44px;
+  font-weight: 900;
+  color: var(--danger);
+  -webkit-text-stroke: 2px var(--paper);
+  text-shadow: 0 4px 0 var(--ink);
+}
+.warning .drop {
+  width: 220px;
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.warning .drop i {
+  display: block;
+  height: 100%;
+  background: var(--danger);
+}
+@keyframes shake {
+  25% {
+    transform: translateX(-52%) rotate(-1deg);
+  }
+  75% {
+    transform: translateX(-48%) rotate(1deg);
+  }
+}
+
+/* Clima: chip bajo las barras mientras la caja está en una isla con clima. */
+.weather {
+  position: absolute;
+  top: 132px;
+  left: 16px;
+  padding: 7px 14px;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  background: rgba(20, 20, 30, 0.55);
+  backdrop-filter: blur(4px);
+  transition: background 0.3s, transform 0.2s;
+}
+.weather:empty {
+  display: none;
+}
+.weather[data-type='rain'] {
+  background: rgba(31, 110, 160, 0.75);
+}
+.weather[data-type='wind'] {
+  background: rgba(70, 120, 90, 0.75);
+}
+.weather[data-type='waves'] {
+  background: rgba(20, 120, 150, 0.8);
+}
+.weather[data-phase='warn'] {
+  animation: weather-warn 0.5s ease-in-out infinite alternate;
+}
+.weather[data-phase='active'] {
+  background: var(--danger);
+}
+.weather[data-phase='safe'] {
+  background: var(--goal);
+  color: var(--ink);
+}
+@keyframes weather-warn {
+  to {
+    transform: scale(1.07);
+  }
+}
+
+.toasts {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+.toast {
+  padding: 8px 18px;
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--ink);
+  background: var(--ui);
+  border-radius: 999px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+  animation: toast 2s forwards;
+}
+.toast.bad {
+  background: var(--danger);
+  color: var(--paper);
+}
+.toast.good {
+  background: var(--goal);
+}
+.toast.wet {
+  background: var(--water);
+  color: var(--paper);
+}
+@keyframes toast {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  10%,
+  80% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.fade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+}
+
+/* Pantallas */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(10, 20, 35, 0.55);
+  backdrop-filter: blur(3px);
+}
+.screen.on {
+  display: grid;
+}
+.card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  max-width: min(720px, calc(100vw - 32px));
+  padding: 28px 32px;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper);
+  border: 5px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
+}
+.card h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(30px, 4.5vw, 48px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.card p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+.card .keys {
+  font-weight: 700;
+  font-size: 14px;
+  opacity: 0.75;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+.stats div {
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  font-weight: 800;
+}
+.stats b {
+  display: block;
+  font-size: 28px;
+  font-weight: 900;
+}
+.rating {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 22px;
+  background: var(--goal);
+}
+.rating.ok {
+  background: var(--ui);
+}
+.rating.damaged {
+  background: var(--danger);
+  color: var(--paper);
+}
+.fail h2 {
+  color: var(--danger);
+}
+.fail .lives-left {
+  margin: 0;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+
+/* Celular (vertical u horizontal): HUD compacto en las esquinas para dejar ver el juego. */
+@media (max-width: 640px), (max-height: 500px) {
+  .meters {
+    top: calc(env(safe-area-inset-top) + 8px);
+    left: calc(env(safe-area-inset-left) + 8px);
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+  .meter,
+  .lives-row {
+    grid-template-columns: 62px 72px 34px;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .lives-row {
+    grid-template-columns: 62px auto;
+  }
+  .meter .bar {
+    height: 9px;
+  }
+  .lives {
+    font-size: 14px;
+  }
+  .level {
+    top: calc(env(safe-area-inset-top) + 8px);
+    right: calc(env(safe-area-inset-right) + 8px);
+    gap: 4px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+  .level .dial {
+    width: 60px;
+    height: 60px;
+  }
+  .level .dot {
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+  }
+  .level .state {
+    font-size: 10px;
+  }
+  .weather {
+    top: calc(env(safe-area-inset-top) + 112px);
+    left: calc(env(safe-area-inset-left) + 8px);
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .warning strong {
+    font-size: 32px;
+  }
+  .warning .drop {
+    width: 160px;
+  }
+  .toast {
+    padding: 6px 14px;
+    font-size: 15px;
+  }
+  .card {
+    gap: 10px;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 18px 20px;
+  }
+  .card p {
+    font-size: 15px;
+  }
+  .stats b {
+    font-size: 22px;
+  }
+}
+/* Vertical: el cronómetro y la caja van bajo el nivel de burbuja (en el centro chocan con las barras). */
+@media (max-width: 640px) {
+  .timer {
+    top: calc(env(safe-area-inset-top) + 114px);
+    right: calc(env(safe-area-inset-right) + 8px);
+    left: auto;
+    transform: none;
+    padding: 4px 10px;
+    font-size: 17px;
+  }
+  .box-name {
+    top: calc(env(safe-area-inset-top) + 150px);
+    right: calc(env(safe-area-inset-right) + 8px);
+    left: auto;
+    transform: none;
+    font-size: 11px;
+  }
+  .hud.bomb .box-name,
+  .hud.cat .box-name {
+    top: calc(env(safe-area-inset-top) + 104px);
+  }
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+/* Horizontal bajito: cronómetro arriba al centro, más chico. */
+@media (max-height: 500px) and (min-width: 641px) {
+  .timer {
+    top: calc(env(safe-area-inset-top) + 8px);
+    padding: 4px 12px;
+    font-size: 18px;
+  }
+  .box-name {
+    top: calc(env(safe-area-inset-top) + 42px);
+    font-size: 11px;
+  }
+  .hud.bomb .box-name,
+  .hud.cat .box-name {
+    top: calc(env(safe-area-inset-top) + 8px);
+  }
+}
+
+/* Táctil: sin pistas de teclado y avisos por encima de los controles. */
+.is-touch .card .keys {
+  display: none;
+}
+.is-touch .toasts {
+  bottom: calc(env(safe-area-inset-bottom) + 140px);
+}

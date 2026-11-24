@@ -1,0 +1,39 @@
+# Deploy del backend (frontend en Vercel; Postgres compartido en la red externa `db`). Desde backend/:
+#   cp .env.production.example .env   # y completar
+#   docker compose up -d --build
+name: htb-backend
+
+services:
+  backend:
+    build:
+      context: ..              # raíz del repo: el backend importa la sim de frontend/src
+      dockerfile: backend/Dockerfile
+    image: holdthebox-api:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${HOST_PORT:-3001}:3000"   # solo localhost: nginx publica con HTTPS
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379
+    networks:
+      - default
+      - db
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+networks:
+  db:
+    external: true

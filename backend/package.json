@@ -1,0 +1,41 @@
+{
+  "name": "hold-the-box-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Servidor online de Hold the Box: salas, partidas en tiempo real (WebSocket, sim autoritativa de ../frontend) y social.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env --watch src/index.js",
+    "start": "node --env-file-if-exists=.env src/index.js",
+    "test": "vitest run",
+    "test:db": "node --env-file=.env node_modules/vitest/vitest.mjs run",
+    "test:watch": "vitest",
+    "bots": "node tools/bots.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file-if-exists=.env src/db/migrate.js",
+    "db:studio": "drizzle-kit studio"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^10.1.0",
+    "@fastify/helmet": "^13.2.0",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/rate-limit": "^11.2.2",
+    "@node-rs/argon2": "^2.2.2",
+    "drizzle-orm": "^0.45.4",
+    "fastify": "^5.12.8",
+    "ioredis": "^6.0.0",
+    "msgpackr": "^2.1.4",
+    "pg": "^8.23.1",
+    "ws": "^8.22.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11",
+    "vitest": "^3.2.7"
+  }
+}

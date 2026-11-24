@@ -1,0 +1,17 @@
+{
+  "name": "hold-the-box-plantilla-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generador de documentos oficiales Hold the Box (mismo patrón que Min Minas: MD + docx)",
+  "main": "generador_el_proyecto.js",
+  "scripts": {
+    "build": "node generador_pdf_creativo.js",
+    "build:creative": "node generador_pdf_creativo.js",
+    "build:classic": "node generador_el_proyecto.js"
+  },
+  "dependencies": {
+    "docx": "^9.7.2",
+    "pdfkit": "^0.17.1",
+    "playwright-core": "^1.65.1"
+  }
+}

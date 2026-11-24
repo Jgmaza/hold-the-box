@@ -1,15 +1,12 @@
-# Asignaciones — fase post-slice
+# Asignaciones — fase expo
 
-Primero: [`docs/ONBOARDING.md`](../docs/ONBOARDING.md). Luego [`INDEX.md`](../INDEX.md). Scope: [`MVP_SCOPE.md`](../MVP_SCOPE.md).
+**Documento único:** [`docs/contexto/EL-PROYECTO.md`](../docs/contexto/EL-PROYECTO.md)
 
-| Persona | Ahora | Carpeta | Rama |
-|---|---|---|---|
-| **Jose** | Deploy + alcance + pitch | [`jose/`](./jose/) | `work/jose` |
-| **Danel** | Estabilizar + integrar assets | [`danel/`](./danel/) | `work/danel` |
-| **Luis** | Perfiles/mejora de **cajas** + audio/color | [`luis/`](./luis/) | `work/luis` |
-| **Zharick** | UI polish | [`zharick/`](./zharick/) | `work/zharick` |
-| **Juanes** | Visuales del juego (caja/P1/P2) | [`juanes/`](./juanes/) | `work/juanes` |
-| **Matias** | Visuales del muelle (señales/props) | [`matias/`](./matias/) | `work/matias` |
+| Persona | Rol |
+|---|---|
+| **Jose** | Lead del proyecto y de la construcción |
+| **Luis** | Relaciones (puente con info/proyectos) + apoyo en desarrollo |
+| **Danel** | Dev estrella (`frontend/` + `backend/`, sync, menú multi) |
+| **Creativos ×3** | Slots A / B / C — playtests, briefs, campaña |
 
-Cada carpeta: `README.md` (tareas) + `prompts.md`.  
-Entregas → `deliveries/<nombre>/` · Juego → `apps/`
+Issues: [`docs/contexto/roles.md`](../docs/contexto/roles.md) · Git: [`docs/ONBOARDING.md`](../docs/ONBOARDING.md)

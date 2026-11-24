@@ -1,21 +1,22 @@
 # Deploy — Jose
 
 Onboarding del equipo (Git + CI/CD): [`ONBOARDING.md`](./ONBOARDING.md).  
-Material oficial del jam: [`jam/`](./jam/).
+Online (contrato / diseño): [`online/PROTOCOL.md`](./online/PROTOCOL.md) · [`online/SDD.md`](./online/SDD.md).
 
-El slice jugable vive en `apps/` (PlayCanvas + Vite).
+El juego vive en `frontend/` (PlayCanvas + Vite). El servidor online en `backend/`.
 
 ## ¿Dónde se despliega?
 
 | Destino | Para qué | Cómo |
 |---|---|---|
-| **itch.io** (HTML5) | Destino del jam / presentación oficial | Zip manual (cuenta itch) |
-| **GitHub Pages** | Link de producción del repo | **CI/CD** al mergear a `main` |
+| **GitHub Pages** | Front estático (local + UI online) | **CI/CD** al mergear a `main` |
+| **API (VPS / Docker)** | Salas, partidas, auth, WSS | `backend/docker-compose.yml` + nginx |
+| **itch.io** (HTML5) | Jam / zip estático | Zip manual del build |
 
-**Nombre del juego:** Hold the Box  
 **Repo:** https://github.com/Jgmaza/hold-the-box  
-**URL GitHub Pages:** https://jgmaza.github.io/hold-the-box/  
-**URL itch.io:** `_crear página y pegar aquí_`
+**URL GitHub Pages:** https://jgmaza.github.io/hold-the-box/
+
+> Pages solo sirve el **front**. Online necesita `VITE_SERVER_URL` apuntando al API con HTTPS/WSS.
 
 ---
 
@@ -26,71 +27,58 @@ work/<persona> → PR a dev → playtest
 dev → PR a main (aprobación de Jose + CI verde) → merge → Deploy Pages automático
 ```
 
-Reglas de `dev` y `main`:
-- Solo entra por **pull request** (no push directo)
-- **Aprueba solo Jose** (Lead + QA, code owner)
-- Check **CI / test** debe pasar
+CI en PRs: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — tests backend + frontend + build.
 
-El workflow [`.github/workflows/deploy-pages.yml`](../.github/workflows/deploy-pages.yml) corre en cada push a `main` (es decir, tras el merge del PR).
-
-CI en PRs: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (`npm test` + `npm run build` en `apps/`).
+Variable de repo para Pages: `VITE_SERVER_URL` (Settings → Variables). Sin ella, Online intenta `http://<host>:3000`.
 
 ---
 
-## Build local
+## Build local (front)
 
 ```bash
-git checkout main
-git pull
-cd apps
-npm ci
+git checkout main && git pull
+npm run install:all
 npm test
-npm run build       # → apps/dist/
+npm run build:frontend       # → frontend/dist/
 ```
 
-Zip para itch (contenido de `dist/`, no la carpeta padre):
+Zip itch (contenido de `dist/`):
 
 ```bash
-cd apps/dist
+cd frontend/dist
 zip -r ../hold-the-box-itch.zip .
-# archivo: apps/hold-the-box-itch.zip
 ```
 
-Smoke del build: `npm run preview` → http://127.0.0.1:4173/
+Smoke: `npm --prefix frontend run preview` → http://127.0.0.1:4173/
 
 ---
 
-## itch.io (oficial jam)
+## Backend (prod)
 
-1. Crear juego en https://itch.io/game/new  
-2. Kind: **HTML** · Classification: **Games**  
-3. **Cover image:** subir [`docs/jam/hold-the-box-itch-cover.png`](./jam/hold-the-box-itch-cover.png) (630×500)  
-4. Subir `apps/hold-the-box-itch.zip`  
-5. “This file will be played in the browser”  
-6. Viewport: p.ej. `1280x720` o fullscreen  
-7. Publicar (Draft → Restricted/Public según el jam)  
-8. Pegar URL arriba en este doc  
+En el server (con Postgres en red Docker `db` y nginx delante):
 
----
+```bash
+cd backend
+cp .env.production.example .env   # JWT_SECRET, CORS_ORIGIN, DATABASE_URL, HOST_PORT
+docker compose up -d --build
+# API en 127.0.0.1:${HOST_PORT} — nginx publica HTTPS/WSS
+```
 
-## GitHub Pages (automático)
+Local con memoria (sin Docker):
 
-Tras merge a `main`:
+```bash
+npm run dev:backend    # :3000
+npm run dev:frontend   # :5173 · VITE_SERVER_URL=http://localhost:3000
+```
 
-1. Actions → workflow **Deploy Pages**  
-2. Si sale verde → https://jgmaza.github.io/hold-the-box/
-
-Redeploy manual (mismo commit de `main`): Actions → Deploy Pages → **Run workflow**.
-
-Pages usa **GitHub Actions** (no hay rama de deploy).
+Local con Postgres + Redis: `docker compose up -d` en la raíz → `npm --prefix backend run db:migrate`.
 
 ---
 
 ## Checklist pre-promote (`dev` → `main`)
 
-- [ ] Smoke 2P en `dev` local o preview
+- [ ] Smoke Local 2P
+- [ ] Smoke Online (lobby → partida) contra el API de staging/prod
 - [ ] CI verde en el PR a `main`
-- [ ] QA y aprobación de Jose
-- [ ] Sin depender de `?debug` para jugar
-- [ ] Fail/win entendibles
-- [ ] (Jam) Página itch creada + URL anotada
+- [ ] `VITE_SERVER_URL` apunta al API correcto
+- [ ] Fail/win entendibles; sin depender de `?debug`

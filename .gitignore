@@ -3,7 +3,11 @@ Thumbs.db
 *.log
 .env
 .env.*
+!.env.example
+!.env.production.example
 node_modules/
+coverage/
+frontend/dist/
 .playcanvas/
 *.tmp
 *.psd
@@ -27,3 +31,8 @@ deliveries/**/video-demo/vo/*-clean*
 deliveries/**/video-demo/vo/*-mastered*
 deliveries/**/video-demo/assets/storyboard*/
 .cursor/plans/
+docs/contexto/plantilla/.chrome-print-profile/
+docs/contexto/plantilla/out/
+frontend/node_modules/
+backend/node_modules/
+frontend/dist/
