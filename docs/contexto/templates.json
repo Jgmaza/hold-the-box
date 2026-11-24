@@ -1,0 +1,390 @@
+{
+  "$schemaNote": "Fuente de plantillas y voz de Hold the Box. Usar al escribir docs UX, briefs, copy de menú y onboarding. Español colombiano, family-friendly.",
+  "version": "1.1.0",
+  "updated": "2026-11-19",
+  "teamNote": "Ver docs/contexto/EL-PROYECTO.md. Jose = lead + construcción. Luis = relaciones (puente con info/proyectos) + apoyo en dev. Danel = dev estrella. Creativos ×3 = slots A/B/C. Alumni: Matias, Zharick, Juanes.",
+  "team": {
+    "jose": { "role": "lead_construccion", "label": "Lead del proyecto y de la construcción" },
+    "luis": { "role": "relaciones_apoyo_dev", "label": "Relaciones + apoyo en desarrollo" },
+    "danel": { "role": "dev_estrella", "label": "Dev estrella" },
+    "creativos": { "slots": ["A", "B", "C"], "label": "Tres creativos (abiertos)" }
+  },
+  "game": {
+    "name": "Hold the Box",
+    "tagline": "Dos en un teclado.",
+    "estribillo": "Ya no jugamos lo mismo. Por eso hicimos un juego donde tienen que ir juntos.",
+    "estribilloCorto": "Dejamos de jugar lo mismo. Volvimos para ir juntos.",
+    "jam": {
+      "name": "GameJamPlus 2026",
+      "theme": "Better Together",
+      "themeRule": "Se juega, no se recita. No poner Better Together como logo del menú."
+    },
+    "oneLiner": "Dos jugadores cargan una caja viva (se inclina, gotea, se moja). Coordinarse = estabilidad.",
+    "enemy": "El enemigo no es el mapa: es no botar, no mojar, no soltar.",
+    "pitchLine": "El enemigo es lo que cargan.",
+    "supportMetaphor": "Como el fuego y el agua, pero se ahoga la caja.",
+    "ruleAcrossMaps": "El mapa cambia. La regla no.",
+    "ctaCierre": "Júéguenlo de a dos."
+  },
+  "voice": {
+    "language": "es-CO",
+    "tone": [
+      "directo",
+      "humor light",
+      "cooperativo",
+      "family-friendly",
+      "sin cinismo",
+      "sin tech-speak en copy de jugador"
+    ],
+    "do": [
+      "Frases cortas, como los blurbs del menú.",
+      "Hablar de sentir y de dos personas, no de features.",
+      "Usar el estribillo solo en pitch/cierre, no en cada cartel.",
+      "Nombres propios del juego: El Muelle, La Bahía, La Aldea, El Campamento.",
+      "Cajas: Caja VIP, Caja del gato, Caja bomba.",
+      "UI en español; teclas con nombres de teclado real (Espacio, Enter, Esc)."
+    ],
+    "dont": [
+      "Listas de obstáculos como pitch (géiser, rodillo, oleaje…).",
+      "Stack (PlayCanvas, Vite, Supabase) en textos de jugador.",
+      "Online / mods / próximamente en slides de jam (salvo fase expo).",
+      "Disculparse por la edad del equipo.",
+      "Horror, cyberpunk, UI de settings fría.",
+      "Cutscenes largas ni diálogos de película.",
+      "Inventar mapas fuera de campaña en material oficial."
+    ],
+    "blurbStyle": {
+      "maxWords": 22,
+      "pattern": "imagen concreta + consecuencia coop",
+      "examplesFromGame": [
+        "Cartón con aires de lujo. Muy fino, muy frágil.",
+        "Trae gato de regalo. Si no lo atienden, araña la caja.",
+        "Tic, tac... Cuídenla o se va todo por los aires.",
+        "Primer turno: cangrejo, perro bravo y aguacero. Arriba los espera el ron.",
+        "Más larga y más mojada: rieles, ferries y olas que no tienen piedad.",
+        "El aldeano tira baldados y el vidrio miente: uno aguanta, el otro no.",
+        "Cactus que chuzan, un coyote con hambre y dos caminos. Uno se corta, ¿cuál?"
+      ]
+    },
+    "signStyle": {
+      "inspiration": "Overcooked-side signs + humor del muelle",
+      "length": "pocas palabras, legible en movimiento",
+      "examplesIdeas": [
+        "Cuidado con la caja",
+        "Trabajo en equipo",
+        "Arriba el ron",
+        "→ La Selva",
+        "→ El Desierto"
+      ]
+    }
+  },
+  "visual": {
+    "titleLayout": ["HOLD THE", "BOX"],
+    "feel": "Moving Out sin soltar + roce Overcooked",
+    "look": "Fall Guys strokes, path recto, sol mediodía caribeño",
+    "boxMvp": "cartón VIP / FRÁGIL",
+    "paletteHints": {
+      "cielo": "#8fd3f4",
+      "estacionVerde": "goal / verde estación",
+      "peligroBomba": "rojo bomba",
+      "arenaDesierto": "#f0c9a0",
+      "selva": "#9bb89a"
+    },
+    "fontUi": "Lilita One (menú/HUD)",
+    "avoid": ["cyberpunk", "horror", "UI de settings", "purple-on-white genérico"]
+  },
+  "controls": {
+    "p1": { "move": "WASD", "jump": "Espacio" },
+    "p2": { "move": "Flechas", "jump": "Enter" },
+    "shared": {
+      "pause": ["P", "Esc"],
+      "restart": "R",
+      "menu": "M",
+      "debug": ["F2", "`"]
+    },
+    "note": "Algunos teclados hacen ghosting; si se traba una tecla, probar otro teclado."
+  },
+  "catalog": {
+    "boxes": [
+      {
+        "id": "vip",
+        "name": "Caja VIP",
+        "icon": "📦",
+        "blurb": "Cartón con aires de lujo. Muy fino, muy frágil.",
+        "pitchSlide": "Se vacía si la tuercen",
+        "emphasis": ["tilt", "leak", "wet"],
+        "fantasy": "Cuidarla juntos; castigo claro pero permisivo al inicio"
+      },
+      {
+        "id": "gato",
+        "name": "Caja del gato",
+        "icon": "🐱",
+        "blurb": "Trae gato de regalo. Si no lo atienden, araña la caja.",
+        "pitchSlide": "Araña si se desesperan",
+        "emphasis": ["tilt", "cat scratch on desync"],
+        "fantasy": "Si se desincronizan, asoma la pata y araña"
+      },
+      {
+        "id": "bomba",
+        "name": "Caja bomba",
+        "icon": "💣",
+        "blurb": "Tic, tac... Cuídenla o se va todo por los aires.",
+        "pitchSlide": "El desorden la daña",
+        "emphasis": ["timer", "desync damage", "water damage"],
+        "fantasy": "Llegar antes de que explote; el desorden y el agua la dañan"
+      }
+    ],
+    "maps": [
+      {
+        "key": "muelle",
+        "name": "El Muelle",
+        "icon": "⚓",
+        "tag": "Mar 1",
+        "look": "beach",
+        "biome": "sea",
+        "difficulty": 1,
+        "blurb": "Primer turno: cangrejo, perro bravo y aguacero. Arriba los espera el ron.",
+        "campaign": true,
+        "redesignSlot": "C",
+        "redesignFocus": ["ritmo", "lectura del camino", "humor de carteles", "cuándo se pone pesado"]
+      },
+      {
+        "key": "bahia",
+        "name": "La Bahía",
+        "icon": "🏴‍☠️",
+        "tag": "Mar 2",
+        "look": "beach",
+        "biome": "sea",
+        "difficulty": 2,
+        "blurb": "Más larga y más mojada: rieles, ferries y olas que no tienen piedad.",
+        "campaign": true,
+        "redesignSlot": "C",
+        "redesignFocus": ["olas", "rieles", "largo vs unfair"]
+      },
+      {
+        "key": "aldea",
+        "name": "La Aldea",
+        "icon": "🛖",
+        "tag": "Selva",
+        "look": "jungle",
+        "biome": "village",
+        "theme": "jungle",
+        "difficulty": 1,
+        "blurb": "El aldeano tira baldados y el vidrio miente: uno aguanta, el otro no.",
+        "campaign": true,
+        "redesignSlot": "B",
+        "redesignFocus": ["feel de cargar la caja", "peligro vs calma", "más selva sin complicar controles"]
+      },
+      {
+        "key": "campamento",
+        "name": "El Campamento",
+        "icon": "🌵",
+        "tag": "Desierto",
+        "look": "desert",
+        "biome": "camp",
+        "theme": "desert",
+        "difficulty": 1,
+        "blurb": "Cactus que chuzan, un coyote con hambre y dos caminos. Uno se corta, ¿cuál?",
+        "campaign": true,
+        "redesignSlot": "A",
+        "redesignFocus": ["elección de carril", "calor / lectura", "coherencia con otros biomas"]
+      }
+    ],
+    "biomes": [
+      {
+        "id": "sea",
+        "label": "Mar / muelle",
+        "maps": ["muelle", "bahia"],
+        "colors": "cielo, agua, madera",
+        "mustFeel": "muelle, humedad, humor de puerto"
+      },
+      {
+        "id": "jungle",
+        "label": "Selva",
+        "maps": ["aldea"],
+        "colors": "tierra, chozas, verde",
+        "mustFeel": "aldea viva, vidrio mentiroso, calma que miente"
+      },
+      {
+        "id": "desert",
+        "label": "Desierto",
+        "maps": ["campamento"],
+        "colors": "arena, cactus",
+        "mustFeel": "calor, decisión de camino, coyote"
+      }
+    ],
+    "characters": [
+      { "id": "alebarto", "name": "Alebarto", "defaultSlot": "p1" },
+      { "id": "gustambo", "name": "Gustambo", "defaultSlot": "p2" },
+      { "id": "alcazar", "name": "Alcázar" },
+      { "id": "matias", "name": "Matías" },
+      { "id": "melith", "name": "Melith" },
+      { "id": "manolo", "name": "Manolo" }
+    ],
+    "failReasons": [
+      { "id": "dropped", "labelHint": "¡Soltaron la caja!" },
+      { "id": "empty", "labelHint": "se vació / sin contenido" },
+      { "id": "soaked", "labelHint": "empapada" },
+      { "id": "exploded", "labelHint": "la bomba explotó" }
+    ],
+    "ratings": [
+      { "id": "perfect", "label": "perfecta" },
+      { "id": "ok", "label": "aceptable" },
+      { "id": "damaged", "label": "dañada" }
+    ],
+    "lives": 3,
+    "checkpointRule": "El checkpoint devuelve, no cura.",
+    "recoveryStations": {
+      "visual": "borde verde; aparatos sueltos a los lados",
+      "types": [
+        { "id": "beer", "forBox": "vip", "hint": "fuente de cerveza" },
+        { "id": "cookies", "forBox": "gato", "hint": "galletas" },
+        { "id": "workshop", "forBox": "bomba", "hint": "mesa de taller" },
+        { "id": "fans", "forBox": "any", "hint": "abanicos: secan mojado sin vaciar" }
+      ],
+      "uxRule": "Hay que adivinarlas jugando; no reemplazan checkpoints."
+    },
+    "npcs": [
+      { "difficulty": "easy", "seaHint": "cangrejo", "behavior": "pellizca → −contenido" },
+      { "difficulty": "medium", "seaHint": "pistola de agua", "behavior": "chorro → +mojado" },
+      { "difficulty": "hard", "seaHint": "perro mojado", "behavior": "embiste → empujón + daño" }
+    ],
+    "weather": ["rain", "wind", "waves"]
+  },
+  "productExpo": {
+    "deadline": "2026-11-28",
+    "menu": {
+      "local": {
+        "label": "Local",
+        "desc": "Mismo PC, teclado compartido. SIN login. Cuenta solo si quieren registrar puntuación."
+      },
+      "multiplayer": {
+        "label": "Multijugador",
+        "desc": "Dos PCs, magic link + username (máx. 16) + salas + sync + micro."
+      },
+      "mobile": {
+        "label": "Coming soon",
+        "desc": "En celular no se juega; pantalla tipográfica Hold the Box."
+      }
+    },
+    "ranking": {
+      "resetArcade": true,
+      "playModes": ["local", "multiplayer"],
+      "note": "Puntuaciones local y multijugador separadas (campo play_mode)."
+    },
+    "usernameMax": 16
+  },
+  "templates": {
+    "playtest": {
+      "issue": 69,
+      "folder": "docs/ux/playtests/",
+      "voiceReminder": "Escribir como se jugó: momentos concretos, no essays. Misma franqueza que los blurbs del menú.",
+      "files": {
+        "A": "claridad.md",
+        "B": "caja.md",
+        "C": "nivel.md"
+      },
+      "markdownSkeleton": "# Playtest — {{nombre}} — slot {{slot}} — {{fecha}}\n\nBuild usado: (link Pages / itch / local)\nMapas jugados:\nCajas usadas:\nCompañero de juego (si hubo):\n\n## Hallazgos\n- …\n\n## Momentos concretos (qué pasó en partida)\n- …\n\n## Prioridad\n- P0 (rompe la experiencia):\n- P1 (molesta mucho):\n- P2 (nice to have):\n",
+      "promptsBySlot": {
+        "A": [
+          "Cronometra los primeros 20 s: ¿se entiende qué hay que hacer?",
+          "HUD: cada barra/icono → se entiende / no se entiende / sobra",
+          "Camino menú → jugar: pasos y textos confusos",
+          "Al perder y al ganar: ¿sabes qué botón tocar?",
+          "Top 5 problemas de claridad (1 = el peor)"
+        ],
+        "B": [
+          "3 momentos en que la caja se sintió bien",
+          "3 momentos en que se sintió injusta",
+          "Al perder: ¿entiendes por qué? (tilt / mojado / contenido / otro)",
+          "5 líneas: Quiero que el jugador sienta ___ cuando ___",
+          "Probar más de un tipo de caja si se puede"
+        ],
+        "C": [
+          "¿Se ve adónde ir? ¿La meta aparece a tiempo?",
+          "Carteles: ayuda / da igual / estorba",
+          "Tramos aburridos vs intensos (minutos desde el inicio)",
+          "5 ideas: pondría ___ / quitaría ___ (solo texto)"
+        ]
+      }
+    },
+    "mapRedesignBrief": {
+      "issue": 70,
+      "folder": "docs/ux/redesign/",
+      "voiceReminder": "1 párrafo de fantasía con el tono del pitch. Beats cortos. No feature dumps. Props en texto, no assets.",
+      "files": {
+        "C": ["muelle.md", "bahia.md"],
+        "B": ["aldea.md"],
+        "A": ["campamento.md", "coherencia-biomas.md"]
+      },
+      "markdownSkeleton": "# Brief rediseño — {{nombreMapa}}\n\n> Voz: humor light, coop, family-friendly. Una fantasía clara. El mapa cambia; la regla (cuidar la caja) no.\n\n## Fantasía / mood\n(1 párrafo: qué debe “sentirse” este mapa)\n\n## Beats de experiencia\n- 0:00–0:30 (llegada / tutorial suave):\n- Mitad (conflicto principal):\n- Final (meta / clímax):\n\n## Qué debe aprender el jugador aquí\n(1–3 habilidades o lecciones de coop)\n\n## Momentos wow (deseados)\n-\n\n## Momentos frustrantes actuales (si ya jugaron)\n-\n\n## Props / señales / NPCs deseados\n(lista en texto; no hace falta dibujar)\n\n## Checklist UX (cosas concretas que mejorarían el mapa)\n- [ ]\n- [ ]\n- [ ]\n",
+      "coherenciaBiomasSkeleton": "# Coherencia de biomas\n\n## Qué debe ser igual en mar / selva / desierto\n(meta, fail, tutorial corto, lectura de la caja…)\n\n## Qué debe ser distinto\n(clima, enemigos, humor, color…)\n\n## Reglas de UX que no queremos romper al rediseñar\n-\n"
+    },
+    "campaignStory": {
+      "issue": 71,
+      "folder": "docs/story/",
+      "voiceReminder": "Narrativa corta, cooperativo, humor light. Sin cutscenes largas. Mejor Together se siente; no se predica.",
+      "files": {
+        "A": "campana-mapa-mundo.md",
+        "B": "transiciones.md",
+        "C": ["boceto-mapa-mundo.md", "boceto-mapa-mundo.png"]
+      },
+      "campanaSkeleton": "# Campaña — mapa mundo\n\n## Orden de mapas / biomas\n1. …\n\n## Por qué ese orden\n…\n\n## Cómo se desbloquea el siguiente\n(idea: ganar una vez / score / cutscene corta — solo diseño)\n\n## Pantalla mapa mundo\nQué se ve (nodos, caminos, labels):\n\n## Estados de cada nodo\n- bloqueado:\n- disponible:\n- completado:\n\n## Fuera de alcance para la expo\nRecordatorio: esto es post-multi.\n\n## Enlaces\n- Transiciones: `transiciones.md`\n- Boceto: `boceto-mapa-mundo.md`\n",
+      "transicionesSkeleton": "# Transiciones entre mapas\n\nTono: cooperativo, humor light. 2–3 frases por salto. Sin diálogos de película.\n\n## Intro (antes del Muelle) — opcional\n…\n\n## El Muelle → La Bahía\n…\n\n## La Bahía → La Aldea\n…\n\n## La Aldea → El Campamento\n…\n\n## Epílogo — opcional\n…\n",
+      "bocetoSkeleton": "# Boceto — mapa mundo\n\n## Qué muestra el dibujo (5–10 bullets)\n- Dónde va cada mapa (nodos)\n- Cómo se elige uno\n- Cómo se vuelve al menú\n- Textos/iconos mínimos (nombres, candado, check)\n-\n\n## Imagen\n`boceto-mapa-mundo.png` (o foto en `deliveries/<tu-nombre>/ux/`)\n"
+    },
+    "menuCopy": {
+      "description": "Referencia de tono para pantallas nuevas (auth, lobby, coming soon). No es copy final cerrado.",
+      "fields": {
+        "localButton": "Local",
+        "multiplayerButton": "Multijugador",
+        "comingSoonTitle": "HOLD THE / BOX",
+        "comingSoonBodyIdeas": [
+          "De a dos, en un teclado. En el teléfono, todavía no.",
+          "Coming soon — júéguenlo en PC."
+        ],
+        "authEmailPromptIdeas": [
+          "Tu correo para entrar",
+          "Te mandamos un link. Sin contraseña rara."
+        ],
+        "authCheckEmailIdeas": [
+          "Revisa tu correo",
+          "Abre el link y vuelves aquí."
+        ],
+        "usernamePromptIdeas": [
+          "Elige un nombre (máx. 16)",
+          "Así te van a ver en la sala."
+        ],
+        "lobbyIdeas": [
+          "Crear sala",
+          "Unirse con código",
+          "LISTO cuando los dos estén",
+          "Micro: encendido / mute"
+        ]
+      }
+    }
+  },
+  "rolesExpo": {
+    "tech": {
+      "jose": { "issues": [63, 64], "focus": "Supabase auth, profiles, leaderboard play_mode, deploy, onboarding nuevos" },
+      "luis": { "issues": [65, 66, 68], "focus": "UI auth, coming soon móvil, lobby, mute" },
+      "danel": { "issues": [63, 64, 66, 67, 68], "focus": "gate auth, Records, menú Local/Multi, sync, voz" }
+    },
+    "docsUxSlots": {
+      "A": { "assignee": null, "label": "Claridad / pantallas", "issues": [69, 70, 71], "focus": "claridad, campamento, coherencia, campaña" },
+      "B": { "assignee": null, "label": "Caja / personajes", "issues": [69, 70, 71], "focus": "caja/personajes, aldea, transiciones" },
+      "C": { "assignee": null, "label": "Nivel / señales", "issues": [69, 70, 71], "focus": "nivel/señales, muelle+bahía, boceto mapa mundo" }
+    },
+    "alumni": ["matias", "zharick", "juanes"]
+  },
+  "paths": {
+    "contexto": "docs/contexto/",
+    "onboarding": "docs/ONBOARDING.md",
+    "appsReadme": "apps/README.md",
+    "pitch": "docs/pitch.md",
+    "mechanics": "docs/mechanics.md",
+    "playtests": "docs/ux/playtests/",
+    "redesign": "docs/ux/redesign/",
+    "story": "docs/story/"
+  }
+}

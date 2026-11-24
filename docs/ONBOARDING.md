@@ -29,8 +29,9 @@ git checkout -b issue/<n>-slug   # n = número del issue en GitHub
 
 ```bash
 git checkout dev && git pull
-cd apps && npm install && npm run dev
-# → http://localhost:5173
+npm run install:all
+npm run dev:frontend   # → http://localhost:5173
+# online (opcional): npm run dev:backend → :3000
 ```
 
 ---
@@ -40,7 +41,8 @@ cd apps && npm install && npm run dev
 | Qué entregas | Dónde lo subes | Rama |
 |---|---|---|
 | Arte / audio / bugs | `deliveries/<tu-nombre>/` | `issue/<n>-…` (o `work/<tú>`) |
-| Código del juego | `apps/` | `issue/<n>-…` |
+| Código del juego | `frontend/` | `issue/<n>-…` |
+| Servidor online | `backend/` | `issue/<n>-…` |
 | Docs / deploy / jam | `docs/` | `issue/<n>-…` |
 | Material oficial del jam | [`docs/jam/`](./jam/) | vía PR a `dev` |
 
@@ -84,7 +86,7 @@ Detalle: [`BRANCHES.md`](./BRANCHES.md).
 
 | Momento | Qué corre | Resultado |
 |---|---|---|
-| PR a `dev` o `main` | **CI** (`npm test` + `npm run build`) | Debe quedar verde |
+| PR a `dev` o `main` | **CI** (test backend + frontend + build) | Debe quedar verde |
 | Push a `dev` | **Sync work from dev** | Las `work/*` reciben `dev` |
 | Merge a `main` | **Deploy Pages** | Se publica el juego en GitHub Pages |
 
@@ -110,11 +112,11 @@ Guía completa de Jose: [`DEPLOY.md`](./DEPLOY.md).
 
 | Persona | Empuja a | Primero lee |
 |---|---|---|
-| Danel | `apps/` → PR a `dev` | `team/danel/README.md` |
-| Luis | `deliveries/luis/` (+ jam en `docs/jam/` si aplica) | `team/luis/README.md` |
-| Juanes / Matias | `deliveries/<nombre>/` PNGs | su `team/.../README.md` |
-| Zharick | UI en `apps/` o bugs en `deliveries/zharick/` | `team/zharick/README.md` |
-| Jose | alcance + merge PRs a `dev` + PR `dev→main` + itch | `team/jose/README.md` + `DEPLOY.md` |
+| Todos | — | [`contexto/EL-PROYECTO.md`](./contexto/EL-PROYECTO.md) |
+| Danel (dev estrella) | `frontend/` · `backend/` → PR a `dev` | `team/danel/README.md` |
+| Luis (relaciones + apoyo) | `frontend/src/ui/` · social back → PR a `dev` | `team/luis/README.md` |
+| Creativos (slots A/B/C) | `docs/ux/` · `docs/story/` → PR a `dev` | EL-PROYECTO §2 + `voz-y-estilo.md` |
+| Jose (lead) | merge + `dev→main` + itch + invitar | `DEPLOY.md` + `COLLABORATORS.md` |
 
 ---
 

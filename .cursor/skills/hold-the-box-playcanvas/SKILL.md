@@ -3,17 +3,16 @@ name: hold-the-box-playcanvas
 description: >-
   Gameplay y arquitectura PlayCanvas para Hold the Box (coop local 2P,
   caja compartida con inclinación, huequito y mojada). Usar cuando se trabaje
-  en apps/, mecánicas de caja, controles P1/P2, nivel jam o integración desde
-  deliveries/.
+  en frontend/, mecánicas de caja, controles P1/P2, online (net/), o integración
+  desde deliveries/. El backend importa frontend/src/sim — no romper ese contrato.
 ---
 
 # Hold the Box — PlayCanvas
 
 ## Contexto
-- Game jam, tema Better Together.
-- 2 jugadores **locales** (no online).
-- Stack: **PlayCanvas** dentro de `apps/`.
-- Owner de código: **Danel**. Review: Jose. UI support: Zharick.
+- Game jam + expo online.
+- Stack: **PlayCanvas** en `frontend/` · servidor en `backend/` (misma sim).
+- Owner de código: **Danel**. Review: Jose. UI: Luis.
 
 ## Propuesta de valor
 La caja es el problema: inclinación, huequito, se moja. Coordinación = estabilidad.
@@ -21,29 +20,21 @@ La caja es el problema: inclinación, huequito, se moja. Coordinación = estabil
 ## Controles
 - P1: WASD + Space
 - P2: Flechas + Enter
+- Online: ver `docs/online/PROTOCOL.md`
 
 ## Alcance
-Leer siempre `MVP_SCOPE.md` y `docs/mechanics.md` en la raíz del repo.  
-Prohibido: multiplayer online, inventario, powerups, tienda, ranking, enemigos complejos.
+Leer `MVP_SCOPE.md`, `docs/mechanics.md`, y si tocas multi `docs/online/SDD.md`.  
+La sim en `frontend/src/sim/` (y `levels/`, `config.js`, `net/duoState.js`) **no puede** usar `window`, DOM ni PlayCanvas: el backend la importa.
 
 ## Convenciones
-- Código modular, parámetros tuneables (speed, jump, tilt threshold, wet weight).
+- Código modular, parámetros en `frontend/src/config.js`.
 - Placeholders OK si falta arte/audio en `deliveries/`.
-- No bloquear gameplay por assets faltantes: warning + seguir.
 - Textos UI en español.
-- Ramas: `apps/danel-*`.
+- Ramas: `issue/<n>-slug` desde `dev`.
 
-## Orden de implementación sugerido
-1. Controllers P1/P2 + cámara
-2. Caja compartida + inclinación + estados `upright|tilting|critical`
-3. Huequito y/o mojada
-4. Nivel mínimo (plataformas, móvil, rodillo, agua, meta, respawn)
-5. Win/fail + enganche UI
-6. Integrar `deliveries/`
-
-## Visual
-Seguir `docs/visual/PLAN.md`: Capa A primitivas primero; PNG de `deliveries/` como texturas/carteles.
-No exigir modelado 3D a Juanes/Matias.
+## Carpetas
+- `frontend/src/sim/` · `view/` · `ui/` · `net/` · `online/`
+- `backend/src/` — Fastify + WS; puerta a la sim: `backend/src/game/index.js`
 
 ## Modelo
-Para implementación en `apps/`, preferir **Claude Opus 5.5** en Cursor Agent.
+Para implementación en `frontend/` / `backend/`, preferir **Claude Opus 5.5** en Cursor Agent.
