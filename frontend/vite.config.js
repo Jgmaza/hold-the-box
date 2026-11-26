@@ -35,6 +35,12 @@ export default defineConfig({
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 3000, // PlayCanvas pesa ~2 MB sin comprimir
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        gameplay: fileURLToPath(new URL('./gameplay/index.html', import.meta.url)),
+      },
+    },
   },
   test: {
     include: ['test/**/*.test.js'],
