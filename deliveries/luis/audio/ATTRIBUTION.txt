@@ -1,5 +1,7 @@
 Todos los sonidos son CC0 (dominio público). OpenGameArt.org.
 
+musica-menu.ogg          Quirky Squad Hangout — syncretreat60 (vía Adri / PR Danel #49)
+                         metadata del archivo; verificar licencia antes de release comercial
 musica-loop.ogg          Pirate Ship Theme Loop — beardalaxy
                          https://opengameart.org/content/pirate-ship-theme-loop
 musica-victoria.ogg      Tropoix — Tozan
