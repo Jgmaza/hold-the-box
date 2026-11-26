@@ -1,13 +1,11 @@
 // Menú del juego en HTML encima de la escena 3D del menú (view/menuStage.js).
 //   Inicio → Mapa + caja → Personajes (cada uno escoge y marca LISTO) → 3, 2, 1 → onStart(selección)
-//   Inicio → Multijugador abre ui/online.js (login, salas, micro).
+//   Inicio → Multijugador → onOnline() (net/onlineSession.js: apodo + API real).
 // Todo se puede con mouse o teclado. Esc = atrás.
 import { BOX_CHOICES, selectBox } from '../config.js';
-import { online } from '../online/index.js';
 import { CHARACTERS, character } from '../view/characters.js';
 import { VOLUME_SLIDERS_HTML, bindVolumeSliders } from '../view/audioPrefs.js';
 import { MenuState } from './menuState.js';
-import { OnlineOverlay } from './online.js';
 import './theme.css';
 import './menu.css';
 
@@ -33,12 +31,14 @@ export class Menu {
    * @param {HTMLElement} root
    * @param {{ stage: import('../view/menuStage.js').MenuStage, maps: object[], palette: object,
    *           initial?: object, audio?: import('../view/audio.js').GameAudio, touch?: boolean,
-   *           onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void }} opts
+   *           onStart: (sel: {level: string, box: string, chars: {p1: string, p2: string}}) => void,
+   *           onOnline?: () => void }} opts
    */
-  constructor(root, { stage, maps, palette, initial, onStart, audio = null, touch = false }) {
+  constructor(root, { stage, maps, palette, initial, onStart, onOnline = null, audio = null, touch = false }) {
     this.root = root;
     this.stage = stage;
     this.onStart = onStart;
+    this.onOnline = onOnline;
     this.audio = audio;
     for (const k of ['ui', 'danger', 'goal', 'water', 'box', 'p2']) root.style.setProperty(`--${k}`, palette[k]);
     this.state = new MenuState({ maps, boxes: BOX_CHOICES, characters: CHARACTERS, initial });
@@ -49,7 +49,6 @@ export class Menu {
 
     root.innerHTML = TEMPLATE;
     this.$ = (sel) => root.querySelector(sel);
-    this.online = new OnlineOverlay({ service: online, maps, onClose: () => this._render() });
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
@@ -124,7 +123,12 @@ export class Menu {
   async _act(act) {
     const s = this.state;
     if (act === 'play') s.go('map');
-    else if (act === 'online') return this.online.show();
+    else if (act === 'online') {
+      // API real: apodo/guest (NetClient). La UI de correo mágico era demo y no envía mails.
+      if (this.onOnline) return this.onOnline();
+      console.warn('[menu] onOnline no configurado');
+      return;
+    }
     else if (act === 'controls') this.overlay = true;
     else if (act === 'close') this.overlay = false;
     else if (act === 'back') s.back();
@@ -255,7 +259,7 @@ export class Menu {
   // ---------------------------------------------------------------- teclado (cada frame)
 
   update(dt, input) {
-    if (!this.visible || this.online.visible) return;
+    if (!this.visible) return;
     const s = this.state;
     const hit = (codes) => input.wasPressed(codes);
 
