@@ -185,7 +185,12 @@ export class Menu {
   show(on) {
     this.visible = on;
     this.root.classList.toggle('on', on);
-    if (on) this._syncStage(true);
+    if (on) {
+      this._syncStage(true);
+      this.audio?.playMenu();
+    } else {
+      this.audio?.stopMenu();
+    }
   }
 
   /** Volver al menú tras una partida: directo al selector de mapas. */
