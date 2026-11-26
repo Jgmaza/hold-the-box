@@ -3,12 +3,14 @@ import level1 from './level1.js';
 import level2 from './level2.js';
 import aldea from './aldea.js';
 import campamento from './campamento.js';
+import demo from './demo.js';
 
 export const LEVELS = {
   muelle: level1,
   bahia: level2,
   aldea,
   campamento,
+  demo, // solo /gameplay (no sale en el selector)
 };
 
 export const DEFAULT_LEVEL = 'muelle';

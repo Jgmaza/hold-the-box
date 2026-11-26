@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Hold the Box — Gameplay demo</title>
+    <meta name="description" content="Demo en bucle de Hold the Box: dos personajes juegan solos." />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+        background: #8fd3f4;
+      }
+      #app {
+        display: block;
+        width: 100%;
+        height: 100%;
+        outline: none;
+      }
+      #demo-badge {
+        position: fixed;
+        left: 50%;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        z-index: 5;
+        margin: 0;
+        padding: 10px 18px;
+        font-family: 'Lilita One', 'Arial Black', system-ui, sans-serif;
+        font-size: clamp(16px, 3.5vw, 22px);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #1d1d1d;
+        background: #fff8e8;
+        border: 4px solid #1d1d1d;
+        border-radius: 14px;
+        box-shadow: 0 5px 0 #1d1d1d;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #demo-links {
+        position: fixed;
+        top: calc(12px + env(safe-area-inset-top));
+        right: calc(12px + env(safe-area-inset-right));
+        z-index: 5;
+        display: flex;
+        gap: 8px;
+      }
+      #demo-links a {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 14px;
+        font-family: 'Lilita One', 'Arial Black', system-ui, sans-serif;
+        font-size: 16px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: #1d1d1d;
+        background: #ffcc33;
+        border: 3px solid #1d1d1d;
+        border-radius: 12px;
+        box-shadow: 0 4px 0 #1d1d1d;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="app" tabindex="0"></canvas>
+    <p id="demo-badge">Hold the Box · demo en bucle</p>
+    <nav id="demo-links">
+      <a href="../">Jugar</a>
+      <a href="../qr/">QR</a>
+    </nav>
+    <script type="module" src="../src/gameplayBoot.js"></script>
+  </body>
+</html>
