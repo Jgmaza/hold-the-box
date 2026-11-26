@@ -482,15 +482,175 @@
 }
 
 @media (max-width: 560px) {
-  .o-panel {
-    padding: 14px;
-    border-radius: 16px;
+  #online .o-screen {
+    padding:
+      calc(env(safe-area-inset-top) + 10px)
+      calc(env(safe-area-inset-right) + 10px)
+      calc(env(safe-area-inset-bottom) + 10px)
+      calc(env(safe-area-inset-left) + 10px);
+    align-items: flex-start;
+    justify-content: flex-start;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .o-panel,
+  .o-panel.wide {
+    width: 100%;
+    max-height: none;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 14px 14px calc(18px + env(safe-area-inset-bottom));
+    border-radius: 18px;
+    border-width: 3px;
+    box-shadow: 0 6px 0 var(--ink);
+    overflow: visible;
+  }
+  .o-head {
+    gap: 10px;
+    margin-bottom: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--paper);
+    padding-bottom: 6px;
   }
   .o-head h2 {
-    font-size: 24px;
+    font-size: clamp(22px, 6.5vw, 28px);
+  }
+  .o-head .btn.icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .o-panel h3 {
+    font-size: 17px;
+    margin: 12px 0 6px;
+  }
+  .o-panel label {
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .o-cols {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .o-nick {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .o-nick label,
+  .o-row label {
+    flex: 0 0 auto;
+  }
+  .o-nick .btn,
+  .o-row .btn,
+  .o-foot .btn,
+  .o-panel .btn.big {
+    min-height: 52px;
+    font-size: 18px;
+    padding: 12px 16px;
+  }
+  .o-panel input:not([type='checkbox']),
+  .o-panel select {
+    min-height: 46px;
+    font-size: 16px;
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
+  .o-code-in {
+    width: 100% !important;
+    text-align: center;
+    font-size: 26px !important;
+    letter-spacing: 0.35em;
+    padding-left: 0.35em;
+  }
+  .o-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 4px;
+  }
+  .o-foot .o-hint {
+    flex: 1 1 100%;
+    margin: 0;
+  }
+  .o-foot .btn.big,
+  .o-foot .btn.big.go {
+    flex: 1 1 100%;
+    min-height: 54px;
+    font-size: 20px;
+  }
+  .o-teams {
+    grid-template-columns: 1fr;
+  }
+  .o-rooms {
+    max-height: none;
+  }
+  .o-error {
+    margin-top: 8px;
   }
   .oh {
     top: auto;
-    bottom: 70px;
+    bottom: calc(env(safe-area-inset-bottom) + 70px);
+  }
+}
+
+/* Teléfono apaisado (ancho > 560): panel compacto, inputs táctiles. */
+@media (max-height: 500px) {
+  #online .o-screen {
+    padding: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .o-panel,
+  .o-panel.wide {
+    width: min(720px, 100%);
+    max-height: calc(100dvh - 16px);
+    min-height: 0;
+    padding: 12px 14px;
+  }
+  .o-head h2 {
+    font-size: 22px;
+  }
+  .o-head .btn.icon {
+    width: 40px;
+    height: 40px;
+  }
+  .o-panel h3 {
+    font-size: 15px;
+    margin: 8px 0 6px;
+  }
+  .o-nick {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .o-nick label {
+    flex: 1 1 180px;
+  }
+  .o-panel input:not([type='checkbox']),
+  .o-panel select,
+  .o-nick .btn,
+  .o-row .btn,
+  .o-foot .btn {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .o-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+  .o-rooms {
+    max-height: 28vh;
+  }
+  .o-foot .btn.big,
+  .o-foot .btn.big.go {
+    flex: 1 1 auto;
+    min-height: 44px;
+    font-size: 18px;
   }
 }

@@ -14,7 +14,8 @@ import { LEVELS } from '../levels/index.js';
 import { Game } from '../sim/game.js';
 import { applyLightDuoState, applyWorldDuoState } from './duoState.js';
 
-export const INTERP_DELAY = 0.1; // s
+/** Atraso del render respecto al reloj servidor. Bajo = más responsive; alto = más suave si hay jitter. */
+export const INTERP_DELAY = 0.05; // s (antes 0.1; con snapshots a 30 Hz ~1.5 intervalos)
 const MAX_BUFFER = 30;
 const SNAP_DIST = 3; // m: si un jugador/caja salta más que esto entre snapshots (respawn), no se interpola
 
@@ -196,12 +197,12 @@ export class OnlineMatch {
 }
 
 /**
- * Manda `input` al servidor: ~30 Hz y en cuanto cambia algo. El salto se guarda hasta enviarse (no se pierde
+ * Manda `input` al servidor: ~60 Hz y en cuanto cambia algo. El salto se guarda hasta enviarse (no se pierde
  * aunque se pulse entre dos envíos).
  */
 export class InputSender {
   /** @param {(t: string, d: object) => void} send */
-  constructor(send, { hz = 30, now = () => performance.now() / 1000 } = {}) {
+  constructor(send, { hz = 60, now = () => performance.now() / 1000 } = {}) {
     this.send = send;
     this.every = 1 / hz;
     this.now = now;

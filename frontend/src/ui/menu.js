@@ -52,10 +52,16 @@ export class Menu {
     this._buildMaps(maps);
     this._buildBoxes();
     this._bindClicks();
-    // En celular/tablet cada jugador juega en su aparato: no hay Local (dos en un teclado).
-    if (touch) {
+    // Móvil / táctil: Multijugador + Controles (Local = teclado compartido).
+    const mobileHome =
+      touch ||
+      (typeof matchMedia === 'function' &&
+        (matchMedia('(max-width: 560px)').matches || matchMedia('(pointer: coarse)').matches));
+    if (mobileHome) {
       this.$('[data-act="play"]').hidden = true;
-      this.$('[data-act="online"]').classList.replace('light', 'big');
+      const onlineBtn = this.$('[data-act="online"]');
+      onlineBtn.classList.remove('light');
+      onlineBtn.classList.add('big', 'm-home-cta');
       this.homeFocus = HOME_ACTS.indexOf('online');
     }
     bindVolumeSliders(this.root, () => this.audio?.applyMix());

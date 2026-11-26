@@ -13,6 +13,8 @@ primary_region = "gru"
   TRUST_PROXY = "true"
   CORS_ORIGIN = "https://jgmaza.github.io"
   LOG_LEVEL = "info"
+  TICK_HZ = "60"
+  SNAPSHOT_HZ = "30"
 
 [http_service]
   internal_port = 3000
