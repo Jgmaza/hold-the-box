@@ -13,6 +13,7 @@ import { Lobby } from '../ui/lobby.js';
 import { OnlineHud } from '../ui/onlineHud.js';
 import { UI } from '../ui/ui.js';
 import { GameView } from '../view/gameView.js';
+import { mergeInputs } from '../touch.js';
 import { NetClient, savedNickname } from './netClient.js';
 import { InputSender, OnlineMatch } from './onlineMatch.js';
 
@@ -34,10 +35,11 @@ function duoLook(duo) {
 
 export class OnlineSession {
   /**
-   * @param {{ app, palette, audio, stage, uiRoot: HTMLElement, maps: object[], onExit: () => void }} deps
+   * @param {{ app, palette, audio, stage, uiRoot: HTMLElement, maps: object[],
+   *           touch?: import('../touch.js').TouchControls|null, onExit: () => void }} deps
    */
-  constructor({ app, palette, audio, stage, uiRoot, maps, onExit }) {
-    Object.assign(this, { app, palette, audio, stage, uiRoot, onExit });
+  constructor({ app, palette, audio, stage, uiRoot, maps, touch = null, onExit }) {
+    Object.assign(this, { app, palette, audio, stage, uiRoot, touch, onExit });
     this.net = new NetClient();
     this.active = false;
     this.run = null; // { match, start, view, ui, hud, sender, countdownEnd, shown, ended }
@@ -294,9 +296,10 @@ export class OnlineSession {
   }
 
   /** Cada frame mientras el modo online está abierto. */
-  update(dt, input) {
+  update(dt, input, touch = this.touch) {
     const r = this.run;
     if (!r) {
+      touch?.show(false);
       if (input.wasPressed('Escape') && this.lobby.current === 'connect') this.exit();
       return;
     }
@@ -304,7 +307,9 @@ export class OnlineSession {
       if (input.wasPressed('KeyQ')) this.watch(-1);
       else if (input.wasPressed('KeyE')) this.watch(1);
     }
-    this._sendInputs(r, input);
+    const racing = !!r.match.mySlots.length && r.match.mine?.status === 'racing';
+    touch?.show(racing);
+    this._sendInputs(r, input, touch);
     r.match.update();
     const game = r.match.focus.game;
     if (!r.shown && game.state !== 'title') {
@@ -319,11 +324,11 @@ export class OnlineSession {
     this.lobby.showCountdown(left > 0 ? Math.ceil(left) : left > -0.8 && !r.start.resume && !r.start.spectate ? 0 : null);
   }
 
-  /** 1 slot: vale cualquiera de los dos juegos de teclas. 2 slots (sofá): WASD = P1, flechas = P2. */
-  _sendInputs(r, input) {
+  /** 1 slot: teclado y/o táctil. 2 slots (sofá): WASD = P1, flechas = P2 (táctil va a P1). */
+  _sendInputs(r, input, touch = null) {
     const slots = r.match.mySlots;
     if (!slots.length || r.match.mine.status !== 'racing') return;
-    const a = input.player('p1');
+    const a = mergeInputs(input.player('p1'), touch?.state());
     const b = input.player('p2');
     if (slots.length === 2) {
       r.sender.update(1, a);

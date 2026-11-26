@@ -1,8 +1,8 @@
-// ¿Celular o tablet? Para la expo solo se juega en PC (dos jugadores en un teclado).
+// ¿Celular o tablet? (menú táctil + Multijugador; ya no bloquea con Coming soon).
 const MOBILE_UA = /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle/i;
 
 /**
- * ?mobile fuerza la pantalla de celular (para verla desde el PC) y ?desktop fuerza el juego.
+ * ?mobile / ?desktop fuerzan la detección (tests y depuración).
  * @param {{ search?: string, userAgent?: string, coarsePointer?: boolean, finePointer?: boolean }} env
  */
 export function isMobileDevice({ search = '', userAgent = '', coarsePointer = false, finePointer = false } = {}) {

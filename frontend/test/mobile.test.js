@@ -6,7 +6,7 @@ const ANDROID = 'Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 Chr
 const WINDOWS = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/130.0 Safari/537.36';
 const MAC = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15';
 
-describe('detección de celular (Coming soon)', () => {
+describe('detección de celular (menú táctil)', () => {
   it('celulares por user agent', () => {
     expect(isMobileDevice({ userAgent: IPHONE })).toBe(true);
     expect(isMobileDevice({ userAgent: ANDROID })).toBe(true);
