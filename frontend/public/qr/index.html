@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Hold the Box — Juega en celular</title>
+    <meta name="description" content="Escanea el QR y juega Hold the Box en tu celular. Multijugador online." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --ink: #1d1d1d;
+        --paper: #fff8e8;
+        --ui: #ffcc33;
+        --sky: #8fd3f4;
+        --display: 'Lilita One', 'Arial Black', system-ui, sans-serif;
+        --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        height: 100%;
+        font-family: var(--font);
+        color: var(--ink);
+        background: #062642;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+          max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        background:
+          linear-gradient(90deg, rgba(6, 38, 66, 0.55) 0%, rgba(6, 38, 66, 0.2) 40%, rgba(6, 38, 66, 0.45) 100%),
+          url('./bg.png') center / cover no-repeat;
+      }
+      .wrap {
+        width: min(1100px, 100%);
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: clamp(16px, 3vw, 28px);
+        align-items: stretch;
+      }
+      .card {
+        background: var(--paper);
+        border: 5px solid var(--ink);
+        border-radius: 28px;
+        box-shadow: 0 10px 0 var(--ink);
+        padding: clamp(18px, 3vw, 28px);
+      }
+      .promo {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 12px;
+        min-height: 280px;
+        background:
+          linear-gradient(180deg, transparent 20%, rgba(255, 248, 232, 0.92) 70%, var(--paper) 100%);
+      }
+      .brand {
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(40px, 7vw, 72px);
+        line-height: 0.95;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--paper);
+        -webkit-text-stroke: 6px var(--ink);
+        paint-order: stroke fill;
+        text-shadow: 0 6px 0 var(--ink);
+      }
+      .promo p {
+        margin: 0;
+        font-weight: 800;
+        font-size: clamp(16px, 2.4vw, 22px);
+        max-width: 28ch;
+      }
+      .qr-card {
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .qr-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 18px;
+        background: var(--ui);
+        border-bottom: 4px solid var(--ink);
+      }
+      .qr-card h1 {
+        margin: 18px 0 0;
+        font-family: var(--display);
+        font-size: clamp(28px, 4vw, 40px);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .qr-card .sub {
+        margin: 0;
+        font-weight: 700;
+        opacity: 0.8;
+        font-size: 15px;
+      }
+      .qr-frame {
+        margin: 6px 0;
+        padding: 14px;
+        background: #fff;
+        border: 4px solid var(--ink);
+        border-radius: 18px;
+        box-shadow: 0 5px 0 var(--ink);
+      }
+      .qr-frame img {
+        display: block;
+        width: min(280px, 62vw);
+        height: auto;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 4px;
+        padding: 12px 22px;
+        font-family: var(--display);
+        font-size: 22px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--ui);
+        border: 4px solid var(--ink);
+        border-radius: 16px;
+        box-shadow: 0 6px 0 var(--ink);
+      }
+      .btn:active {
+        transform: translateY(4px);
+        box-shadow: 0 2px 0 var(--ink);
+      }
+      .url {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        word-break: break-all;
+        opacity: 0.7;
+      }
+      @media (max-width: 780px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+        .promo {
+          min-height: 0;
+          order: 2;
+          background: var(--paper);
+        }
+        .brand {
+          color: var(--ink);
+          -webkit-text-stroke: 0;
+          text-shadow: none;
+          font-size: clamp(34px, 10vw, 48px);
+        }
+        .qr-card {
+          order: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card promo" aria-label="Hold the Box">
+        <h2 class="brand">Hold the Box</h2>
+        <p>Abre la cámara → escanea → Multijugador → ¡a jugar en celular!</p>
+      </section>
+      <section class="card qr-card">
+        <h1>Juega en celular</h1>
+        <p class="sub">Escanea y entra al multijugador</p>
+        <div class="qr-frame">
+          <img src="./code.png" width="280" height="280" alt="Código QR para abrir Hold the Box" />
+        </div>
+        <a class="btn" href="../">▶ Abrir juego</a>
+        <p class="url">jgmaza.github.io/hold-the-box</p>
+      </section>
+    </main>
+  </body>
+</html>
