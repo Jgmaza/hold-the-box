@@ -54,19 +54,20 @@ describe('OnlineMatch', () => {
     expect(setup().m.duoName(0)).toBe('Ana y Beto');
   });
 
-  it('interpola ~100 ms por detrás entre dos snapshots', () => {
+  it('interpola INTERP_DELAY por detrás entre dos snapshots', () => {
     const { m, snap, advance, tick } = setup();
     m.onSnapshot(snap(0));
     advance(0.5);
     const s1 = snap(0.5);
     tick(0.5);
     m.onSnapshot(s1);
-    // Justo al llegar: render = 0.5 − 0.1 = 0.4 → 80 % del camino entre 0 y 0.5.
+    // Justo al llegar: render = 0.5 − delay → fracción (0.5−delay)/0.5 del camino.
     m.update();
     expect(m.renderTime).toBeCloseTo(0.5 - INTERP_DELAY, 5);
+    const alpha = (0.5 - INTERP_DELAY) / 0.5;
     const z0 = m.buffer[0].duos[0].players[0].pos[2];
     const z1 = s1.duos[0].players[0].pos[2];
-    expect(m.duos[0].game.p1.pos.z).toBeCloseTo((z0 + (z1 - z0) * 0.8) / 100, 1);
+    expect(m.duos[0].game.p1.pos.z).toBeCloseTo((z0 + (z1 - z0) * alpha) / 100, 1);
     expect(m.duos[0].game.state).toBe('playing');
     // El estado discreto se vuelca del snapshot nuevo.
     expect(m.duos[1].game.box.integrity).toBe(s1.duos[1].box.integrity);
@@ -80,11 +81,12 @@ describe('OnlineMatch', () => {
     advance(0.5);
     tick(0.5);
     m.onSnapshot(snap(0.5));
-    m.onEvents([{ duo: 1, e: 'box:drop', d: { x: 1 }, t: 0.45 }]);
-    m.update(); // render 0.4 < 0.45
+    const eventT = 0.5 - INTERP_DELAY + 0.02; // un poco por delante del render actual
+    m.onEvents([{ duo: 1, e: 'box:drop', d: { x: 1 }, t: eventT }]);
+    m.update(); // render aún < eventT
     expect(got).toEqual([]);
-    tick(0.06);
-    m.update(); // render 0.46
+    tick(0.04);
+    m.update(); // render supera eventT
     expect(got).toEqual([{ x: 1 }]);
   });
 
@@ -130,13 +132,13 @@ describe('OnlineMatch: mirar', () => {
 });
 
 describe('InputSender', () => {
-  it('manda al cambiar, a 30 Hz si no cambia, y el salto no se pierde', () => {
+  it('manda al cambiar, a 60 Hz si no cambia, y el salto no se pierde', () => {
     const sent = [];
     let t = 0;
     const s = new InputSender((_t, d) => sent.push(d), { now: () => t });
     const idle = { x: 0, z: 0, jumpPressed: false, jumpHeld: false };
     s.update(1, idle);
-    s.update(1, idle); // igual y sin pasar 1/30 s → nada
+    s.update(1, idle); // igual y sin pasar 1/60 s → nada
     expect(sent).toHaveLength(1);
     t += 0.01;
     s.update(1, { ...idle, jumpPressed: true, jumpHeld: true }); // salto → sale ya
@@ -144,8 +146,8 @@ describe('InputSender', () => {
     t += 0.01;
     s.update(1, { ...idle, jumpHeld: true });
     expect(sent).toHaveLength(2);
-    t += 0.04;
-    s.update(1, { ...idle, jumpHeld: true }); // pasó 1/30 s → reenvío
+    t += 0.02;
+    s.update(1, { ...idle, jumpHeld: true }); // pasó 1/60 s → reenvío
     expect(sent.at(-1)).toMatchObject({ seq: 3, jump: false });
     s.update(2, { x: 1, z: 0, jumpPressed: false });
     expect(sent.at(-1)).toMatchObject({ slot: 2, seq: 1, x: 1 });

@@ -1,7 +1,7 @@
 # Hold the Box — API online (WebSocket + Fastify)
 # Deploy from repo root: fly deploy --ha=false
 app = "hold-the-box-api"
-primary_region = "gru"
+primary_region = "dfw"
 
 [build]
   dockerfile = "backend/Dockerfile"
@@ -13,6 +13,8 @@ primary_region = "gru"
   TRUST_PROXY = "true"
   CORS_ORIGIN = "https://jgmaza.github.io"
   LOG_LEVEL = "info"
+  TICK_HZ = "60"
+  SNAPSHOT_HZ = "30"
 
 [http_service]
   internal_port = 3000

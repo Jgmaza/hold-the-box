@@ -29,7 +29,7 @@ export function loadEnv(overrides = {}) {
     redisUrl: e.REDIS_URL || null,
     // Tiempo real
     tickHz: num(e.TICK_HZ, 60), // vueltas del loop por segundo (la sim corre a CONFIG.physics.fixedStep dentro)
-    snapshotHz: num(e.SNAPSHOT_HZ, 20),
+    snapshotHz: num(e.SNAPSHOT_HZ, 30), // antes 20: más estado por segundo → menos espera + interp más corta
     heartbeatMs: num(e.HEARTBEAT_MS, 15000),
     presenceTtlSec: num(e.PRESENCE_TTL_SEC, 60), // se renueva en cada heartbeat; si el proceso muere, vence sola
     inviteTtlSec: num(e.INVITE_TTL_SEC, 120),
