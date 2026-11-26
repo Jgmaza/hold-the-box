@@ -8,11 +8,12 @@ Para que Multijugador funcione hace falta un **API vivo con HTTPS + WSS**.
 | Pieza | Estado |
 |---|---|
 | Front Pages | ✅ https://jgmaza.github.io/hold-the-box/ |
-| Var `VITE_SERVER_URL` | ❌ **No puesta** — sin ella el menú Online intenta `http://jgmaza.github.io:3000` (falla) |
-| API (Node + WS) | ❌ **No hay URL pública** conocida |
-| Postgres / Redis | ❌ Solo en el diseño de Danel (VPS / Fly / Upstash) |
+| Var `VITE_SERVER_URL` | ✅ `https://hold-the-box-api.fly.dev` |
+| API (Node + WS) | ✅ Fly.io `hold-the-box-api` (región `gru`, memoria — sin Postgres/Redis aún) |
+| Postgres / Redis | ⚠️ Opcional; demo expo corre en memoria |
 
-`hold-the-box.vercel.app` del repo de Danel → **404** (no hay deploy).
+API: https://hold-the-box-api.fly.dev/health  
+Redeploy API: `fly deploy --ha=false` desde la raíz del repo.
 
 ---
 
