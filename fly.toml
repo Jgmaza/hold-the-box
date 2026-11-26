@@ -1,7 +1,7 @@
 # Hold the Box — API online (WebSocket + Fastify)
 # Deploy from repo root: fly deploy --ha=false
 app = "hold-the-box-api"
-primary_region = "gru"
+primary_region = "dfw"
 
 [build]
   dockerfile = "backend/Dockerfile"
