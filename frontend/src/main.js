@@ -19,6 +19,8 @@ import { PALETTE_MD, reportDeliveries } from './view/deliveries.js';
 import { GameView } from './view/gameView.js';
 import { MenuStage } from './view/menuStage.js';
 
+/** Controles táctiles (joystick + salto). En online mueven el slot de este aparato. */
+
 const canvas = document.getElementById('app');
 const app = new pc.Application(canvas, {
   graphicsDeviceOptions: { antialias: true, alpha: false },
@@ -41,7 +43,13 @@ const audio = new GameAudio(app);
 window.audio = audio;
 const input = new Input(window);
 // Celular/tablet: joystick + saltar para el jugador de este aparato (P1 hasta que exista el online, #67).
-const touch = isTouchDevice() ? new TouchControls({ onPause: () => run?.game.togglePause() }) : null;
+const touch = isTouchDevice()
+  ? new TouchControls({
+      onPause: () => {
+        if (run) run.game.togglePause();
+      },
+    })
+  : null;
 document.documentElement.classList.toggle('is-touch', !!touch);
 const uiRoot = document.getElementById('ui');
 const stage = new MenuStage(app, palette);
@@ -61,6 +69,7 @@ let online = null;
 function openOnline() {
   endRun();
   menu.show(false);
+  touch?.show(false);
   online ??= new OnlineSession({
     app,
     palette,
@@ -68,7 +77,11 @@ function openOnline() {
     stage,
     uiRoot,
     maps: MAPS,
-    onExit: () => menu.open('home'),
+    touch,
+    onExit: () => {
+      touch?.show(false);
+      menu.open('home');
+    },
   });
   online.open();
 }
@@ -146,7 +159,7 @@ app.on('update', (dt) => {
       debug?.update();
     }
   } else if (online?.active) {
-    online.update(dt, input);
+    online.update(dt, input, touch);
     if (!online.inMatch) stage.update(dt);
   } else {
     menu.update(dt, input);
