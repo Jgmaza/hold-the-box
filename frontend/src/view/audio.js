@@ -12,6 +12,7 @@ export function musicSlotFor(levelId) {
 }
 
 const SLOTS = {
+  'musica-menu': { volume: 1, loop: true },
   'musica-loop': { volume: 1, loop: true },
   'musica-selva': { volume: 1, loop: true },
   'musica-desierto': { volume: 1, loop: true },
@@ -45,6 +46,7 @@ export class GameAudio {
     this.available = new Set();
     this._wantMusic = false;
     this._musicName = 'musica-loop';
+    this._inMenu = false;
 
     for (const [name, opts] of Object.entries(SLOTS)) {
       const url = AUDIO[name];
@@ -55,6 +57,20 @@ export class GameAudio {
       this.entity.sound.addSlot(name, { asset: asset.id, volume: this._level(name), loop: !!opts.loop, overlap: !opts.loop, autoPlay: false });
       this.available.add(name);
     }
+
+    // Desbloqueo pasivo para la política de autoplay del navegador
+    const unlock = () => {
+      const ctx = this.app.systems?.sound?.manager?.context;
+      if (ctx?.state === 'suspended') {
+        ctx.resume().then(() => {
+          if (this._inMenu) this.playMenu();
+        }).catch(() => {});
+      } else if (this._inMenu) {
+        this.playMenu();
+      }
+    };
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
   }
 
   _level(name, weather = 1) {
@@ -68,6 +84,7 @@ export class GameAudio {
       if (slot) slot.volume = this._level(name);
     }
     this._resumeMusic();
+    if (this._inMenu) this.playMenu();
   }
 
   /** El loop del nivel. Si falta el archivo, sigue el del muelle. */
@@ -86,7 +103,23 @@ export class GameAudio {
   }
 
   _stopMusic() {
-    for (const name of ['musica-loop', 'musica-selva', 'musica-desierto']) this.stop(name);
+    for (const name of ['musica-loop', 'musica-selva', 'musica-desierto', 'musica-menu']) this.stop(name);
+  }
+
+  /** Música del menú principal: reproduce en loop y no reinicia si ya está sonando. */
+  playMenu() {
+    this._inMenu = true;
+    if (CONFIG.audio.music <= 0 || !this.available.has('musica-menu')) return;
+    const slot = this.entity.sound.slot('musica-menu');
+    if (!slot || slot.isPlaying) return;
+    if (!slot.isLoaded && slot.instances.length > 0) return;
+    this._applyOne('musica-menu');
+    this.entity.sound.play('musica-menu');
+  }
+
+  stopMenu() {
+    this._inMenu = false;
+    this.stop('musica-menu');
   }
 
   play(name) {
@@ -182,6 +215,7 @@ export class GameAudio {
   /** Al salir al menú: corta música y loops de la partida. */
   stopAll() {
     this._wantMusic = false;
+    this._inMenu = false;
     for (const name of this.available) this.entity.sound.stop(name);
   }
 
@@ -202,6 +236,7 @@ export class GameAudio {
     events.on('game:start', () => {
       this.stop('musica-victoria');
       this.stop('musica-derrota');
+      this.stopMenu();
       this._stopMusic();
       this._wantMusic = true;
       this.play(this._musicName);
