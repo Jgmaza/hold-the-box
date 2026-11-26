@@ -29,7 +29,9 @@ dev → PR a main (aprobación de Jose + CI verde) → merge → Deploy Pages au
 
 CI en PRs: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — tests backend + frontend + build.
 
-Variable de repo para Pages: `VITE_SERVER_URL` (Settings → Variables). Sin ella, Online intenta `http://<host>:3000`.
+Variable de repo para Pages: `VITE_SERVER_URL` (Settings → Variables → Actions).  
+Sin ella, Online en Pages intenta `http://jgmaza.github.io:3000` y **falla**.  
+Checklist online prod (qué pedir a Danel): [`online/PROD.md`](./online/PROD.md).
 
 ---
 
