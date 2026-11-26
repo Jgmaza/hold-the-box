@@ -72,7 +72,8 @@ export function createAutopilot({ gapFrom = 1.2, gapTo = -3.2, sideX = 0.7, endH
       const nearCrab = crab && crab.dist < 2.4 && crab.npc.pos.z < z + 0.5 && crab.npc.pos.z > z - 3.5;
       // Perro: saltar o abrirse si embiste / está muy cerca.
       const dogClose = dog && dog.dist < 3.2;
-      const dogDash = dog && (dog.npc.state === 'attack' || dog.npc.state === 'windup') && dog.dist < 5;
+      const dogDash =
+        dog && dog.dist < 5 && (dog.npc.state === 'attack' || dog.npc.phase === 'windup' || dog.npc.phase === 'dash');
       const air = !game.p1.grounded || !game.p2.grounded;
 
       let move = { x: 0, z: -1, jumpPressed: false, jumpHeld: false };
