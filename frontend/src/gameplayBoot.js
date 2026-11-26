@@ -54,3 +54,5 @@ app.on('update', (dt) => {
   else if (game.state === 'failed') setBadge('Ups… reintentando…');
   else setBadge('Hold the Box · demo en bucle');
 });
+
+app.start();
